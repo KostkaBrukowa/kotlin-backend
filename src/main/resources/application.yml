@@ -1,0 +1,4 @@
+graphql:
+  packages:
+    - "com.example.graphql"
+
