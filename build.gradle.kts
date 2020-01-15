@@ -23,10 +23,19 @@ dependencies {
     implementation("com.expediagroup:graphql-kotlin-spring-server:1.4.2")
     implementation("org.hibernate:hibernate-core:5.4.2.Final")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
-//    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.security:spring-security-test")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+//    implementation("org.springframework.security:spring-security-test")
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+//    implementation("org.springframework.security:spring-security-core:5.2.1.RELEASE")
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-web
+//    implementation("org.springframework.security:spring-security-web:5.2.1.RELEASE")
+
+
     implementation("com.auth0:java-jwt:3.9.0")
 //    implementation("org.springframework.boot:spring-boot-starter-web")
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    implementation("javax.servlet:javax.servlet-api:4.0.1")
+
 
 
     runtimeOnly("com.h2database:h2")
