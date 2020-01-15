@@ -1,6 +1,5 @@
 package com.example.graphql.domain.user
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
@@ -24,8 +23,18 @@ class UserService(private val userRepository: UserRepository, private val passwo
         )
     }
 
-    fun saveNewUser(user: User, password: String) {
-        userRepository.saveUser(user, passwordEncoder.encode(password))
+    fun saveNewUser(email: String, password: String): Long {
+        val encodedPassword = passwordEncoder.encode(password)
+        val user = User(email = email, password = encodedPassword)
+
+        return userRepository.saveUser(user) ?: 0
+    }
+
+    fun validateUser(email: String, password: String): String? {
+        val user = userRepository.getUserByEmail(email) ?: return null
+        val passwordMatches = passwordEncoder.matches(password, user.password)
+
+        return if(passwordMatches) user.id else null
     }
 }
 

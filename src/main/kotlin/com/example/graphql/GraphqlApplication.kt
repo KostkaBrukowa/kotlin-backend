@@ -1,20 +1,17 @@
 package com.example.graphql
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
-import com.example.graphql.configuration.security.JWTAuthenticationFilter
-import com.example.graphql.configuration.security.JWTAuthorizationFilter
-import com.example.graphql.configuration.security.SecurityConstants
 import com.example.graphql.schema.extensions.CustomSchemaGeneratorHooks
 import com.expediagroup.graphql.directives.KotlinDirectiveWiringFactory
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -25,21 +22,18 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 @EnableWebSecurity
 class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecurityConfigurerAdapter() {
 
-    @Throws(Exception::class)
-    override fun configure(http: HttpSecurity) {
-        http.authorizeRequests()
-                .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilter(JWTAuthenticationFilter(authenticationManager()))
-                .addFilter(JWTAuthorizationFilter(authenticationManager())) // this disables session creation on Spring Security
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-    }
+//    @Throws(Exception::class)
+//    override fun configure(http: HttpSecurity) {
+//        http.anonymous()
+//                .antMatchers(HttpMethod.POST, "/playground").permitAll()
+//    }
 
 
     @Bean
     fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
-        http.authorizeExchange().pathMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+        http.csrf().disable().authorizeExchange()
+                .pathMatchers(HttpMethod.POST, "/graphql").permitAll()
+                .pathMatchers(HttpMethod.GET, "/playground").permitAll()
         return http.build()
     }
 //    @Bean
@@ -64,6 +58,8 @@ class GraphqlApplication(userRepository: PersistentUserRepository) {
 //                bankAccount = null
 //        ))
     }
+    companion object {
+    }
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {
@@ -79,4 +75,5 @@ class GraphqlApplication(userRepository: PersistentUserRepository) {
 
 fun main(args: Array<String>) {
     runApplication<GraphqlApplication>(*args)
+
 }

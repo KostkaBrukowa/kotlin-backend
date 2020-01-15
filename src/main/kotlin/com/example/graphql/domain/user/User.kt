@@ -8,19 +8,22 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 
 data class User(
         @GraphQLID
-        val id: String,
-
-        val partyRequests: List<PartyRequest>,
-
-        val expenses: List<Expense>,
-
-        val messageGroups: List<MessageGroup>,
-
-        val name: String?,
+        val id: String = "0",
 
         val email: String,
 
-        val bankAccount: String?,
+        val partyRequests: List<PartyRequest> = emptyList(),
+
+        val expenses: List<Expense> = emptyList(),
+
+        val messageGroups: List<MessageGroup> = emptyList(),
+
+        val name: String? = null,
+
+        val bankAccount: String? = null,
+
+        @GraphQLIgnore
+        val password: String,
 
         @GraphQLIgnore
         val isEmailConfirmed: Boolean = false

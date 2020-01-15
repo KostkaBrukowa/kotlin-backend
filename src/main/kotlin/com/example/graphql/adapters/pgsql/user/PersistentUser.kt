@@ -38,6 +38,7 @@ data class PersistentUser(
         fun toDomain() = User(
                 id = this.id.toString(),
                 name = this.name,
+                password = this.password,
                 bankAccount = this.bankAccount,
                 email = this.email,
                 expenses = emptyList(),
@@ -47,12 +48,12 @@ data class PersistentUser(
         )
 }
 
-fun User.toPersistentEntity(password: String) = PersistentUser(
+fun User.toPersistentEntity() = PersistentUser(
         id = this.id.toLong(),
         name = this.name,
         bankAccount = this.bankAccount,
         email = this.email,
-        password = password,
+        password = this.password ?: "",
         expenses = emptyList(),
         messageGroups = emptyList(),
         partyRequests = emptyList(),
