@@ -3,8 +3,6 @@ package com.example.graphql.domain.user
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.partyrequest.PersistentPartyRequest
-import com.expediagroup.graphql.annotations.GraphQLID
-import com.expediagroup.graphql.annotations.GraphQLIgnore
 import javax.persistence.*
 
 @Table(name="users")
@@ -25,6 +23,7 @@ data class PersistentUser(
 
         val name: String?,
 
+        @Column(unique = true)
         val email: String,
 
         @Column(name ="bank_account")

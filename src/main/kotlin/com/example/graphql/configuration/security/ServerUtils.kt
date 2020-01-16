@@ -1,19 +1,8 @@
 package com.example.graphql.configuration.security
 
-import org.springframework.http.CacheControl
-import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
-import java.util.concurrent.TimeUnit
-
-const val INTERNAL_IP = "X-InternalIP"
-
-val DISABLE_CACHE_HEADERS = HttpHeaders().apply {
-    pragma = "no-cache"
-    cacheControl = "no-cache, no-store, must-revalidate"
-    expires = 0
-}
 
 fun ServerHttpRequest.isCookiePresent(name: String): Boolean = this.cookies.getFirst(name) == null
 

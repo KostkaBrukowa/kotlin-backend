@@ -5,22 +5,16 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.auditing.DateTimeProvider
 import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseCookie
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 
 const val ACCESS_TOKEN = "xppctkn"
-const val REFRESH_TOKEN = "xppcreftkn"
-const val X_PPC_AJAX = "X-PPC-AJAX"
-const val OAUTH_CODE_URI_PREFIX = "/auth/"
-const val OAUTH_CODE_PARAM = "code"
-const val AUTH_HEADER = "Authorisation"
+//const val REFRESH_TOKEN = "xppcreftkn"
 
 @Component
-open class JWTAuthentication() {
+class JWTAuthentication() {
 
     fun isAuthenticated(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT? {
         return try {

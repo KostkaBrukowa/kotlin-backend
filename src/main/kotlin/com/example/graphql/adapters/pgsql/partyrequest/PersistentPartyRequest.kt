@@ -2,7 +2,6 @@ package com.example.graphql.domain.partyrequest
 
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.user.PersistentUser
-import com.expediagroup.graphql.annotations.GraphQLID
 import javax.persistence.*
 
 @Table(name="party_requests")

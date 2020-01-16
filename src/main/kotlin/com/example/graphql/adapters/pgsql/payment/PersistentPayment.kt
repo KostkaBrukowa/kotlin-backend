@@ -2,7 +2,6 @@ package com.example.graphql.domain.payment
 
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.user.PersistentUser
-import com.expediagroup.graphql.annotations.GraphQLID
 import javax.persistence.*
 
 @Table(name="payments")

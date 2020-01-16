@@ -1,10 +1,9 @@
 package com.example.graphql
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.domain.user.PersistentUser
 import com.example.graphql.schema.extensions.CustomSchemaGeneratorHooks
 import com.expediagroup.graphql.directives.KotlinDirectiveWiringFactory
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -22,13 +21,6 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 @EnableWebSecurity
 class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecurityConfigurerAdapter() {
 
-//    @Throws(Exception::class)
-//    override fun configure(http: HttpSecurity) {
-//        http.anonymous()
-//                .antMatchers(HttpMethod.POST, "/playground").permitAll()
-//    }
-
-
     @Bean
     fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
         http.csrf().disable().authorizeExchange()
@@ -36,28 +28,24 @@ class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecur
                 .pathMatchers(HttpMethod.GET, "/playground").permitAll()
         return http.build()
     }
-//    @Bean
-//    fun corsConfigurationSource(): CorsConfigurationSource {
-//        val source = UrlBasedCorsConfigurationSource()
-//        source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
-//        return source
-//    }
 }
 
 @SpringBootApplication()
 class GraphqlApplication(userRepository: PersistentUserRepository) {
     init {
-//        userRepository.save(PersistentUser(
-//                id = 123,
-//                partyRequests = emptyList(),
-//                messageGroups = emptyList(),
-//                password = "dkfsA,",
-//                name = "fjadks",
-//                expenses = emptyList(),
-//                email = "dfka",
-//                bankAccount = null
-//        ))
+        // TODO REMOVE BEFORE PROD
+        userRepository.save(PersistentUser(
+                id = 123,
+                partyRequests = emptyList(),
+                messageGroups = emptyList(),
+                password = "dkfsA,",
+                name = "fjadks",
+                expenses = emptyList(),
+                email = "dfka",
+                bankAccount = null
+        ))
     }
+
     companion object {
     }
 

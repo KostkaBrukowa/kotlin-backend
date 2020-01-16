@@ -8,12 +8,12 @@ import java.time.ZonedDateTime
 
 data class Party(
         @GraphQLID
-        val id: String,
-        val messageGroup: MessageGroup,
-        val partyRequests: List<PartyRequest>,
-        val expenses: List<Expense>,
+        val id: String = "0",
+        val messageGroup: MessageGroup? = null,
+        val partyRequests: List<PartyRequest> = emptyList(),
+        val expenses: List<Expense> = emptyList(),
         val name: String,
-        val description: String,
+        val description: String = "",
         val startDate: ZonedDateTime,
-        val endDate: ZonedDateTime?
+        val endDate: ZonedDateTime? = null
 )

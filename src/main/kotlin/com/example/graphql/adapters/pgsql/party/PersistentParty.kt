@@ -3,7 +3,6 @@ package com.example.graphql.domain.party
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.partyrequest.PersistentPartyRequest
-import com.expediagroup.graphql.annotations.GraphQLID
 import java.time.ZonedDateTime
 import javax.persistence.*
 

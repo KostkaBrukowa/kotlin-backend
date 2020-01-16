@@ -11,18 +11,19 @@ import java.util.*
 
 @Component
 class AuthService(private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) {
-    fun signUpUser(email: String, password: String): String? {
-        val encodedPassword = passwordEncoder.encode(password)
-        val user = User(email = email, password = encodedPassword)
 
-        return userRepository.saveUser(user)?.toString()
+    fun signUpUser(email: String, password: String): String? {
+        val user = User(email = email, password = passwordEncoder.encode(password))
+        val savedUser = userRepository.saveUser(user)
+
+        return createToken(savedUser.id)
     }
 
     fun logInUser(email: String, password: String): String? {
         val user = userRepository.getUserByEmail(email) ?: return null
         val passwordMatches = passwordEncoder.matches(password, user.password)
 
-        return if(passwordMatches) user.id else null
+        return if (passwordMatches) createToken(user.id) else null
     }
 
     private fun createToken(userId: String): String {
