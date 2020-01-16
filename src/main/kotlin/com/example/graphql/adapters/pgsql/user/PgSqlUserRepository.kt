@@ -8,13 +8,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class PgSqlUserRepository(private val userRepository: PersistentUserRepository) : UserRepository {
-    override fun saveUser(user: User): Long? {
-        return userRepository.save(user.toPersistentEntity()).id
-    }
 
-    override fun getUserByEmail(email: String): User? {
-        return userRepository.findTopByEmail(email)?.toDomain()
-    }
+    override fun saveUser(user: User): Long? = userRepository.save(user.toPersistentEntity()).id
 
+    override fun getUserByEmail(email: String): User? = userRepository.findTopByEmail(email)?.toDomain()
 
+    override fun getUserById(id: String): User? = userRepository.getOne(id.toLong()).toDomain()
 }
