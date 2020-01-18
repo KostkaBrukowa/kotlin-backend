@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.2.2.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
+    id("groovy")
     kotlin("jvm") version "1.3.61"
     kotlin("plugin.spring") version "1.3.61"
     kotlin("plugin.jpa") version "1.3.61"
@@ -24,24 +25,19 @@ dependencies {
     implementation("org.hibernate:hibernate-core:5.4.2.Final")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-logging
     implementation("org.springframework.boot:spring-boot-starter-logging:2.2.2.RELEASE")
-
-
-
     implementation("com.auth0:java-jwt:3.9.0")
-//    implementation("org.springframework.boot:spring-boot-starter-web")
-    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
     implementation("javax.servlet:javax.servlet-api:4.0.1")
-
-
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
-    testImplementation("org.hibernate:hibernate-testing:5.4.2.Final")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+//    testImplementation("org.hibernate:hibernate-testing:5.4.2.Final")
+    testImplementation("org.spockframework:spock-core:1.2-groovy-2.4")
+    testImplementation("org.spockframework:spock-spring:1.2-groovy-2.4")
+    testImplementation("org.codehaus.groovy:groovy-all:2.5.2")
+    testImplementation ("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1")
 }
 
 tasks.withType<Test> {
