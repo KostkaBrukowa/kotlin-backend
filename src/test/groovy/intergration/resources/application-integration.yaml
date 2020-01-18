@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+discovery:
+  enabled: false
+
+metadata:
+  cloud:
+    reading: skip
+
+metrics:
+  graphite:
+    enabled: false
+
+spring:
+  jpa:
+    show-sql: true
