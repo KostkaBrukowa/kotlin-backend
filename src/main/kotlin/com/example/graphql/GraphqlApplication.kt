@@ -2,8 +2,10 @@ package com.example.graphql
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.user.PersistentUser
+import com.example.graphql.schema.exceptions.CustomDataFetcherExceptionHandler
 import com.example.graphql.schema.extensions.CustomSchemaGeneratorHooks
 import com.expediagroup.graphql.directives.KotlinDirectiveWiringFactory
+import graphql.execution.DataFetcherExceptionHandler
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -33,17 +35,17 @@ class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecur
 @SpringBootApplication()
 class GraphqlApplication(userRepository: PersistentUserRepository) {
     init {
-        // TODO REMOVE BEFORE PROD
-        userRepository.save(PersistentUser(
-                id = 123,
-                partyRequests = emptyList(),
-                messageGroups = emptyList(),
-                password = "dkfsA,",
-                name = "fjadks",
-                expenses = emptyList(),
-                email = "dfka",
-                bankAccount = null
-        ))
+//        // TODO REMOVE BEFORE PROD
+//        userRepository.save(PersistentUser(
+//                id = 123,
+//                partyRequests = emptyList(),
+//                messageGroups = emptyList(),
+//                password = "dkfsA,",
+//                name = "fjadks",
+//                expenses = emptyList(),
+//                email = "dfka",
+//                bankAccount = null
+//        ))
     }
 
     companion object {
@@ -59,6 +61,9 @@ class GraphqlApplication(userRepository: PersistentUserRepository) {
 
     @Bean
     fun hooks(wiringFactory: KotlinDirectiveWiringFactory) = CustomSchemaGeneratorHooks(wiringFactory)
+
+    @Bean
+    fun dataFetcherExceptionHandler(): DataFetcherExceptionHandler = CustomDataFetcherExceptionHandler()
 }
 
 fun main(args: Array<String>) {

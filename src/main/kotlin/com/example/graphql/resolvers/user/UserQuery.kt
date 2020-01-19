@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class UserQuery(private val userService: UserService) : Query {
 
-    fun getUser(id: String): User? = userService.getUserById(id)
+    fun getUser(id: String): User? {
+        return userService.getUserById(id)
+    }
 }
-
