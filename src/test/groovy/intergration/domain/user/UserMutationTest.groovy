@@ -2,6 +2,7 @@ package intergration.domain.user
 
 import com.auth0.jwt.JWT
 import intergration.BaseIntegrationSpec
+import spock.lang.Unroll
 
 class UserMutationTest extends BaseIntegrationSpec {
 
@@ -9,7 +10,8 @@ class UserMutationTest extends BaseIntegrationSpec {
         return JWT.decode(jwt).subject
     }
 
-    def "test"() {
+    @Unroll
+    def "Should send different reponse when we set authentication header (#setAuthorizationHeader) or not"() {
         given:
         def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"})'
 
@@ -18,7 +20,7 @@ class UserMutationTest extends BaseIntegrationSpec {
             """
             getUser(id: "${id}"){
               id
-              name
+              email
               partyRequests {
                 id
               }
@@ -30,11 +32,19 @@ class UserMutationTest extends BaseIntegrationSpec {
         def newUserJWTToken = postMutation(signUpMutation, "signUp")
 
         and:
+        if (setAuthorizationHeader)
+            setHeaders(["Authorization": "Bearer " + newUserJWTToken])
+
+        and:
         def getUserResponse = postQuery(signUpQuery(decodeJWT(newUserJWTToken)), "getUser")
 
         then:
-        getUserResponse.id == decodeJWT(newUserJWTToken)
-        getUserResponse.name == null
-        getUserResponse.partyRequests.size() == 0
+        !setAuthorizationHeader || getUserResponse.id == decodeJWT(newUserJWTToken)
+        getUserResponse?.email == email
+
+        where:
+        setAuthorizationHeader | email
+        true                   | "a@gmail.com"
+        false                  | null
     }
 }

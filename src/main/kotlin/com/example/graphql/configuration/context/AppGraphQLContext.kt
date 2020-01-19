@@ -1,4 +1,6 @@
 package com.example.graphql.configuration.context
 
-data class AppGraphQLContext(val myCustomValue: Boolean, val subject: String?)
+import com.auth0.jwt.interfaces.DecodedJWT
+
+data class AppGraphQLContext(val authenticated: Boolean, val subject: String?, val decodedJWT: DecodedJWT?)
 
