@@ -33,7 +33,7 @@ class UserMutationTest extends BaseIntegrationSpec {
         def getUserResponse = postQuery(signUpQuery(decodeJWT(newUserJWTToken)), "getUser")
 
         then:
-        getUserResponse.id == "2"
+        getUserResponse.id == decodeJWT(newUserJWTToken)
         getUserResponse.name == null
         getUserResponse.partyRequests.size() == 0
     }
