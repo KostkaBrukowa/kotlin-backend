@@ -1,7 +1,7 @@
 package com.example.graphql
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
-import com.example.graphql.domain.user.PersistentUser
+import com.example.graphql.schema.directives.CustomDirectiveWiringFactory
 import com.example.graphql.schema.exceptions.CustomDataFetcherExceptionHandler
 import com.example.graphql.schema.extensions.CustomSchemaGeneratorHooks
 import com.expediagroup.graphql.directives.KotlinDirectiveWiringFactory
@@ -48,16 +48,13 @@ class GraphqlApplication(userRepository: PersistentUserRepository) {
 //        ))
     }
 
-    companion object {
-    }
-
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
     }
 
     @Bean
-    fun wiringFactory() = KotlinDirectiveWiringFactory()
+    fun wiringFactory() = CustomDirectiveWiringFactory()
 
     @Bean
     fun hooks(wiringFactory: KotlinDirectiveWiringFactory) = CustomSchemaGeneratorHooks(wiringFactory)

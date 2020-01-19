@@ -89,7 +89,7 @@ class BaseIntegrationSpec extends Specification {
         ]).responseData
 
         if(errorExpected) {
-            return responseData.error
+            return responseData.errors
         }
 
         return responseData.data[queryName]
@@ -105,6 +105,13 @@ class BaseIntegrationSpec extends Specification {
         def mutationString ="mutation { ${mutation} }"
 
         return postToGraphQL(mutationString, mutationName, errorExpected)
+    }
+
+    protected setHeaders(Map<String, String> headers) {
+        restClient.setHeaders([
+                "Content-Type" : "application/graphql",
+                "Accept"       : "application/json"
+        ] + headers)
     }
 
     def cleanup() {
