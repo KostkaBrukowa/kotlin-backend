@@ -1,0 +1,4 @@
+# Spring DataSource for integration testing configured in pl.allegro.advertising.ppc.bonuses.EmbeddedPostgreSQLDataSource
+spring.datasource.url=jdbc:postgresql://localhost:5432/postgres_demo
+spring.datasource.username=postgres
+spring.datasource.password=admin1
