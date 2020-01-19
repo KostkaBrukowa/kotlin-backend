@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.JdbcTemplate
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+@Ignore
 @SpringBootTest(classes = [GraphqlApplication],
         properties = "application.environment=integration",
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
