@@ -1,7 +1,9 @@
 package intergration
 
 import com.example.graphql.GraphqlApplication
+import com.example.graphql.domain.auth.AuthService
 import groovyx.net.http.RESTClient
+import intergration.utils.CookiesUtils
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -22,6 +24,7 @@ import java.time.ZonedDateTime
 class BaseIntegrationSpec extends Specification {
     private def DEFAULT_TIMEZONE_NAME = "Europe/Warsaw"
     private def DEFAULT_TIMEZONE = ZoneId.of(DEFAULT_TIMEZONE_NAME)
+    def ACCESS_TOKEN = "xppctkn"
     def DATA_JSON_PATH = "data" as String
     def ERRORS_JSON_PATH = "errors"
     def EXTENSIONS_JSON_PATH = "extensions"
@@ -34,6 +37,9 @@ class BaseIntegrationSpec extends Specification {
 
     @Autowired
     JdbcTemplate jdbcTemplate
+
+    @Autowired
+    AuthService authService
 
 //    @Autowired
 //    DateTimeProvider dateTimeProvider
@@ -93,6 +99,16 @@ class BaseIntegrationSpec extends Specification {
         }
 
         return responseData.data[queryName]
+    }
+
+    protected def authenticate() {
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { id }'
+
+        postMutation(signUpMutation, "signUp")
+
+        String newUserJWTToken = CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient)
+
+        setHeaders(["Authorization": "Bearer " + newUserJWTToken])
     }
 
     protected def postQuery(String query, String queryName, Boolean errorExpected = false) {

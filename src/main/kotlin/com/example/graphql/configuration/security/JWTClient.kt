@@ -1,0 +1,47 @@
+package com.example.graphql.configuration.security
+
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import org.springframework.stereotype.Component
+import java.util.*
+
+@Component
+class JWTClient {
+    fun createJWTToken(userId: String): String {
+        return createToken(userId, SecurityConstants.JWT_EXPIRATION_TIME)
+    }
+
+    fun createRefreshToken(userId: String): String {
+        return createToken(userId, SecurityConstants.REFRESH_EXPIRATION_TIME)
+    }
+
+
+    fun validateAndCreateValidationTokens(token: String): RefreshTokenResponse {
+        return try {
+            val subject = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
+                    .build()
+                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+                    .subject
+
+            createAuthenticationTokensResponse(subject)
+        } catch (e: Exception) {
+            throw JWTAuthentication.ClientAuthenticationException("Token was not valid")
+        }
+    }
+
+    fun createAuthenticationTokensResponse(subject: String): RefreshTokenResponse {
+        val jwtToken = createJWTToken(subject)
+        val refreshToken = createRefreshToken(subject)
+
+        return RefreshTokenResponse(jwtToken, refreshToken)
+    }
+
+    private fun createToken(userId: String, expirationTime: Long): String {
+        return JWT.create()
+                .withSubject(userId)
+                .withExpiresAt(Date(System.currentTimeMillis() + expirationTime))
+                .sign(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
+    }
+
+    data class RefreshTokenResponse(val jwtToken: String, val refreshToken: String)
+}
