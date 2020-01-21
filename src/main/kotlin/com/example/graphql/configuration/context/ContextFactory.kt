@@ -12,12 +12,13 @@ class MyGraphQLContextFactory(private val jwtAuthentication: JWTAuthentication) 
             request: ServerHttpRequest,
             response: ServerHttpResponse
     ): AppGraphQLContext {
-        val decodedJWT = jwtAuthentication.isAuthenticated(request, response)
+        val decodedJWT = jwtAuthentication.handleJWTAuthorisation(request, response)
 
         return AppGraphQLContext(
                 decodedJWT != null,
                 decodedJWT?.subject,
-                decodedJWT
+                request,
+                response
         )
     }
 }

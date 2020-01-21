@@ -4,7 +4,7 @@ import org.springframework.http.ResponseCookie
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
 
-fun ServerHttpRequest.isCookiePresent(name: String): Boolean = this.cookies.getFirst(name) == null
+fun ServerHttpRequest.isCookiePresent(name: String): Boolean = this.cookies.getFirst(name) != null
 
 fun ServerHttpRequest.getCookieValue(name: String): String = this.cookies.getFirst(name)?.value ?: ""
 

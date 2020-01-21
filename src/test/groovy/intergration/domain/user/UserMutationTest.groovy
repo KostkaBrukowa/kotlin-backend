@@ -1,19 +1,19 @@
 package intergration.domain.user
 
-import com.auth0.jwt.JWT
+
 import intergration.BaseIntegrationSpec
+import intergration.utils.CookiesUtils
+import intergration.utils.JWTUtils
 import spock.lang.Unroll
 
 class UserMutationTest extends BaseIntegrationSpec {
-
-    def decodeJWT(String jwt) {
-        return JWT.decode(jwt).subject
-    }
+    def ACCESS_TOKEN = "xppctkn"
+    def REFRESH_TOKEN = "xppcreftkn"
 
     @Unroll
-    def "Should send different reponse when we set authentication header (#setAuthorizationHeader) or not"() {
+    def "Should send different response when we remove authentication cookies (#clearAuthenticationCookie) or not"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"})'
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { id }'
 
         and:
         def signUpQuery = { String id ->
@@ -29,22 +29,30 @@ class UserMutationTest extends BaseIntegrationSpec {
         }
 
         when:
-        def newUserJWTToken = postMutation(signUpMutation, "signUp")
+        postMutation(signUpMutation, "signUp")
 
         and:
-        if (setAuthorizationHeader)
-            setHeaders(["Authorization": "Bearer " + newUserJWTToken])
+        String newUserJWTToken = CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient)
 
         and:
-        def getUserResponse = postQuery(signUpQuery(decodeJWT(newUserJWTToken)), "getUser")
+        if (clearAuthenticationCookie) {
+            CookiesUtils.removeCookie(ACCESS_TOKEN, restClient)
+            CookiesUtils.removeCookie(REFRESH_TOKEN, restClient)
+//            String expiredToken = JWTUtils.expireToken(newUserJWTToken)
+//
+//            CookiesUtils.setCookieValue(ACCESS_TOKEN, expiredToken, restClient)
+        }
+
+        and:
+        def getUserResponse = postQuery(signUpQuery(JWTUtils.getJWTTokenSubject(newUserJWTToken)), "getUser")
 
         then:
-        !setAuthorizationHeader || getUserResponse.id == decodeJWT(newUserJWTToken)
+        clearAuthenticationCookie || getUserResponse.id == JWTUtils.getJWTTokenSubject(newUserJWTToken)
         getUserResponse?.email == email
 
         where:
-        setAuthorizationHeader | email
-        true                   | "a@gmail.com"
-        false                  | null
+        clearAuthenticationCookie | email
+        false                     | "a@gmail.com"
+        true                      | null
     }
 }
