@@ -4,14 +4,13 @@ package intergration.domain.user
 import intergration.BaseIntegrationSpec
 import intergration.utils.CookiesUtils
 import intergration.utils.JWTUtils
+import intergration.utils.SecurityConstants
 import spock.lang.Unroll
 
 class UserMutationTest extends BaseIntegrationSpec {
-    def ACCESS_TOKEN = "xppctkn"
-    def REFRESH_TOKEN = "xppcreftkn"
 
     @Unroll
-    def "Should send different response when we remove authentication cookies (#clearAuthenticationCookie) or not"() {
+    def "Should return a user when user is authenticated"() {
         given:
         def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { id }'
 
@@ -32,27 +31,47 @@ class UserMutationTest extends BaseIntegrationSpec {
         postMutation(signUpMutation, "signUp")
 
         and:
-        String newUserJWTToken = CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient)
-
-        and:
-        if (clearAuthenticationCookie) {
-            CookiesUtils.removeCookie(ACCESS_TOKEN, restClient)
-            CookiesUtils.removeCookie(REFRESH_TOKEN, restClient)
-//            String expiredToken = JWTUtils.expireToken(newUserJWTToken)
-//
-//            CookiesUtils.setCookieValue(ACCESS_TOKEN, expiredToken, restClient)
-        }
+        String newUserJWTToken = CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient)
 
         and:
         def getUserResponse = postQuery(signUpQuery(JWTUtils.getJWTTokenSubject(newUserJWTToken)), "getUser")
 
         then:
-        clearAuthenticationCookie || getUserResponse.id == JWTUtils.getJWTTokenSubject(newUserJWTToken)
-        getUserResponse?.email == email
+        getUserResponse.id == JWTUtils.getJWTTokenSubject(newUserJWTToken)
+        getUserResponse.email == "a@gmail.com"
+    }
 
-        where:
-        clearAuthenticationCookie | email
-        false                     | "a@gmail.com"
-        true                      | null
+    def "Should sent error response when user is not authenticated"() {
+        given:
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { id }'
+
+        and:
+        def signUpQuery = { String id ->
+            """
+            getUser(id: "${id}"){
+              id
+              email
+              partyRequests {
+                id
+              }
+            }
+        """
+        }
+
+        when:
+        postMutation(signUpMutation, "signUp")
+
+        and:
+        String newUserJWTToken = CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient)
+
+        and:
+        CookiesUtils.removeCookie(SecurityConstants.ACCESS_TOKEN, restClient)
+        CookiesUtils.removeCookie(SecurityConstants.REFRESH_TOKEN, restClient)
+
+        and:
+        def getUserResponse = postQuery(signUpQuery(JWTUtils.getJWTTokenSubject(newUserJWTToken)), "getUser", true)
+
+        then:
+        getUserResponse[0].errorType == "ExecutionAborted"
     }
 }

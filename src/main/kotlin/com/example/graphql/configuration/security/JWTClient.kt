@@ -15,8 +15,7 @@ class JWTClient {
         return createToken(userId, SecurityConstants.REFRESH_EXPIRATION_TIME)
     }
 
-
-    fun validateAndCreateValidationTokens(token: String): RefreshTokenResponse {
+    fun validateAndCreateValidationTokens(token: String): ValidationTokensResponse {
         return try {
             val subject = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
                     .build()
@@ -29,11 +28,11 @@ class JWTClient {
         }
     }
 
-    fun createAuthenticationTokensResponse(subject: String): RefreshTokenResponse {
+    fun createAuthenticationTokensResponse(subject: String): ValidationTokensResponse {
         val jwtToken = createJWTToken(subject)
         val refreshToken = createRefreshToken(subject)
 
-        return RefreshTokenResponse(jwtToken, refreshToken)
+        return ValidationTokensResponse(jwtToken, refreshToken)
     }
 
     private fun createToken(userId: String, expirationTime: Long): String {
@@ -43,5 +42,5 @@ class JWTClient {
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
     }
 
-    data class RefreshTokenResponse(val jwtToken: String, val refreshToken: String)
+    data class ValidationTokensResponse(val jwtToken: String, val refreshToken: String)
 }

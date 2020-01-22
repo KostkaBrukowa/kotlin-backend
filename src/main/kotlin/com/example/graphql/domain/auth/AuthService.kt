@@ -2,9 +2,9 @@ package com.example.graphql.domain.auth
 
 import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.configuration.security.JWTAuthentication
-import com.example.graphql.configuration.security.JWTClient
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
+import com.expediagroup.graphql.annotations.GraphQLContext
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component
 class AuthService(
         private val userRepository: UserRepository,
         private val passwordEncoder: PasswordEncoder,
-        private val jwtClient: JWTClient,
         private val jwtAuthentication: JWTAuthentication
+
 ) {
 
     fun signUpUser(email: String, password: String, context: AppGraphQLContext): User? {

@@ -33,7 +33,6 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-//    testImplementation("org.hibernate:hibernate-testing:5.4.2.Final")
     testImplementation("org.spockframework:spock-core:1.2-groovy-2.4")
     testImplementation("org.spockframework:spock-spring:1.2-groovy-2.4")
     testImplementation("org.codehaus.groovy:groovy-all:2.5.2")

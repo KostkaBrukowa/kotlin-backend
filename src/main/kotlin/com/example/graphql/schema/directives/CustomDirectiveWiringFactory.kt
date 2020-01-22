@@ -8,10 +8,10 @@ import kotlin.reflect.KClass
 
 class CustomDirectiveWiringFactory : KotlinDirectiveWiringFactory() {
 
-    private val caleOnlyDirectiveWiring = SpecificValueOnlySchemaDirectiveWiring()
+    private val authenticationDirectiveWiring = AuthenticationSchemaDirectiveWiring()
 
     override fun getSchemaDirectiveWiring(environment: KotlinSchemaDirectiveEnvironment<GraphQLDirectiveContainer>): KotlinSchemaDirectiveWiring? = when (environment.directive.name) {
-        getDirectiveName(Authenticated::class) -> caleOnlyDirectiveWiring
+        getDirectiveName(Authenticated::class) -> authenticationDirectiveWiring
         else -> null
     }
 }
