@@ -8,15 +8,13 @@ import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
 import graphql.schema.GraphQLFieldDefinition
 
-class SpecificValueOnlySchemaDirectiveWiring() : KotlinSchemaDirectiveWiring {
-
+class AuthenticationSchemaDirectiveWiring() : KotlinSchemaDirectiveWiring {
 
     @Throws(RuntimeException::class)
     override fun onField(environment: KotlinFieldDirectiveEnvironment): GraphQLFieldDefinition {
         val field = environment.element
         val roleName = environment.directive.getArgument("role")?.value?.toString() ?: ""
         val originalDataFetcher: DataFetcher<Any> = environment.getDataFetcher()
-
 
         val authorisationFetcherFetcher = DataFetcher<Any> { dataEnv ->
             when (Roles.values().firstOrNull { it.name == roleName }) {

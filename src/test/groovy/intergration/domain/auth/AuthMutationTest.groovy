@@ -3,11 +3,10 @@ package intergration.domain.auth
 import intergration.BaseIntegrationSpec
 import intergration.utils.CookiesUtils
 import intergration.utils.JWTUtils
+import intergration.utils.SecurityConstants
 import spock.lang.Unroll
 
 class AuthMutationTest extends BaseIntegrationSpec {
-    def ACCESS_TOKEN = "xppctkn"
-    def REFRESH_TOKEN = "xppcreftkn"
 
     def "Should return store correct jwt and store refresh token in cookie token after correct sign up"() {
         given:
@@ -17,8 +16,8 @@ class AuthMutationTest extends BaseIntegrationSpec {
         String newUserId = postMutation(signUpMutation, "signUp").id
 
         then:
-        def accessTokenSubject = JWTUtils.getJWTTokenSubject(CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient))
-        def refreshTokenSubject = JWTUtils.getJWTTokenSubject(CookiesUtils.getCookieValue(REFRESH_TOKEN, restClient))
+        def accessTokenSubject = JWTUtils.getJWTTokenSubject(CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient))
+        def refreshTokenSubject = JWTUtils.getJWTTokenSubject(CookiesUtils.getCookieValue(SecurityConstants.REFRESH_TOKEN, restClient))
 
         accessTokenSubject == newUserId
         refreshTokenSubject == newUserId
@@ -33,16 +32,15 @@ class AuthMutationTest extends BaseIntegrationSpec {
         postMutation(signUpMutation, "signUp")
 
         and:
-        CookiesUtils.removeCookie(ACCESS_TOKEN, restClient)
-        CookiesUtils.removeCookie(REFRESH_TOKEN, restClient)
-
+        CookiesUtils.removeCookie(SecurityConstants.ACCESS_TOKEN, restClient)
+        CookiesUtils.removeCookie(SecurityConstants.REFRESH_TOKEN, restClient)
 
         and:
         def userResponse = postMutation(loginMutation, "logIn")
 
         then:
-        def accessToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient))
-        def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(REFRESH_TOKEN, restClient))
+        def accessToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient))
+        def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.REFRESH_TOKEN, restClient))
 
         if (loginCorrect) {
             accessToken.subject == userResponse.id
@@ -68,17 +66,17 @@ class AuthMutationTest extends BaseIntegrationSpec {
         String userId = postMutation(signUpMutation, "signUp").id
 
         and:
-        String expiredToken = JWTUtils.expireToken(CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient))
+        String expiredToken = JWTUtils.expireToken(CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient))
 
         and:
-        CookiesUtils.setCookieValue(ACCESS_TOKEN, expiredToken, restClient)
+        CookiesUtils.setCookieValue(SecurityConstants.ACCESS_TOKEN, expiredToken, restClient)
 
         and:
         def userResponse = postQuery(authenticationNeededQuery(userId), "getUser")
 
         then:
-        def accessToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(ACCESS_TOKEN, restClient))
-        def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(REFRESH_TOKEN, restClient))
+        def accessToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient))
+        def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.REFRESH_TOKEN, restClient))
 
         userResponse.id == userId
         accessToken.subject == userResponse.id
