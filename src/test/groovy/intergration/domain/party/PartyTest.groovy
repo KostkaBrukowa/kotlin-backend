@@ -32,7 +32,7 @@ class PartyTest extends BaseIntegrationSpec {
         def createPartyMutation = { String name ->
             """
             createParty(
-                newPartyInput: {
+                NewPartyInput: {
                   name: "${name}"
                   description: "test description"
                   startDate: "01.01.2020"
@@ -69,7 +69,7 @@ class PartyTest extends BaseIntegrationSpec {
         and:
         def createPartyMutation = """
             createParty(
-                newPartyInput: {
+                NewPartyInput: {
                   name: "test party"
                   description: "test description"
                   startDate: "01.01.2020"
@@ -118,7 +118,7 @@ class PartyTest extends BaseIntegrationSpec {
         def createPartyMutation = { String firstUserId, String secondUserId ->
             """
             createParty(
-                newPartyInput: {
+                NewPartyInput: {
                   name: "test party"
                   description: "test description"
                   participants: [
@@ -164,7 +164,7 @@ class PartyTest extends BaseIntegrationSpec {
         and:
         def createPartyMutation = """
             createParty(
-                newPartyInput: {
+                NewPartyInput: {
                   name: "test party"
                   description: "test description"
                   startDate: "01.01.2020"
@@ -175,7 +175,7 @@ class PartyTest extends BaseIntegrationSpec {
         and:
         def updatePartyMutation = { String id -> """
             updateParty(
-                updatePartyInput: {
+                UpdatePartyInput: {
                   id: "${id}" 
                   name: "updated party name"
                   description: "updated party description"
