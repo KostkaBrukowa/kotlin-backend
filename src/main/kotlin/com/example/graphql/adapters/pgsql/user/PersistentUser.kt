@@ -34,6 +34,7 @@ data class PersistentUser(
         @Column(name ="is_email_confirmed")
         val isEmailConfirmed: Boolean = false
 ) {
+
         fun toDomain() = User(
                 id = this.id.toString(),
                 name = this.name,

@@ -1,7 +1,6 @@
 package intergration.utils
 
 import groovyx.net.http.RESTClient
-import org.apache.http.impl.cookie.BasicClientCookie
 
 class CookiesUtils {
     static String getCookieValue(String cookieName, RESTClient restClient) {

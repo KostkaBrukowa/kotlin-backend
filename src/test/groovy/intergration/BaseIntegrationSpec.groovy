@@ -39,8 +39,8 @@ class BaseIntegrationSpec extends Specification {
         ])
         restClient.handler.failure = restClient.handler.success
     }
-    protected def authenticate() {
-        def signUpMutation = "signUp(input: {email: ${baseUserEmail}, password: ${baseUserPassword}) { id }"
+    protected def authenticate(String email) {
+        def signUpMutation = "signUp(input: {email: \"${email ?: baseUserEmail}\", password: \"${baseUserPassword}\" }) { id }"
 
         baseUserId = postMutation(signUpMutation, "signUp").id
 

@@ -14,4 +14,10 @@ class UserQuery(private val userService: UserService) : Query {
     fun getUser(id: String): User? {
         return userService.getUserById(id)
     }
+
+    fun test(): testClass {
+        return testClass(listOf("fdks", "fdks"), "fdjsal")
+    }
 }
+
+data class testClass(val table: List<String>, val name: String)
