@@ -13,6 +13,8 @@ data class Party(
 
         val name: String,
 
+        val owner: User? = null,
+
         val messageGroup: MessageGroup? = null,
 
         val participants: List<User> = emptyList(),
@@ -21,7 +23,7 @@ data class Party(
 
         val expenses: List<Expense> = emptyList(),
 
-        val description: String = "",
+        val description: String? = null,
 
         val startDate: ZonedDateTime,
 

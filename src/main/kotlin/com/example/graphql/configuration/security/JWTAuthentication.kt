@@ -69,7 +69,7 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
             return JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
                     .build()
                     .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-        } catch (e: JWTDecodeException) {
+        } catch (e: Exception) {
             throw ClientAuthenticationException(cause = e.toString())
         }
     }
