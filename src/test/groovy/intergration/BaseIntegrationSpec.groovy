@@ -1,9 +1,14 @@
 package intergration
 
 import com.example.graphql.GraphqlApplication
+import com.fasterxml.jackson.databind.ser.Serializers
+import groovy.json.JsonBuilder
 import groovyx.net.http.RESTClient
 import intergration.utils.CookiesUtils
 import intergration.utils.SecurityConstants
+import org.apache.groovy.json.internal.LazyMap
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,6 +23,7 @@ import java.time.ZoneId
         properties = "application.environment=integration",
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BaseIntegrationSpec extends Specification {
+    private Logger log = LoggerFactory.getLogger(BaseIntegrationSpec.getClass())
     protected String baseUserEmail = "a@gmail.com"
     protected String baseUserPassword = "Password"
     protected String baseUserId
@@ -70,6 +76,9 @@ class BaseIntegrationSpec extends Specification {
         if(errorExpected) {
             return responseData.errors
         }
+        if((responseData as LazyMap).containsKey('errors')){
+            log.error(new JsonBuilder(responseData.errors).toPrettyString())
+        }
 
         return responseData.data[queryName]
     }
@@ -87,7 +96,9 @@ class BaseIntegrationSpec extends Specification {
 
     private def cleanupTables() {
         jdbcTemplate.execute("""
-            TRUNCATE TABLE expenses,
+            TRUNCATE TABLE 
+                party_user,
+                expenses,
               message_groups,
               messagegroup_user ,
               messages ,

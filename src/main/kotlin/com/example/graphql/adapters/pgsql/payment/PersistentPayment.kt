@@ -11,11 +11,11 @@ data class PersistentPayment(
         @GeneratedValue
         val id: Long? = null,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "expense_id", nullable = false)
         val expense: PersistentExpense,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "user_id", nullable = false)
         val user: PersistentUser,
 

@@ -11,7 +11,7 @@ data class Party(
         @GraphQLID
         val id: String = "0",
 
-        val name: String,
+        val name: String = "",
 
         val owner: User? = null,
 

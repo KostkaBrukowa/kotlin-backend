@@ -1,10 +1,12 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.domain.user.User
+import com.example.graphql.domain.user.UserRepository
 import org.springframework.stereotype.Component
 import java.time.ZonedDateTime
 
 @Component
-class PartyService {
+class PartyService(private val partyRepository: PartyRepository, private val userRepository: UserRepository) {
     fun getTestParty(): Party {
         return Party(
                 name = "test name",
@@ -13,22 +15,29 @@ class PartyService {
     }
 
     fun getAllParties(userId: String): List<Party> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return partyRepository.getAllByOwnerId(userId.toLong())
     }
 
-    fun getSingleParty(partyId: String): Party {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun getSingleParty(partyId: String): Party? {
+        return partyRepository.getTopById(partyId.toLong())
     }
 
-    fun createParty(party: Party): Party {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun createParty(party: Party, userId: String): Party {
+        val currentUser = User(id = userId)
+        val participants = (party.participants + currentUser).distinctBy { it.id }
+
+//        requestService.sendRequestsForParty(participants - currentUser) TODO when requests are done
+
+        return partyRepository.saveNewParty(party.copy(owner = currentUser, participants = participants))
     }
 
     fun updateParty(id: String, party: Party): Party {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return partyRepository.updateParty(party.copy(id = id))
     }
 
     fun deleteParty(id: String): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        partyRepository.removeParty(id)
+
+        return true
     }
 }

@@ -5,7 +5,9 @@ import com.example.graphql.schema.directives.CustomDirectiveWiringFactory
 import com.example.graphql.schema.exceptions.CustomDataFetcherExceptionHandler
 import com.example.graphql.schema.extensions.CustomSchemaGeneratorHooks
 import com.expediagroup.graphql.directives.KotlinDirectiveWiringFactory
+import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.execution.DataFetcherExceptionHandler
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -46,6 +48,11 @@ class GraphqlApplication(userRepository: PersistentUserRepository) {
 //                email = "dfka",
 //                bankAccount = null
 //        ))
+    }
+
+    @Autowired
+    fun configureObjectMapper(mapper: ObjectMapper) {
+        mapper.findAndRegisterModules()
     }
 
     @Bean

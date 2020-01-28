@@ -4,7 +4,6 @@ import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.configuration.security.JWTAuthentication
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
-import com.expediagroup.graphql.annotations.GraphQLContext
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 

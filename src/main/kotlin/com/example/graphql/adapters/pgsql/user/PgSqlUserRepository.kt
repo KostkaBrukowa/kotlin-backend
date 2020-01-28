@@ -14,4 +14,6 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
     override fun getUserByEmail(email: String): User? = userRepository.findTopByEmail(email)?.toDomain()
 
     override fun getUserById(id: String): User? = userRepository.findByIdOrNull(id.toLong())?.toDomain()
+
+    override fun findAllPartyParticipants(partyId: Long): List<User> = userRepository.findAllPartyParticipants(partyId).map { it.toDomain() }
 }

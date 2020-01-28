@@ -11,11 +11,11 @@ data class PersistentPartyRequest(
         @GeneratedValue
         val id: Long? = null,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "user_id", nullable = false)
         val user: PersistentUser,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "party_id", nullable = false)
         val party: PersistentParty,
 
