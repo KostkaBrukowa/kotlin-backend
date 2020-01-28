@@ -13,14 +13,14 @@ data class PersistentExpense(
         @GeneratedValue
         val id: Long? = null,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "user_id", nullable = false)
         val user: PersistentUser,
 
         @OneToMany(mappedBy = "expense")
         val payments: List<PersistentPayment>,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "party_id", nullable = false)
         val party: PersistentParty,
 

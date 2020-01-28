@@ -1,4 +1,13 @@
 graphql:
   packages:
     - "com.example.graphql"
+spring:
+  jackson:
+    timeZone: 'Europe/Warsaw'
+
+    serialization:
+      write_dates_as_timestamps: false
+      indent_output: true
+    generator:
+      WRITE_BIGDECIMAL_AS_PLAIN: true
 

@@ -16,7 +16,7 @@ class MyGraphQLContextFactory(private val jwtAuthentication: JWTAuthentication) 
 
         return AppGraphQLContext(
                 decodedJWT != null,
-                decodedJWT?.subject,
+                decodedJWT?.subject ?: "",
                 request,
                 response
         )

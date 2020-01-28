@@ -17,11 +17,11 @@ data class PersistentMessage(
         @Column(name = "send_date")
         val sendDate: ZonedDateTime,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "user_id", nullable = false)
         val user: PersistentUser,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "message_group_id", nullable = false)
         val messageGroup: PersistentMessageGroup
 )

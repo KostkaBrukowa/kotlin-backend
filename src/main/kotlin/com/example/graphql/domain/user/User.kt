@@ -10,7 +10,7 @@ data class User(
         @GraphQLID
         val id: String = "0",
 
-        val email: String,
+        val email: String = "",
 
         val partyRequests: List<PartyRequest> = emptyList(),
 
@@ -23,7 +23,7 @@ data class User(
         val bankAccount: String? = null,
 
         @GraphQLIgnore
-        val password: String,
+        val password: String = "",
 
         @GraphQLIgnore
         val isEmailConfirmed: Boolean = false

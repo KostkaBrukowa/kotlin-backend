@@ -2,6 +2,7 @@ package com.example.graphql.domain.user
 
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
+import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PersistentPartyRequest
 import javax.persistence.*
 
@@ -15,11 +16,18 @@ data class PersistentUser(
         @OneToMany(mappedBy = "user")
         val partyRequests: List<PersistentPartyRequest> = emptyList(),
 
+        @OneToMany(mappedBy = "owner")
+        val ownedParties: List<PersistentParty> = emptyList(),
+
         @OneToMany(mappedBy = "user")
         val expenses: List<PersistentExpense> = emptyList(),
 
         @ManyToMany(mappedBy = "users")
         val messageGroups: List<PersistentMessageGroup> = emptyList(),
+
+        @ManyToMany(mappedBy = "participants")
+        @Column(name = "party_id")
+        val joinedParties: List<PersistentParty> = emptyList(),
 
         val name: String?,
 
