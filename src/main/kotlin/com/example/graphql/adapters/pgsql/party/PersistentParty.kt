@@ -19,16 +19,16 @@ data class PersistentParty(
         @JoinColumn(name = "user_id")
         val owner: PersistentUser?,
 
-        @ManyToMany(fetch = FetchType.EAGER)
+        @ManyToMany(fetch = FetchType.LAZY)
         @JoinTable(name = "party_user", inverseJoinColumns = [JoinColumn(name = "user_id")], joinColumns = [JoinColumn(name = "party_id")])
         val participants: List<PersistentUser>,
 
-        @OneToOne(fetch = FetchType.EAGER)
+        @OneToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "messagegroup_id")
         val messageGroup: PersistentMessageGroup?,
 
-        @OneToMany(mappedBy = "party", fetch = FetchType.EAGER)
-        val partyRequests: Set<PersistentPartyRequest>,
+        @OneToMany(mappedBy = "party", fetch = FetchType.LAZY)
+        val partyRequests: Set<PersistentPartyRequest>? = null,
 
         @OneToMany(mappedBy = "party")
         val expenses: List<PersistentExpense>,
@@ -47,9 +47,8 @@ data class PersistentParty(
     fun toDomain(): Party = Party(
             id = this.id.toString(),
             owner = this.owner?.toDomain(),
-            participants = this.participants.map { it.toDomain() },
+            participants = emptyList(),
             messageGroup = null,
-            partyRequests = emptyList(),
             expenses = emptyList(),
             name = this.name,
             description = this.description,
@@ -63,7 +62,6 @@ fun Party.toPersistentEntity() = PersistentParty(
         owner = this.owner?.toPersistentEntity(),
         participants = this.participants.map { it.toPersistentEntity() },
         messageGroup = null,
-        partyRequests = emptySet(),
         expenses = emptyList(),
         name = this.name,
         description = this.description ?: "",

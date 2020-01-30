@@ -1,11 +1,11 @@
 package intergration
 
 import com.example.graphql.GraphqlApplication
-import com.fasterxml.jackson.databind.ser.Serializers
+import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.configuration.security.JWTClient
 import groovy.json.JsonBuilder
 import groovyx.net.http.RESTClient
-import intergration.utils.CookiesUtils
-import intergration.utils.SecurityConstants
+import intergration.utils.builders.PersistentUserTestBuilder
 import org.apache.groovy.json.internal.LazyMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import spock.lang.Ignore
 import spock.lang.Specification
 
-import java.time.ZoneId
+import javax.persistence.EntityManager
 
 @Ignore
 @SpringBootTest(classes = [GraphqlApplication],
@@ -34,6 +34,15 @@ class BaseIntegrationSpec extends Specification {
     @Autowired
     JdbcTemplate jdbcTemplate
 
+    @Autowired
+    EntityManager entityManager
+
+    @Autowired
+    JWTClient jwtClient
+
+    @Autowired
+    PersistentUserRepository userRepository
+
     RESTClient restClient
 
     def setup() {
@@ -45,14 +54,13 @@ class BaseIntegrationSpec extends Specification {
         ])
         restClient.handler.failure = restClient.handler.success
     }
-    protected def authenticate(String email) {
-        def signUpMutation = "signUp(input: {email: \"${email ?: baseUserEmail}\", password: \"${baseUserPassword}\" }) { id }"
 
-        baseUserId = postMutation(signUpMutation, "signUp").id
+    protected def authenticate(String email = "a@gmail.com") {
+        def user = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([email: email]))
 
-        String newUserJWTToken = CookiesUtils.getCookieValue(SecurityConstants.ACCESS_TOKEN, restClient)
+        baseUserId = user.id
 
-        setHeaders(["Authorization": "Bearer " + newUserJWTToken])
+        setHeaders(["Authorization": "Bearer " + jwtClient.createJWTToken(baseUserId)])
     }
 
     protected def postQuery(String query, String queryName, Boolean errorExpected = false) {
@@ -62,7 +70,7 @@ class BaseIntegrationSpec extends Specification {
     }
 
     protected def postMutation(String mutation, String mutationName, Boolean errorExpected = false) {
-        def mutationString ="mutation { ${mutation} }"
+        def mutationString = "mutation { ${mutation} }"
 
         return postToGraphQL(mutationString, mutationName, errorExpected)
     }
@@ -73,10 +81,10 @@ class BaseIntegrationSpec extends Specification {
                 body: query
         ]).responseData
 
-        if(errorExpected) {
+        if (errorExpected) {
             return responseData.errors
         }
-        if((responseData as LazyMap).containsKey('errors')){
+        if ((responseData as LazyMap).containsKey('errors')) {
             log.error(new JsonBuilder(responseData.errors).toPrettyString())
         }
 
@@ -85,8 +93,8 @@ class BaseIntegrationSpec extends Specification {
 
     protected setHeaders(Map<String, String> headers) {
         restClient.setHeaders([
-                "Content-Type" : "application/graphql",
-                "Accept"       : "application/json"
+                "Content-Type": "application/graphql",
+                "Accept"      : "application/json"
         ] + headers)
     }
 

@@ -11,11 +11,17 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
     @Query("""
         SELECT u.id, u.name, u.email, u.bank_account, u.password, u.is_email_confirmed
         FROM party_user as pu
-        INNER JOIN parties as p
-            ON pu.party_id = p.id
         INNER JOIN users as u
-            ON p.user_id = u.id
+            ON pu.user_id = u.id
         WHERE pu.party_id = :partyId
     """, nativeQuery = true)
     fun findAllPartyParticipants(@Param("partyId") partyId: Long): List<PersistentUser>
+
+    @Query("""
+        SELECT u
+        FROM PersistentUser as u
+        JOIN FETCH u.partyRequests as pr
+        WHERE pr.party.id = (:partyId)
+    """)
+    fun xxx(@Param("partyId") partyId: Long): PersistentUser
 }

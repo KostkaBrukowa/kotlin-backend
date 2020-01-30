@@ -4,11 +4,13 @@ import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PersistentPartyRequest
+import org.hibernate.Hibernate
 import javax.persistence.*
 
-@Table(name="users")
+@Table(name = "users")
 @Entity
 data class PersistentUser(
+
         @Id
         @GeneratedValue
         val id: Long? = null,
@@ -34,26 +36,25 @@ data class PersistentUser(
         @Column(unique = true)
         val email: String,
 
-        @Column(name ="bank_account")
+        @Column(name = "bank_account")
         val bankAccount: String?,
 
         val password: String,
 
-        @Column(name ="is_email_confirmed")
+        @Column(name = "is_email_confirmed")
         val isEmailConfirmed: Boolean = false
 ) {
-
-        fun toDomain() = User(
-                id = this.id.toString(),
-                name = this.name,
-                password = this.password,
-                bankAccount = this.bankAccount,
-                email = this.email,
-                expenses = emptyList(),
-                messageGroups = emptyList(),
-                partyRequests = emptyList(),
-                isEmailConfirmed = this.isEmailConfirmed
-        )
+    fun toDomain() = User(
+            id = this.id.toString(),
+            name = this.name,
+            password = this.password,
+            bankAccount = this.bankAccount,
+            email = this.email,
+            expenses = emptyList(),
+            messageGroups = emptyList(),
+            partyRequests = lazyProxy(this.partyRequests)?.map { it.toLazyDomain() } ?: emptyList(),
+            isEmailConfirmed = this.isEmailConfirmed
+    )
 }
 
 fun User.toPersistentEntity() = PersistentUser(
@@ -67,3 +68,7 @@ fun User.toPersistentEntity() = PersistentUser(
         partyRequests = emptyList(),
         isEmailConfirmed = this.isEmailConfirmed
 )
+
+fun <T> lazyProxy(property: T): T? {
+    return if (Hibernate.isInitialized(property)) property else null
+}

@@ -32,7 +32,6 @@ dependencies {
     implementation("com.auth0:java-jwt:3.9.0")
     implementation("javax.servlet:javax.servlet-api:4.0.1")
 
-    runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

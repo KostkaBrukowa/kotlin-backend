@@ -1,12 +1,16 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.User
-import com.example.graphql.domain.user.UserRepository
+import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
 import java.time.ZonedDateTime
 
 @Component
-class PartyService(private val partyRepository: PartyRepository, private val userRepository: UserRepository) {
+class PartyService(
+        private val partyRepository: PartyRepository,
+        private val partyRequestService: PartyRequestService
+) {
     fun getTestParty(): Party {
         return Party(
                 name = "test name",
@@ -26,16 +30,22 @@ class PartyService(private val partyRepository: PartyRepository, private val use
         val currentUser = User(id = userId)
         val participants = (party.participants + currentUser).distinctBy { it.id }
 
-//        requestService.sendRequestsForParty(participants - currentUser) TODO when requests are done
+        val newParty = partyRepository.saveNewParty(party.copy(owner = currentUser, participants = participants))
 
-        return partyRepository.saveNewParty(party.copy(owner = currentUser, participants = participants))
+        partyRequestService.sendRequestsForPartyParticipants(participants - currentUser, newParty)
+
+        return newParty
     }
 
     fun updateParty(id: String, party: Party): Party {
         return partyRepository.updateParty(party.copy(id = id))
     }
 
-    fun deleteParty(id: String): Boolean {
+    fun deleteParty(id: String, currentUserId: String): Boolean {
+        if (partyRepository.getTopById(id.toLong())?.owner?.id != currentUserId) {
+            throw UnauthorisedException()
+        }
+
         partyRepository.removeParty(id)
 
         return true

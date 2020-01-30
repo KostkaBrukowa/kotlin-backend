@@ -7,6 +7,8 @@ import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.user.PersistentUser
 import org.apache.commons.lang.RandomStringUtils
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
@@ -47,6 +49,7 @@ class PersistentUserTestBuilder {
         )
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     static PersistentUser aClient(Map props = ["email": RandomStringUtils.random(5) + "@gmail.com"]
                                   , PersistentUserRepository repository) {
         return repository.save(defaultPersistentUser(props))
