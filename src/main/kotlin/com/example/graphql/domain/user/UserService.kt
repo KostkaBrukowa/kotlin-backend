@@ -10,7 +10,7 @@ class UserService(private val userRepository: UserRepository) {
     }
 
     fun getAllPartyParticipants(partyId: String): List<User> {
-        return userRepository.findAllPartyParticipants(partyId.toLong())
+        return userRepository.findAllPartyParticipants(partyId)
     }
 }
 

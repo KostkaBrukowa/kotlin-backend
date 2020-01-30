@@ -7,9 +7,9 @@ import com.expediagroup.graphql.annotations.GraphQLID
 data class PartyRequest(
         @GraphQLID
         val id: String,
-        val user: User,
-        val party: Party,
-        val status: PartyRequestStatus
+        val user: User? = null,
+        val party: Party? = null,
+        val status: PartyRequestStatus = PartyRequestStatus.IN_PROGRESS
 )
 
 enum class PartyRequestStatus {

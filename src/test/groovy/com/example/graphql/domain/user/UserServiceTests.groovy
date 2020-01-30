@@ -1,7 +1,6 @@
 package com.example.graphql.domain.user
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class UserServiceTests extends Specification {
     UserRepository userRepository = Stub()

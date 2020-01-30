@@ -1,17 +1,15 @@
 package com.example.graphql.domain.party
 
 
-import com.example.graphql.domain.party.PartyTestBuilder
-import com.example.graphql.domain.user.UserRepository
+import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.UserTestBuilder
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import spock.lang.Specification
 
 class PartyServiceTest extends Specification {
 
     PartyRepository partyRepository = Mock()
-    UserRepository userRepository = Stub()
-    PartyService partyService = new PartyService(partyRepository, userRepository)
+    PartyRequestService partyRequestService = Stub()
+    PartyService partyService = new PartyService(partyRepository, partyRequestService)
 
     def "service should save new party with distinct participants and owner"() {
         given:

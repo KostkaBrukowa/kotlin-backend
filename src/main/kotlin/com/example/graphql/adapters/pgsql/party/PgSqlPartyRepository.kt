@@ -4,12 +4,15 @@ import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.party.toPersistentEntity
 import org.springframework.stereotype.Component
+import javax.transaction.Transactional
 
 @Component
 class PgSqlPartyRepository(private val persistentPartyRepository: PersistentPartyRepository) : PartyRepository {
 
+    @Transactional
     override fun getAllByOwnerId(id: Long): List<Party> = persistentPartyRepository.getAllByOwnerId(id).map { it.toDomain() }
 
+    @Transactional
     override fun getTopById(id: Long): Party? = persistentPartyRepository.getTopById(id)?.toDomain()
 
     override fun saveNewParty(party: Party): Party = persistentPartyRepository.save(party.toPersistentEntity()).toDomain()

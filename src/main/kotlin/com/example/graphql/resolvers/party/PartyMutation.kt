@@ -3,6 +3,7 @@ package com.example.graphql.resolvers.party
 import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyService
+import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserService
 import com.example.graphql.schema.directives.Authenticated
@@ -18,19 +19,27 @@ import javax.validation.constraints.FutureOrPresent
 
 @Validated
 @Component
-class PartyMutation(private val partyService: PartyService, private val userService: UserService) : Mutation {
+class PartyMutation(
+        private val partyService: PartyService,
+        private val userService: UserService,
+        private val partyRequestService: PartyRequestService
+) : Mutation {
 
     @Authenticated(role = Roles.USER)
     fun createParty(
             @Valid newPartyInput: NewPartyInput,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyService.createParty(newPartyInput.toDomain(), context.subject).toResponse(userService)
+    ) = partyService.createParty(newPartyInput.toDomain(), context.subject).toResponse(userService, partyRequestService)
 
     @Authenticated(role = Roles.USER)
     fun updateParty(id: String, @Valid newPartyInput: NewPartyInput) = partyService.updateParty(id, newPartyInput.toDomain())
 
     @Authenticated(role = Roles.USER)
-    fun deleteParty(id: String) = partyService.deleteParty(id)
+    fun deleteParty(
+            id: String,
+            @GraphQLContext context: AppGraphQLContext
+    ) = partyService.deleteParty(id, context.subject)
+
 }
 
 data class NewPartyInput(

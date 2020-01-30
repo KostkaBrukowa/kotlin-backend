@@ -1,13 +1,18 @@
 package intergration.domain.party
 
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.domain.party.PersistentParty
+import com.example.graphql.domain.partyrequest.PartyRequestStatus
+import com.example.graphql.domain.partyrequest.PersistentPartyRequest
+import com.example.graphql.domain.user.PersistentUser
 import intergration.BaseIntegrationSpec
 import org.apache.groovy.json.internal.LazyMap
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 
+import javax.persistence.EntityManager
 import java.time.ZonedDateTime
 
 import static intergration.utils.builders.PersistentPartyTestBuilder.aPartyWithProps
@@ -21,6 +26,12 @@ class PartyTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPartyRepository partyRepository
+
+    @Autowired
+    PersistentPartyRequestRepository partyRequestRepository
+
+    @Autowired
+    EntityManager entityManager
 
     def "Should return an error when user is not signed in"() {
         given:
@@ -45,19 +56,21 @@ class PartyTest extends BaseIntegrationSpec {
         and:
         aPartyWithProps([owner: secondClient], partyRepository)
         aPartyWithProps([owner: thirdClient], partyRepository)
-        aPartyWithProps([owner: loggedInClient, name: 'logged party 1'], partyRepository)
-        aPartyWithProps([owner: loggedInClient, name: 'logged party 2'], partyRepository)
+        aPartyWithProps([owner: loggedInClient, name: 'logged party 1', participants: [secondClient, thirdClient]], partyRepository)
+        aPartyWithProps([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient]], partyRepository)
 
         and:
-        def getAllPartiesQuery = """getAllParties(userId: "${baseUserId}"){ name, owner { id } }"""
+        def getAllPartiesQuery = """getAllParties(userId: "${baseUserId}"){ name, owner { id } participants { id } }"""
 
         when:
         def response = postQuery(getAllPartiesQuery, "getAllParties") as ArrayList<LazyMap>
 
         then:
         response.size() == 2
-        response.any { it -> it.owner.id == baseUserId && it.name == 'logged party 1'}
-        response.any { it -> it.owner.id == baseUserId && it.name == 'logged party 2'}
+        response.any { it -> it.owner.id == baseUserId && it.name == 'logged party 1' }
+        response.any { it -> it.owner.id == baseUserId && it.name == 'logged party 2' }
+        response.every { it -> it.participants.any { it.id == secondClient.id.toString() } }
+        response.every { it -> it.participants.any { it.id == thirdClient.id.toString() } }
     }
 
     def "Should return a created party given an id"() {
@@ -111,7 +124,9 @@ class PartyTest extends BaseIntegrationSpec {
         String newPartyId = postMutation(createPartyMutation, "createParty").id
 
         when:
-        def partyResponse = partyRepository.getTopById(newPartyId.toLong())
+        PersistentParty partyResponse = partyRepository.getTopById(newPartyId.toLong())
+        List<PersistentPartyRequest> partyRequestResponse = partyRequestRepository.findAllByPartyId(newPartyId.toLong())
+        List<PersistentUser> participantsResponse = userRepository.findAllPartyParticipants(newPartyId.toLong())
 
         then:
         partyResponse.id == newPartyId.toLong()
@@ -119,12 +134,11 @@ class PartyTest extends BaseIntegrationSpec {
         partyResponse.description == "test description"
         partyResponse.startDate == tenDaysFromNow
         partyResponse.endDate == elevenDaysFromNow
-//        partyResponse.messageGroup.containsKey("id")
-        partyResponse.participants.size() == 1
-        partyResponse.partyRequests.size() == 0
+//        partyResponse.messageGroup.containsKey("id") TODO when messages are up
+        partyRequestResponse.size() == 0
+        participantsResponse.size() == 1
     }
 
-    @Ignore
     def "Should return party requests for all participants"() {
         given:
         authenticate()
@@ -159,14 +173,15 @@ class PartyTest extends BaseIntegrationSpec {
         String newPartyId = postMutation(createPartyMutation(firstUserId, secondUserId), "createParty").id
 
         when:
-        def partyResponse = postQuery(getSinglePartyQuery(newPartyId), "getSingleParty") as LazyMap
+
+        def partyRequestsResponse = findPartyRequestsByPartyId(newPartyId)
+
 
         then:
-        partyResponse.partyRequests.size() == 2
-        partyResponse.partyRequests[0].user.id == firstUserId
-        partyResponse.partyRequests[1].user.id == secondUserId
-        partyResponse.partyRequests[0].status == "IN_PROGRESS"
-        partyResponse.partyRequests[1].status == "IN_PROGRESS"
+        partyRequestsResponse.size() == 2
+        partyRequestsResponse.any { it.user.id == firstUserId.toLong() }
+        partyRequestsResponse.any { it.user.id == secondUserId.toLong() }
+        partyRequestsResponse.every { it.status == PartyRequestStatus.IN_PROGRESS }
     }
 
     def "Should properly update a party"() {
@@ -212,5 +227,67 @@ class PartyTest extends BaseIntegrationSpec {
         partyResponse.description == "updated party description"
         partyResponse.startDate == elevenDaysFromNow
         partyResponse.endDate == twelveDaysFromNow
+    }
+
+    def "Should not delete a party when issuing user is not an owner"() {
+        given:
+        authenticate()
+
+        and:
+        def notAnOwner = aClient(userRepository)
+
+        and:
+        def partyId = aPartyWithProps([
+                name       : 'name',
+                description: 'description',
+                startDate  : ZonedDateTime.now().plusDays(10),
+                owner      : notAnOwner
+        ], partyRepository).id
+
+        and:
+        def deletePartyMutation = """deleteParty( id: "${partyId}" )"""
+
+        when:
+        def response = postMutation(deletePartyMutation, "deleteParty", true)
+
+        then:
+        response[0].errorType == "DataFetchingException"
+    }
+
+    def "Should delete a party when issuing user is an owner"() {
+        given:
+        authenticate()
+
+        and:
+        def owner = defaultPersistentUser([id: baseUserId])
+
+        and:
+        def partyId = aPartyWithProps([
+                name       : 'name',
+                description: 'description',
+                startDate  : ZonedDateTime.now().plusDays(10),
+                owner      : owner
+        ], partyRepository).id
+
+        and:
+        def deletePartyMutation = """deleteParty( id: "${partyId}" )"""
+
+        when:
+        postMutation(deletePartyMutation, "deleteParty")
+
+        and:
+        def partyResponse = partyRepository.getTopById(partyId.toLong())
+
+        then:
+        partyResponse == null
+    }
+
+    def findPartyRequestsByPartyId(String partyId) {
+        List<PersistentPartyRequest> partyRequestsResponse = partyRequestRepository.findAllByPartyId(partyId.toLong())
+        partyRequestsResponse.forEach {
+            Hibernate.initialize(it.user)
+        }
+
+        return partyRequestsResponse
     }
 }
