@@ -56,7 +56,7 @@ class PartyTest extends BaseIntegrationSpec {
         aParty([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient]], partyRepository)
 
         and:
-        def getAllPartiesQuery = """getAllParties(userId: "${baseUserId}"){ name, owner { id } participants { id } }"""
+        def getAllPartiesQuery = """getAllParties(userId: "${baseUserId}"){ name, owner { id } partyParticipants { id }, partyPartyRequests { id } }"""
 
         when:
         def response = postQuery(getAllPartiesQuery, "getAllParties") as ArrayList<LazyMap>
@@ -65,8 +65,8 @@ class PartyTest extends BaseIntegrationSpec {
         response.size() == 2
         response.any { it -> it.owner.id == baseUserId && it.name == 'logged party 1' }
         response.any { it -> it.owner.id == baseUserId && it.name == 'logged party 2' }
-        response.every { it -> it.participants.any { it.id == secondClient.id.toString() } }
-        response.every { it -> it.participants.any { it.id == thirdClient.id.toString() } }
+        response.every { it -> it.partyParticipants.any { it.id == secondClient.id.toString() } }
+        response.every { it -> it.partyParticipants.any { it.id == thirdClient.id.toString() } }
     }
 
     def "Should return a created party given an id"() {

@@ -2,6 +2,7 @@ package com.example.graphql.domain.user
 
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.messagegroup.MessageGroup
+import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.partyrequest.PartyRequest
 
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
@@ -12,6 +13,7 @@ class UserTestBuilder {
             id              : '0',
             email           : 'test@email.com',
             partyRequests   : [],
+            joinedParties   : [],
             expenses        : [],
             messageGroups   : [],
             name            : 'testname',
@@ -31,6 +33,7 @@ class UserTestBuilder {
                 allArgs.id as String,
                 allArgs.email as String,
                 allArgs.partyRequests as List<PartyRequest>,
+                allArgs.joinedParties as List<Party>,
                 allArgs.expenses as List<Expense>,
                 allArgs.messageGroups as List<MessageGroup>,
                 allArgs.name as String,

@@ -17,7 +17,7 @@ data class PersistentMessageGroup(
 
         @ManyToMany()
         @JoinTable(name = "messagegroup_user")
-        val users: List<PersistentUser>,
+        val users: Set<PersistentUser>,
 
         @OneToOne(fetch = FetchType.LAZY, optional = true)
         val party: PersistentParty?

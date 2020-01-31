@@ -25,7 +25,7 @@ data class Party(
 
         val description: String? = null,
 
-        val startDate: ZonedDateTime,
+        val startDate: ZonedDateTime = ZonedDateTime.now(),
 
         val endDate: ZonedDateTime? = null
 )

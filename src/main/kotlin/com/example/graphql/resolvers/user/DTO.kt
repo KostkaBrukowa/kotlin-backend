@@ -5,7 +5,6 @@ import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
-import com.example.graphql.resolvers.partyrequest.toResponse
 import com.expediagroup.graphql.annotations.GraphQLID
 
 data class UserType(
@@ -16,22 +15,19 @@ data class UserType(
 
         val name: String? = null,
 
-        val bankAccount: String? = null,
-
-        private val partyRequestService: PartyRequestService
+        val bankAccount: String? = null
 ) {
 
-    fun partyRequests(): List<PartyRequestType> = partyRequestService.getAllPartyRequestsByUserId(this.id).map { it.toResponse() }
+    lateinit var userPartyRequests: List<PartyRequestType>
 
     fun expenses(): List<Expense> = emptyList()
 
     fun messageGroups(): List<MessageGroup> = emptyList()
 }
 
-fun User.toResponse(partyRequestService: PartyRequestService) = UserType(
+fun User.toResponse() = UserType(
         id = this.id,
         name = this.name,
         email = this.email,
-        bankAccount = this.bankAccount,
-        partyRequestService = partyRequestService
+        bankAccount = this.bankAccount
 )

@@ -1,5 +1,6 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.User
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
@@ -11,21 +12,12 @@ class PartyService(
         private val partyRepository: PartyRepository,
         private val partyRequestService: PartyRequestService
 ) {
-    fun getTestParty(): Party {
-        return Party(
-                name = "test name",
-                startDate = ZonedDateTime.now()
-        )
-    }
+    // GET
+    fun getAllParties(userId: String) = partyRepository.getAllByOwnerId(userId)
 
-    fun getAllParties(userId: String): List<Party> {
-        return partyRepository.getAllByOwnerId(userId)
-    }
+    fun getSingleParty(partyId: String) = partyRepository.getTopById(partyId)
 
-    fun getSingleParty(partyId: String): Party? {
-        return partyRepository.getTopById(partyId)
-    }
-
+    // CREATE
     fun createParty(party: Party, userId: String): Party {
         val currentUser = User(id = userId)
         val participants = (party.participants + currentUser).distinctBy { it.id }
@@ -37,10 +29,10 @@ class PartyService(
         return newParty
     }
 
-    fun updateParty(id: String, party: Party): Party {
-        return partyRepository.updateParty(party.copy(id = id))
-    }
+    // UPDATE
+    fun updateParty(id: String, party: Party) = partyRepository.updateParty(party.copy(id = id))
 
+    // DELETE
     fun deleteParty(id: String, currentUserId: String): Boolean {
         if (partyRepository.getTopById(id)?.owner?.id != currentUserId) {
             throw UnauthorisedException()
@@ -50,4 +42,9 @@ class PartyService(
 
         return true
     }
+
+    fun removeParticipant(partyId: String, participantId: String, context: AppGraphQLContext): Boolean {
+        TODO("")
+    }
+
 }

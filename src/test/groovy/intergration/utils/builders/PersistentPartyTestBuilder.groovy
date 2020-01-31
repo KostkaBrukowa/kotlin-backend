@@ -35,7 +35,7 @@ class PersistentPartyTestBuilder {
         return new PersistentParty(
                 allArgs.id as Long,
                 allArgs.owner as PersistentUser,
-                allArgs.participants as List<PersistentUser>,
+                allArgs.participants as Set<PersistentUser>,
                 allArgs.messageGroup as PersistentMessageGroup,
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.expenses as List<PersistentExpense>,

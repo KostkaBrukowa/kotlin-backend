@@ -1,6 +1,5 @@
 package com.example.graphql.adapters.pgsql.partyrequest
 
-import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.partyrequest.PartyRequestStatus
@@ -17,19 +16,19 @@ data class PersistentPartyRequest(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
-        val user: PersistentUser? = null,
+        val user: PersistentUser,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "party_id", nullable = false)
-        val party: PersistentParty?,
+        val party: PersistentParty,
 
         @Enumerated(EnumType.STRING)
         val status: PartyRequestStatus
 ){
         fun toDomain(): PartyRequest = PartyRequest(
                 id = this.id.toString(),
-                user = lazyProxy(this.user)?.toDomain(),
-                party = this.party?.toDomain(),
+                user = this.user.toDomain(),
+                party = this.party.toDomain(),
                 status = this.status
         )
 
@@ -39,4 +38,8 @@ data class PersistentPartyRequest(
                 party = null,
                 status = this.status
         )
+
+        override fun toString(): String {
+                return "PersistentParty"
+        }
 }

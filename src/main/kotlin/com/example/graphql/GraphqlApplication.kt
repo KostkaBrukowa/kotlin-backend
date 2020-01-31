@@ -1,6 +1,8 @@
 package com.example.graphql
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.resolvers.configuration.CustomDataFetcherFactoryProvider
+import com.example.graphql.resolvers.configuration.SpringDataFetcherFactory
 import com.example.graphql.schema.directives.CustomDirectiveWiringFactory
 import com.example.graphql.schema.exceptions.CustomDataFetcherExceptionHandler
 import com.example.graphql.schema.extensions.CustomSchemaGeneratorHooks
@@ -37,7 +39,7 @@ class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecur
 @SpringBootApplication()
 class GraphqlApplication(userRepository: PersistentUserRepository) {
     init {
-//        // TODO REMOVE BEFORE PROD
+        //        // TODO REMOVE BEFORE PROD
 //        userRepository.save(PersistentUser(
 //                id = 123,
 //                partyRequests = emptyList(),
@@ -49,6 +51,10 @@ class GraphqlApplication(userRepository: PersistentUserRepository) {
 //                bankAccount = null
 //        ))
     }
+
+    @Bean
+    fun dataFetcherFactoryProvider(springDataFetcherFactory: SpringDataFetcherFactory, objectMapper: ObjectMapper) =
+            CustomDataFetcherFactoryProvider(springDataFetcherFactory, objectMapper)
 
     @Autowired
     fun configureObjectMapper(mapper: ObjectMapper) {

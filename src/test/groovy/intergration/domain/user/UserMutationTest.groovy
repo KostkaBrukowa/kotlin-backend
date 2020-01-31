@@ -20,7 +20,7 @@ class UserMutationTest extends BaseIntegrationSpec {
             getUser(id: "${id}"){
               id
               email
-              partyRequests {
+              userPartyRequests {
                 id
               }
             }
@@ -51,7 +51,7 @@ class UserMutationTest extends BaseIntegrationSpec {
             getUser(id: "${id}"){
               id
               email
-              partyRequests {
+              userPartyRequests {
                 id
               }
             }

@@ -62,7 +62,8 @@ class PartyRequestTest extends BaseIntegrationSpec {
 
         and:
         def differentUserThanCurrentlyLogged = aClient(userRepository)
-        def aParty = aParty(partyRepository)
+
+        def aParty = aParty(owner: baseUser, partyRepository)
         def aPartyRequest = aPartyRequest([
                 user : differentUserThanCurrentlyLogged,
                 party: aParty
@@ -121,7 +122,7 @@ class PartyRequestTest extends BaseIntegrationSpec {
     }
 
     @Unroll
-    def "Should send the party request to a user when party request is issued when the owner is the sender"() {
+    def "Should send [#ownerIsSender] the party request to a user when party request is issued when the owner is [#ownerIsSender] the sender"() {
         given:
         authenticate()
 
@@ -130,7 +131,7 @@ class PartyRequestTest extends BaseIntegrationSpec {
         def aParty = aParty([owner: ownerIsSender ? baseUser : aClient(userRepository)], partyRepository)
 
         and:
-        def inviteUserToPartyMutation = ("""sendPartyRequest(userId: "${clientToBeRequested.id}", partyId: "${aParty.id}") { id }""")
+        def inviteUserToPartyMutation = ("""sendPartyRequest(requestReceiverId: "${clientToBeRequested.id}", partyId: "${aParty.id}") { id }""")
 
         when:
         def response = postMutation(inviteUserToPartyMutation, "sendPartyRequest", !ownerIsSender)
@@ -145,7 +146,7 @@ class PartyRequestTest extends BaseIntegrationSpec {
             assert actualPartyRequests.get(0).user.id == clientToBeRequested.id
         } else {
             assert response[0].errorType == 'DataFetchingException'
-            assert response[0].descriptoin == 'User is not authorised to perform this action'
+            assert response[0].message.contains("User is not authorised to perform this action")
         }
 
         where:
@@ -157,14 +158,14 @@ class PartyRequestTest extends BaseIntegrationSpec {
         authenticate()
 
         and:
-        def aParty = aParty([owner: baseUser], partyRepository)
         def aClient = aClient(userRepository)
+        def aParty = aParty([owner: baseUser, participants: [aClient]], partyRepository)
 
         and:
         def alreadyIssuedRequest = aPartyRequest([party: aParty, user: aClient], partyRequestRepository)
 
         and:
-        def inviteUserToPartyMutation = ("""sendPartyRequest(userId: "${aClient.id}", partyId: "${aParty.id}") { id }""")
+        def inviteUserToPartyMutation = ("""sendPartyRequest(requestReceiverId: "${aClient.id}", partyId: "${aParty.id}") { id }""")
 
         when:
         postMutation(inviteUserToPartyMutation, "sendPartyRequest")
@@ -185,16 +186,17 @@ class PartyRequestTest extends BaseIntegrationSpec {
         def aParty = aParty([owner: baseUser], partyRepository)
 
         and:
-        def inviteUserToPartyMutation = ("""sendPartyRequest(userId: "${baseUser.id}", partyId: "${aParty.id}") { id }""")
+        def inviteUserToPartyMutation = ("""sendPartyRequest(requestReceiverId: "${baseUser.id}", partyId: "${aParty.id}") { id }""")
 
         when:
-        postMutation(inviteUserToPartyMutation, "sendPartyRequest")
+        def response = postMutation(inviteUserToPartyMutation, "sendPartyRequest")
 
         and:
         def actualPartyRequests = partyRequestRepository.findAllByUserId(baseUser.id)
 
         then:
         actualPartyRequests.empty
+        response == null
     }
 
     def "Should not send a request when party has already been finished"() {
@@ -206,7 +208,7 @@ class PartyRequestTest extends BaseIntegrationSpec {
         def aParty = aParty([owner: baseUser, endDate: ZonedDateTime.now().minusDays(1)], partyRepository)
 
         and:
-        def inviteUserToPartyMutation = ("""sendPartyRequest(userId: "${aClient.id}", partyId: "${aParty.id}") { id }""")
+        def inviteUserToPartyMutation = ("""sendPartyRequest(requestReceiverId: "${aClient.id}", partyId: "${aParty.id}") { id }""")
 
         when:
         def response = postMutation(inviteUserToPartyMutation, "sendPartyRequest")

@@ -1,5 +1,6 @@
 package com.example.graphql.adapters.pgsql.user
 
+import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.user.PersistentUser
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -16,5 +17,13 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
         WHERE pu.party_id = :partyId
     """, nativeQuery = true)
     fun findAllPartyParticipants(@Param("partyId") partyId: Long): List<PersistentUser>
+
+    @Query("""
+        SELECT distinct user
+        FROM PersistentUser as user
+        LEFT JOIN FETCH user.partyRequests
+        WHERE user.id in :usersIds
+    """)
+    fun findUsersWithPartyRequests(@Param("usersIds") usersIds: List<Long>): List<PersistentUser>
 }
 

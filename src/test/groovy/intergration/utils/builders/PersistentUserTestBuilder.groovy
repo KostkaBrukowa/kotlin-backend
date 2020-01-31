@@ -39,7 +39,7 @@ class PersistentUserTestBuilder {
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.ownedParties as List<PersistentParty>,
                 allArgs.expenses as List<PersistentExpense>,
-                allArgs.messageGroups as List<PersistentMessageGroup>,
+                allArgs.messageGroups as Set<PersistentMessageGroup>,
                 allArgs.joinedParties as List<PersistentParty>,
                 allArgs.name as String,
                 allArgs.email as String,

@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component
 
 @Component
 class PgSqlPartyRequestRepository(private val persistentPartyRequestRepository: PersistentPartyRequestRepository) : PartyRequestRepository {
-    override fun createPartyRequestsParticipants(participants: List<User>, party: Party) {
+    override fun createPartyRequestsForParticipants(participants: List<User>, party: Party): List<PartyRequest> {
         val persistentParty = party.toPersistentEntity()
-        persistentPartyRequestRepository.saveAll(participants.map {
+        return persistentPartyRequestRepository.saveAll(participants.map {
             PersistentPartyRequest(
                     user = it.toPersistentEntity(),
                     party = persistentParty,
                     status = PartyRequestStatus.IN_PROGRESS
             )
-        })
+        }).map { it.toDomain() }
     }
 
     override fun findAllByParty(partyId: String): List<PartyRequest> =
@@ -27,4 +27,8 @@ class PgSqlPartyRequestRepository(private val persistentPartyRequestRepository: 
 
     override fun findAllByUserId(userId: String): List<PartyRequest> =
             persistentPartyRequestRepository.findAllByUserId(userId.toLong()).map { it.toDomain() }
+
+    override fun findByUserIdAndPartyId(userId: String, partyId: String): PartyRequest? {
+        return persistentPartyRequestRepository.findByUserIdAndPartyId(userId.toLong(), partyId.toLong())?.toDomain()
+    }
 }
