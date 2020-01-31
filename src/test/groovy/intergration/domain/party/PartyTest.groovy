@@ -1,11 +1,11 @@
 package intergration.domain.party
 
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PartyRequestStatus
-import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.user.PersistentUser
 import intergration.BaseIntegrationSpec
 import org.apache.groovy.json.internal.LazyMap
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import java.time.ZonedDateTime
 
-import static intergration.utils.builders.PersistentPartyTestBuilder.aPartyWithProps
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
 import static intergration.utils.builders.PersistentUserTestBuilder.defaultPersistentUser
 
@@ -50,10 +50,10 @@ class PartyTest extends BaseIntegrationSpec {
         def thirdClient = aClient(userRepository)
 
         and:
-        aPartyWithProps([owner: secondClient], partyRepository)
-        aPartyWithProps([owner: thirdClient], partyRepository)
-        aPartyWithProps([owner: loggedInClient, name: 'logged party 1', participants: [secondClient, thirdClient]], partyRepository)
-        aPartyWithProps([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient]], partyRepository)
+        aParty([owner: secondClient], partyRepository)
+        aParty([owner: thirdClient], partyRepository)
+        aParty([owner: loggedInClient, name: 'logged party 1', participants: [secondClient, thirdClient]], partyRepository)
+        aParty([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient]], partyRepository)
 
         and:
         def getAllPartiesQuery = """getAllParties(userId: "${baseUserId}"){ name, owner { id } participants { id } }"""
@@ -77,7 +77,7 @@ class PartyTest extends BaseIntegrationSpec {
         def tenDaysFromNow = ZonedDateTime.now().plusDays(10)
 
         and:
-        def partyId = aPartyWithProps([
+        def partyId = aParty([
                 name       : 'test name',
                 description: 'test description',
                 startDate  : tenDaysFromNow,
@@ -190,7 +190,7 @@ class PartyTest extends BaseIntegrationSpec {
         def twelveDaysFromNow = ZonedDateTime.now().plusDays(12)
 
         and:
-        def partyId = aPartyWithProps([
+        def partyId = aParty([
                 name       : 'name before update',
                 description: 'description before update',
                 startDate  : tenDaysFromNow,
@@ -233,7 +233,7 @@ class PartyTest extends BaseIntegrationSpec {
         def notAnOwner = aClient(userRepository)
 
         and:
-        def partyId = aPartyWithProps([
+        def partyId = aParty([
                 name       : 'name',
                 description: 'description',
                 startDate  : ZonedDateTime.now().plusDays(10),
@@ -250,19 +250,22 @@ class PartyTest extends BaseIntegrationSpec {
         response[0].errorType == "DataFetchingException"
     }
 
-    def "Should delete a party when issuing user is an owner"() {
+    def "Should delete a party when issuing user is an owner, and should remove users' participant status when party is deleted "() {
         given:
         authenticate()
 
         and:
         def owner = defaultPersistentUser([id: baseUserId])
+        def participant1 = aClient(userRepository)
+        def participant2 = aClient(userRepository)
 
         and:
-        def partyId = aPartyWithProps([
-                name       : 'name',
-                description: 'description',
-                startDate  : ZonedDateTime.now().plusDays(10),
-                owner      : owner
+        def partyId = aParty([
+                name        : 'name',
+                description : 'description',
+                startDate   : ZonedDateTime.now().plusDays(10),
+                owner       : owner,
+                participants: [participant1, participant2]
         ], partyRepository).id
 
         and:
@@ -273,9 +276,11 @@ class PartyTest extends BaseIntegrationSpec {
 
         and:
         def partyResponse = partyRepository.getTopById(partyId.toLong())
+        def participantsResponse = userRepository.findAllPartyParticipants(partyId)
 
         then:
         partyResponse == null
+        participantsResponse.empty
     }
 
     def findPartyRequestsByPartyId(String partyId) {
