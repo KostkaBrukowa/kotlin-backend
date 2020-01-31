@@ -29,16 +29,26 @@ class PartyMutation(
     fun createParty(
             @Valid newPartyInput: NewPartyInput,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyService.createParty(newPartyInput.toDomain(), context.subject).toResponse(userService, partyRequestService)
+    ) = partyService.createParty(newPartyInput.toDomain(), context.subject).toResponse()
 
     @Authenticated(role = Roles.USER)
-    fun updateParty(id: String, @Valid newPartyInput: NewPartyInput) = partyService.updateParty(id, newPartyInput.toDomain())
+    fun updateParty(
+            id: String,
+            @Valid newPartyInput: NewPartyInput
+    ) = partyService.updateParty(id, newPartyInput.toDomain())
 
     @Authenticated(role = Roles.USER)
     fun deleteParty(
             id: String,
             @GraphQLContext context: AppGraphQLContext
     ) = partyService.deleteParty(id, context.subject)
+
+    @Authenticated(role = Roles.USER)
+    fun removeParticipant(
+            partyId: String,
+            participantId: String,
+            @GraphQLContext context: AppGraphQLContext
+    ) = partyService.removeParticipant(partyId, participantId, context)
 }
 
 data class NewPartyInput(

@@ -6,6 +6,8 @@ import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserService
+import com.example.graphql.resolvers.partyrequest.PartyRequestType
+import com.example.graphql.resolvers.user.UserType
 import com.expediagroup.graphql.annotations.GraphQLID
 import java.time.ZonedDateTime
 
@@ -21,26 +23,22 @@ data class PartyType(
 
         val startDate: ZonedDateTime,
 
-        val endDate: ZonedDateTime? = null,
+        val endDate: ZonedDateTime? = null
 
-        private val userService: UserService,
-        private val partyRequestService: PartyRequestService
 ) {
 
-    fun participants(): List<User> = userService.getAllPartyParticipants(this.id)
+    lateinit var partyParticipants: List<UserType>
 
-    fun partyRequests(): List<PartyRequest> = partyRequestService.getAllPartyRequestsByPartyId(this.id)
+    lateinit var partyPartyRequests: List<PartyRequestType>
 
     fun expenses(): List<Expense> = emptyList()
 }
 
-fun Party.toResponse(userService: UserService, partyRequestService: PartyRequestService) = PartyType(
+fun Party.toResponse() = PartyType(
         id = this.id,
         name = this.name,
         owner = this.owner,
         description = this.description,
         startDate = this.startDate,
-        endDate = this.endDate,
-        userService = userService,
-        partyRequestService =partyRequestService
+        endDate = this.endDate
 )

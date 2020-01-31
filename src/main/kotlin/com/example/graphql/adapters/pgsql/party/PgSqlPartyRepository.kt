@@ -15,6 +15,18 @@ class PgSqlPartyRepository(private val persistentPartyRepository: PersistentPart
     @Transactional
     override fun getTopById(id: String): Party? = persistentPartyRepository.getTopById(id.toLong())?.toDomain()
 
+    override fun getPartyWithOwnerAndParticipants(partyId: String): Party? {
+        return persistentPartyRepository.getPartyWithOwnerAndParticipants(partyId.toLong())?.toDomain()
+    }
+
+    override fun findPartiesWithParticipants(partiesIds: Set<String>): List<Party> {
+        return persistentPartyRepository.findPartiesWithParticipants(partiesIds.map { it.toLong() }).map { it.toDomain() }
+    }
+
+    override fun findPartiesWithPartyRequests(partiesIds: Set<String>): List<Party> {
+        return persistentPartyRepository.findPartiesWithPartyRequests(partiesIds.map { it.toLong() }).map { it.toDomain() }
+    }
+
     override fun saveNewParty(party: Party): Party = persistentPartyRepository.save(party.toPersistentEntity()).toDomain()
 
     override fun updateParty(updatedParty: Party): Party {

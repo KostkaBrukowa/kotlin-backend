@@ -2,6 +2,7 @@ package com.example.graphql.domain.user
 
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.messagegroup.MessageGroup
+import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLIgnore
@@ -13,6 +14,8 @@ data class User(
         val email: String = "",
 
         val partyRequests: List<PartyRequest> = emptyList(),
+
+        val joinedParties: List<Party> = emptyList(),
 
         val expenses: List<Expense> = emptyList(),
 
