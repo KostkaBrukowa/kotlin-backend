@@ -39,7 +39,6 @@ class PartyMutation(
             id: String,
             @GraphQLContext context: AppGraphQLContext
     ) = partyService.deleteParty(id, context.subject)
-
 }
 
 data class NewPartyInput(

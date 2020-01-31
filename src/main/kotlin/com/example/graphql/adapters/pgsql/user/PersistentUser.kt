@@ -3,8 +3,8 @@ package com.example.graphql.domain.user
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
-import org.hibernate.Hibernate
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
+import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import javax.persistence.*
 
 @Table(name = "users")
@@ -69,6 +69,3 @@ fun User.toPersistentEntity() = PersistentUser(
         isEmailConfirmed = this.isEmailConfirmed
 )
 
-fun <T> lazyProxy(property: T): T? {
-    return if (Hibernate.isInitialized(property)) property else null
-}

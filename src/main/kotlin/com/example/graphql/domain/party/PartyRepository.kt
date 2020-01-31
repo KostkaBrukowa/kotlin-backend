@@ -1,9 +1,9 @@
 package com.example.graphql.domain.party
 
 interface PartyRepository {
-    fun getAllByOwnerId(id: Long): List<Party>
+    fun getAllByOwnerId(id: String): List<Party>
 
-    fun getTopById(id: Long): Party?
+    fun getTopById(id: String): Party?
 
     fun saveNewParty(party: Party): Party
 

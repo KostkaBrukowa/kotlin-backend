@@ -16,8 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate
 import spock.lang.Ignore
 import spock.lang.Specification
 
-import javax.persistence.EntityManager
-
 @Ignore
 @SpringBootTest(classes = [GraphqlApplication],
         properties = "application.environment=integration",
@@ -33,9 +31,6 @@ class BaseIntegrationSpec extends Specification {
 
     @Autowired
     JdbcTemplate jdbcTemplate
-
-    @Autowired
-    EntityManager entityManager
 
     @Autowired
     JWTClient jwtClient

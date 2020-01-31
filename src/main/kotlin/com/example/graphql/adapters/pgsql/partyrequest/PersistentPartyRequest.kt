@@ -1,8 +1,10 @@
-package com.example.graphql.domain.partyrequest
+package com.example.graphql.adapters.pgsql.partyrequest
 
+import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import com.example.graphql.domain.party.PersistentParty
+import com.example.graphql.domain.partyrequest.PartyRequest
+import com.example.graphql.domain.partyrequest.PartyRequestStatus
 import com.example.graphql.domain.user.PersistentUser
-import com.example.graphql.domain.user.lazyProxy
 import javax.persistence.*
 
 @Table(name="party_requests")
@@ -11,7 +13,7 @@ data class PersistentPartyRequest(
 
         @Id
         @GeneratedValue
-        val id: Long? = null,
+        val id: Long = 0,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
@@ -25,24 +27,16 @@ data class PersistentPartyRequest(
         val status: PartyRequestStatus
 ){
         fun toDomain(): PartyRequest = PartyRequest(
-                id = this.id?.toString() ?: "",
+                id = this.id.toString(),
                 user = lazyProxy(this.user)?.toDomain(),
                 party = this.party?.toDomain(),
                 status = this.status
         )
 
         fun toLazyDomain(): PartyRequest = PartyRequest(
-                id = this.id?.toString() ?: "",
+                id = this.id.toString(),
                 user = null,
                 party = null,
                 status = this.status
         )
 }
-
-
-
-//enum class PartyRequestStatus {
-//    ACCEPTED,
-//    DECLINED,
-//    IN_PROGRESS,
-//}

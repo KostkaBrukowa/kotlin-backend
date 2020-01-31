@@ -1,12 +1,10 @@
 package com.example.graphql.adapters.pgsql.partyrequest
 
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface PersistentPartyRequestRepository: JpaRepository<PersistentPartyRequest, Long> {
 
     fun findAllByPartyId(partyId: Long): List<PersistentPartyRequest>
     fun findAllByUserId(userId: Long): List<PersistentPartyRequest>
-
 }
 

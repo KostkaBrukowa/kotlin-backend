@@ -10,10 +10,10 @@ import javax.transaction.Transactional
 class PgSqlPartyRepository(private val persistentPartyRepository: PersistentPartyRepository) : PartyRepository {
 
     @Transactional
-    override fun getAllByOwnerId(id: Long): List<Party> = persistentPartyRepository.getAllByOwnerId(id).map { it.toDomain() }
+    override fun getAllByOwnerId(id: String): List<Party> = persistentPartyRepository.getAllByOwnerId(id.toLong()).map { it.toDomain() }
 
     @Transactional
-    override fun getTopById(id: Long): Party? = persistentPartyRepository.getTopById(id)?.toDomain()
+    override fun getTopById(id: String): Party? = persistentPartyRepository.getTopById(id.toLong())?.toDomain()
 
     override fun saveNewParty(party: Party): Party = persistentPartyRepository.save(party.toPersistentEntity()).toDomain()
 
@@ -28,5 +28,5 @@ class PgSqlPartyRepository(private val persistentPartyRepository: PersistentPart
         return persistentPartyRepository.save(partyToUpdate).toDomain()
     }
 
-    override fun removeParty(id: String): Unit = persistentPartyRepository.deleteById(id.toLong())
+    override fun removeParty(id: String) = persistentPartyRepository.deleteById(id.toLong())
 }

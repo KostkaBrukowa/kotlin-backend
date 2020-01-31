@@ -10,5 +10,4 @@ data class PartyRequestType(
         val status: PartyRequestStatus
 )
 
-
 fun PartyRequest.toResponse() = PartyRequestType(id = this.id, status = this.status)
