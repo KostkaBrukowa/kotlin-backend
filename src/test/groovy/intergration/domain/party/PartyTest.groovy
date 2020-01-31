@@ -5,14 +5,13 @@ import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRep
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PartyRequestStatus
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.user.PersistentUser
 import intergration.BaseIntegrationSpec
 import org.apache.groovy.json.internal.LazyMap
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
 
-import javax.persistence.EntityManager
 import java.time.ZonedDateTime
 
 import static intergration.utils.builders.PersistentPartyTestBuilder.aPartyWithProps
@@ -29,9 +28,6 @@ class PartyTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPartyRequestRepository partyRequestRepository
-
-    @Autowired
-    EntityManager entityManager
 
     def "Should return an error when user is not signed in"() {
         given:

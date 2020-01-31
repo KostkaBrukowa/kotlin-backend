@@ -6,5 +6,4 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface PersistentPartyRepository : JpaRepository<PersistentParty, Long> {
     fun getAllByOwnerId(id: Long): List<PersistentParty>
     fun getTopById(id: Long): PersistentParty?
-    fun findAllById(id: Long): List<PersistentParty>
 }

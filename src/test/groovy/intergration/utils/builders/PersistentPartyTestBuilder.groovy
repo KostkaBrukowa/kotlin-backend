@@ -4,7 +4,7 @@ import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.user.PersistentUser
 
 import java.time.ZonedDateTime
@@ -37,13 +37,12 @@ class PersistentPartyTestBuilder {
                 allArgs.owner as PersistentUser,
                 allArgs.participants as List<PersistentUser>,
                 allArgs.messageGroup as PersistentMessageGroup,
-                allArgs.partyRequests as Set<PersistentPartyRequest>,
+                allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.expenses as List<PersistentExpense>,
                 allArgs.name as String,
                 allArgs.description as String,
                 allArgs.startDate instanceof ZonedDateTime ? allArgs.startDate : ZonedDateTime.parse(allArgs.startDate),
                 allArgs.endDate instanceof ZonedDateTime ? allArgs.endDate : ZonedDateTime.parse(allArgs.endDate),
-//                ZonedDateTime.parse(allArgs.endDate),
         )
     }
 

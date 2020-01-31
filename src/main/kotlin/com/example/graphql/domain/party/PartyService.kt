@@ -19,11 +19,11 @@ class PartyService(
     }
 
     fun getAllParties(userId: String): List<Party> {
-        return partyRepository.getAllByOwnerId(userId.toLong())
+        return partyRepository.getAllByOwnerId(userId)
     }
 
     fun getSingleParty(partyId: String): Party? {
-        return partyRepository.getTopById(partyId.toLong())
+        return partyRepository.getTopById(partyId)
     }
 
     fun createParty(party: Party, userId: String): Party {
@@ -42,7 +42,7 @@ class PartyService(
     }
 
     fun deleteParty(id: String, currentUserId: String): Boolean {
-        if (partyRepository.getTopById(id.toLong())?.owner?.id != currentUserId) {
+        if (partyRepository.getTopById(id)?.owner?.id != currentUserId) {
             throw UnauthorisedException()
         }
 

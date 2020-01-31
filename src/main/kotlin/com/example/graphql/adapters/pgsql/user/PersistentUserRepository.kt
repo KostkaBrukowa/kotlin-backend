@@ -16,12 +16,5 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
         WHERE pu.party_id = :partyId
     """, nativeQuery = true)
     fun findAllPartyParticipants(@Param("partyId") partyId: Long): List<PersistentUser>
-
-    @Query("""
-        SELECT u
-        FROM PersistentUser as u
-        JOIN FETCH u.partyRequests as pr
-        WHERE pr.party.id = (:partyId)
-    """)
-    fun xxx(@Param("partyId") partyId: Long): PersistentUser
 }
+

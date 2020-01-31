@@ -5,7 +5,6 @@ import com.example.graphql.domain.party.toPersistentEntity
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.partyrequest.PartyRequestRepository
 import com.example.graphql.domain.partyrequest.PartyRequestStatus
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.toPersistentEntity
 import org.springframework.stereotype.Component

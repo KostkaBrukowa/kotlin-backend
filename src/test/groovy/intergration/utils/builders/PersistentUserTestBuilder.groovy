@@ -4,7 +4,7 @@ import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.user.PersistentUser
 import org.apache.commons.lang.RandomStringUtils
 import org.springframework.transaction.annotation.Propagation

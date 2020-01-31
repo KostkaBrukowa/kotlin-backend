@@ -19,6 +19,6 @@ data class PersistentMessageGroup(
         @JoinTable(name = "messagegroup_user")
         val users: List<PersistentUser>,
 
-        @OneToOne(fetch = FetchType.EAGER, optional = true)
+        @OneToOne(fetch = FetchType.LAZY, optional = true)
         val party: PersistentParty?
 )

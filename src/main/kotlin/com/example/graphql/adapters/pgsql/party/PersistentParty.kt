@@ -2,7 +2,8 @@ package com.example.graphql.domain.party
 
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
-import com.example.graphql.domain.partyrequest.PersistentPartyRequest
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
+import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import com.example.graphql.domain.user.PersistentUser
 import com.example.graphql.domain.user.toPersistentEntity
 import java.time.ZonedDateTime
@@ -11,11 +12,12 @@ import javax.persistence.*
 @Table(name = "parties")
 @Entity
 data class PersistentParty(
+
         @Id
         @GeneratedValue
         val id: Long? = null,
 
-        @ManyToOne(fetch = FetchType.EAGER)
+        @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id")
         val owner: PersistentUser?,
 
@@ -28,7 +30,7 @@ data class PersistentParty(
         val messageGroup: PersistentMessageGroup?,
 
         @OneToMany(mappedBy = "party", fetch = FetchType.LAZY)
-        val partyRequests: Set<PersistentPartyRequest>? = null,
+        val partyRequests: List<PersistentPartyRequest>? = null,
 
         @OneToMany(mappedBy = "party")
         val expenses: List<PersistentExpense>,
@@ -47,7 +49,7 @@ data class PersistentParty(
     fun toDomain(): Party = Party(
             id = this.id.toString(),
             owner = this.owner?.toDomain(),
-            participants = emptyList(),
+            participants = lazyProxy(this.participants)?.map { it.toDomain() } ?: emptyList(),
             messageGroup = null,
             expenses = emptyList(),
             name = this.name,
