@@ -46,7 +46,7 @@ class PersistentPartyTestBuilder {
         )
     }
 
-    static PersistentParty aPartyWithProps(Map props = [:], PersistentPartyRepository repository) {
+    static PersistentParty aParty(Map props = [:], PersistentPartyRepository repository) {
         return repository.save(defaultPersistentParty(props))
     }
 }

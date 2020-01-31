@@ -3,6 +3,7 @@ package intergration
 import com.example.graphql.GraphqlApplication
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.configuration.security.JWTClient
+import com.example.graphql.domain.user.PersistentUser
 import groovy.json.JsonBuilder
 import groovyx.net.http.RESTClient
 import intergration.utils.builders.PersistentUserTestBuilder
@@ -25,6 +26,7 @@ class BaseIntegrationSpec extends Specification {
     protected String baseUserEmail = "a@gmail.com"
     protected String baseUserPassword = "Password"
     protected String baseUserId
+    protected PersistentUser baseUser
 
     @Value('${local.server.port}')
     protected int port
@@ -51,9 +53,9 @@ class BaseIntegrationSpec extends Specification {
     }
 
     protected def authenticate(String email = "a@gmail.com") {
-        def user = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([email: email]))
+        baseUser = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([email: email]))
 
-        baseUserId = user.id
+        baseUserId = baseUser.id
 
         setHeaders(["Authorization": "Bearer " + jwtClient.createJWTToken(baseUserId)])
     }

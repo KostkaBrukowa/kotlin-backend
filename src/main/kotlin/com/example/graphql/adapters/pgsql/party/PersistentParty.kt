@@ -17,7 +17,7 @@ data class PersistentParty(
         @GeneratedValue
         val id: Long? = null,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "user_id")
         val owner: PersistentUser?,
 

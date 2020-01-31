@@ -30,7 +30,7 @@ class PersistentUserTestBuilder {
 
     private PersistentUserTestBuilder() {}
 
-    static PersistentUser defaultPersistentUser(Map args) {
+    static PersistentUser defaultPersistentUser(Map args = [:]) {
         verifyPropertyNames(defaults, args)
 
         def allArgs = defaults + args
