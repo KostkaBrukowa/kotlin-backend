@@ -14,32 +14,22 @@ data class PersistentPartyRequest(
         @GeneratedValue
         val id: Long = 0,
 
+        @Enumerated(EnumType.STRING)
+        val status: PartyRequestStatus,
+
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
         val user: PersistentUser,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "party_id", nullable = false)
-        val party: PersistentParty,
-
-        @Enumerated(EnumType.STRING)
-        val status: PartyRequestStatus
+        val party: PersistentParty
 ){
-        fun toDomain(): PartyRequest = PartyRequest(
-                id = this.id.toString(),
-                user = this.user.toDomain(),
-                party = this.party.toDomain(),
-                status = this.status
-        )
 
-        fun toLazyDomain(): PartyRequest = PartyRequest(
-                id = this.id.toString(),
+        fun toDomain(): PartyRequest = PartyRequest(
+                id = this.id,
                 user = null,
                 party = null,
                 status = this.status
         )
-
-        override fun toString(): String {
-                return "PersistentParty"
-        }
 }

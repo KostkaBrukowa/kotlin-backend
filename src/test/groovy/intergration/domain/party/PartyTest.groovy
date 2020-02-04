@@ -69,7 +69,7 @@ class PartyTest extends BaseIntegrationSpec {
         response.every { it -> it.partyParticipants.any { it.id == thirdClient.id.toString() } }
     }
 
-    def "Should return a created party given an id"() {
+    def "Should return single party given an id"() {
         given:
         authenticate("firstUser@gmail.com")
 
@@ -81,6 +81,7 @@ class PartyTest extends BaseIntegrationSpec {
                 name       : 'test name',
                 description: 'test description',
                 startDate  : tenDaysFromNow,
+                owner: aClient(userRepository)
         ], partyRepository).id
 
         and:
@@ -90,7 +91,7 @@ class PartyTest extends BaseIntegrationSpec {
         def partyResponse = postQuery(getSinglePartyQuery, "getSingleParty") as LazyMap
 
         then:
-        partyResponse.id == partyId.toString()
+        partyResponse.id == partyId
         partyResponse.name == "test name"
         partyResponse.description == "test description"
         partyResponse.startDate == tenDaysFromNow.toString()
@@ -194,7 +195,8 @@ class PartyTest extends BaseIntegrationSpec {
                 name       : 'name before update',
                 description: 'description before update',
                 startDate  : tenDaysFromNow,
-                endDate    : elevenDaysFromNow
+                endDate    : elevenDaysFromNow,
+                owner: baseUser
         ], partyRepository).id
 
         and:

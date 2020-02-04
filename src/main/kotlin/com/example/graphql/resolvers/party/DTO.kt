@@ -2,10 +2,7 @@ package com.example.graphql.resolvers.party
 
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.party.Party
-import com.example.graphql.domain.partyrequest.PartyRequest
-import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.User
-import com.example.graphql.domain.user.UserService
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.user.UserType
 import com.expediagroup.graphql.annotations.GraphQLID
@@ -35,7 +32,7 @@ data class PartyType(
 }
 
 fun Party.toResponse() = PartyType(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         owner = this.owner,
         description = this.description,

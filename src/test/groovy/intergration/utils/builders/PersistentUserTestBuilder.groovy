@@ -36,16 +36,16 @@ class PersistentUserTestBuilder {
         def allArgs = defaults + args
         return new PersistentUser(
                 allArgs.id as Long,
-                allArgs.partyRequests as List<PersistentPartyRequest>,
-                allArgs.ownedParties as List<PersistentParty>,
-                allArgs.expenses as List<PersistentExpense>,
-                allArgs.messageGroups as Set<PersistentMessageGroup>,
-                allArgs.joinedParties as List<PersistentParty>,
                 allArgs.name as String,
                 allArgs.email as String,
                 allArgs.bankAccount as String,
                 allArgs.password as String,
                 allArgs.isEmailConfirmed as Boolean,
+                allArgs.partyRequests as List<PersistentPartyRequest>,
+                allArgs.ownedParties as List<PersistentParty>,
+                allArgs.expenses as List<PersistentExpense>,
+                allArgs.messageGroups as List<PersistentMessageGroup>,
+                allArgs.joinedParties as List<PersistentParty>,
         )
     }
 

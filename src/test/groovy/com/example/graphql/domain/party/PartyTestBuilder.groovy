@@ -12,7 +12,7 @@ import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 class PartyTestBuilder {
 
     private static def defaults = [
-            id           : '0',
+            id           : 0,
             name         : 'testname',
             owner        : null,
             messageGroup : null,
@@ -31,16 +31,16 @@ class PartyTestBuilder {
 
         def allArgs = defaults + args
         return new Party(
-                allArgs.id as String,
+                allArgs.id as Long,
                 allArgs.name as String,
+                allArgs.description as String,
+                ZonedDateTime.parse(allArgs.startDate),
+                ZonedDateTime.parse(allArgs.endDate),
                 allArgs.owner as User,
                 allArgs.messageGroup as MessageGroup,
                 allArgs.participants as List<User>,
                 allArgs.partyRequests as List<PartyRequest>,
                 allArgs.expenses as List<Expense>,
-                allArgs.description,
-                ZonedDateTime.parse(allArgs.startDate),
-                ZonedDateTime.parse(allArgs.endDate),
         )
     }
 }

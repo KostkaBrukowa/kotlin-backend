@@ -11,4 +11,4 @@ data class PartyRequestType(
 )
 
 
-fun PartyRequest.toResponse() = PartyRequestType(id = this.id, status = this.status)
+fun PartyRequest.toResponse() = PartyRequestType(id = this.id.toString(), status = this.status)

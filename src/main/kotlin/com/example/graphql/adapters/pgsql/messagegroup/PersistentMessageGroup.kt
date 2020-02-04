@@ -8,17 +8,19 @@ import javax.persistence.*
 @Table(name = "message_groups")
 @Entity
 data class PersistentMessageGroup(
+
         @Id
         @GeneratedValue
         val id: Long? = null,
 
+
         @OneToMany(mappedBy = "messageGroup")
         val messages: List<PersistentMessage>,
 
-        @ManyToMany()
-        @JoinTable(name = "messagegroup_user")
-        val users: Set<PersistentUser>,
-
         @OneToOne(fetch = FetchType.LAZY, optional = true)
-        val party: PersistentParty?
+        val party: PersistentParty?,
+
+        @ManyToMany
+        @JoinTable(name = "messagegroup_user")
+        val users: List<PersistentUser> = emptyList()
 )

@@ -5,7 +5,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 
 data class AppGraphQLContext(
         val authenticated: Boolean,
-        val subject: String,
+        val subject: Long,
         val request: ServerHttpRequest,
         val response: ServerHttpResponse
 )

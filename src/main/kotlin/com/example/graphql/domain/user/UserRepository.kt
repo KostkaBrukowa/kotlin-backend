@@ -1,17 +1,15 @@
 package com.example.graphql.domain.user
 
-import com.example.graphql.domain.party.Party
-
 interface UserRepository {
     fun saveUser(user: User): User
 
     fun getUserByEmail(email: String): User?
 
-    fun getUserById(id: String): User?
+    fun getUserById(id: Long): User?
 
-    fun findAllPartyParticipants(partyId: String): List<User>
+    fun findAllPartyParticipants(partyId: Long): List<User>
 
-    fun findUsersWithPartyRequests(usersIds: Set<String>): List<User>
+    fun findUsersWithPartyRequests(usersIds: Set<Long>): List<User>
 
-    fun findUsersById(usersIds: List<String>): List<User>
+    fun findUsersById(usersIds: List<Long>): List<User>
 }

@@ -4,14 +4,19 @@ import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.user.User
-import com.expediagroup.graphql.annotations.GraphQLID
 import java.time.ZonedDateTime
 
 data class Party(
-        @GraphQLID
-        val id: String = "0",
+        val id: Long = 0,
 
         val name: String = "",
+
+        val description: String? = null,
+
+        val startDate: ZonedDateTime = ZonedDateTime.now(),
+
+        val endDate: ZonedDateTime? = null,
+
 
         val owner: User? = null,
 
@@ -21,11 +26,5 @@ data class Party(
 
         val partyRequests: List<PartyRequest> = emptyList(),
 
-        val expenses: List<Expense> = emptyList(),
-
-        val description: String? = null,
-
-        val startDate: ZonedDateTime = ZonedDateTime.now(),
-
-        val endDate: ZonedDateTime? = null
+        val expenses: List<Expense> = emptyList()
 )

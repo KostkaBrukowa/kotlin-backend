@@ -34,15 +34,15 @@ class PersistentPartyTestBuilder {
         def allArgs = defaults + args
         return new PersistentParty(
                 allArgs.id as Long,
-                allArgs.owner as PersistentUser,
-                allArgs.participants as Set<PersistentUser>,
-                allArgs.messageGroup as PersistentMessageGroup,
-                allArgs.partyRequests as List<PersistentPartyRequest>,
-                allArgs.expenses as List<PersistentExpense>,
                 allArgs.name as String,
                 allArgs.description as String,
-                allArgs.startDate instanceof ZonedDateTime ? allArgs.startDate : ZonedDateTime.parse(allArgs.startDate),
-                allArgs.endDate instanceof ZonedDateTime ? allArgs.endDate : ZonedDateTime.parse(allArgs.endDate),
+                allArgs.startDate instanceof ZonedDateTime ? allArgs.startDate : ZonedDateTime.parse(allArgs.startDate) as ZonedDateTime,
+                allArgs.endDate instanceof ZonedDateTime ? allArgs.endDate : ZonedDateTime.parse(allArgs.endDate) as ZonedDateTime,
+                allArgs.owner as PersistentUser,
+                allArgs.messageGroup as PersistentMessageGroup,
+                allArgs.participants as List<PersistentUser>,
+                allArgs.partyRequests as List<PersistentPartyRequest>,
+                allArgs.expenses as List<PersistentExpense>,
         )
     }
 

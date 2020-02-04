@@ -25,7 +25,7 @@ class BaseIntegrationSpec extends Specification {
     private Logger log = LoggerFactory.getLogger(BaseIntegrationSpec.getClass())
     protected String baseUserEmail = "a@gmail.com"
     protected String baseUserPassword = "Password"
-    protected String baseUserId
+    protected Long baseUserId
     protected PersistentUser baseUser
 
     @Value('${local.server.port}')
@@ -57,7 +57,7 @@ class BaseIntegrationSpec extends Specification {
 
         baseUserId = baseUser.id
 
-        setHeaders(["Authorization": "Bearer " + jwtClient.createJWTToken(baseUserId)])
+        setHeaders(["Authorization": "Bearer " + jwtClient.createJWTToken(baseUserId.toString())])
     }
 
     protected def postQuery(String query, String queryName, Boolean errorExpected = false) {
