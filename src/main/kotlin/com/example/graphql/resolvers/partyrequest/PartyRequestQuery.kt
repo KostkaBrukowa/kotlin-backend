@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 class PartyRequestQuery(private val partyRequestService: PartyRequestService): Query {
 
     @Authenticated(role = Roles.USER)
-    fun getPartyRequestsForParty(partyId: String) = partyRequestService.getAllPartyRequestsByPartyId(partyId)
+    fun getPartyRequestsForParty(partyId: Long) = partyRequestService.getAllPartyRequestsByPartyId(partyId)
 
     @Authenticated(role = Roles.USER)
-    fun getPartyRequestsForUser(userId: String) = partyRequestService.getAllPartyRequestsByUserId(userId)
+    fun getPartyRequestsForUser(userId: Long) = partyRequestService.getAllPartyRequestsByUserId(userId)
 }

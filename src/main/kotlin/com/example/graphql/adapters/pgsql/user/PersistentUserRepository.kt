@@ -1,6 +1,5 @@
 package com.example.graphql.adapters.pgsql.user
 
-import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.user.PersistentUser
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query

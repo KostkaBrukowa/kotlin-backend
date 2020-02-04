@@ -13,31 +13,31 @@ class PartyServiceTest extends Specification {
 
     def "service should save new party with distinct participants and owner"() {
         given:
-        String userId = '42'
+        Long userId = 42
 
         when:
         partyService.createParty(PartyTestBuilder.defaultParty([
                 participants: [
-                        UserTestBuilder.defaultUser([id: '1']),
-                        UserTestBuilder.defaultUser([id: '1']),
-                        UserTestBuilder.defaultUser([id: '1'])
+                        UserTestBuilder.defaultUser([id: 1]),
+                        UserTestBuilder.defaultUser([id: 1]),
+                        UserTestBuilder.defaultUser([id: 1])
                 ]
         ]), userId)
 
         then:
         1 * partyRepository.saveNewParty({ Party party ->
             (
-                    party.owner.id == '42'
+                    party.owner.id == 42
                             && party.participants.size() == 2
-                            && party.participants.any { it.id == '1' }
-                            && party.participants.any { it.id == '42' }
+                            && party.participants.any { it.id == 1 }
+                            && party.participants.any { it.id == 42 }
             )
         })
     }
 
     def "Should update a party with correct id"() {
         given:
-        String partyId = '420'
+        Long partyId = 420
 
         and:
         def partyToUpdate = PartyTestBuilder.defaultParty()
@@ -48,7 +48,7 @@ class PartyServiceTest extends Specification {
         then:
         1 * partyRepository.updateParty({ Party party ->
             (
-                    party.id == '420'
+                    party.id == 420
             )
         })
     }

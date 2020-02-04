@@ -22,13 +22,13 @@ class PgSqlPartyRequestRepository(private val persistentPartyRequestRepository: 
         }).map { it.toDomain() }
     }
 
-    override fun findAllByParty(partyId: String): List<PartyRequest> =
-            persistentPartyRequestRepository.findAllByPartyId(partyId = partyId.toLong()).map { it.toDomain() }
+    override fun findAllByParty(partyId: Long): List<PartyRequest> =
+            persistentPartyRequestRepository.findAllByPartyId(partyId = partyId).map { it.toDomain() }
 
-    override fun findAllByUserId(userId: String): List<PartyRequest> =
-            persistentPartyRequestRepository.findAllByUserId(userId.toLong()).map { it.toDomain() }
+    override fun findAllByUserId(userId: Long): List<PartyRequest> =
+            persistentPartyRequestRepository.findAllByUserId(userId).map { it.toDomain() }
 
-    override fun findByUserIdAndPartyId(userId: String, partyId: String): PartyRequest? {
-        return persistentPartyRequestRepository.findByUserIdAndPartyId(userId.toLong(), partyId.toLong())?.toDomain()
+    override fun findByUserIdAndPartyId(userId: Long, partyId: Long): PartyRequest? {
+        return persistentPartyRequestRepository.findByUserIdAndPartyId(userId, partyId)?.toDomain()
     }
 }

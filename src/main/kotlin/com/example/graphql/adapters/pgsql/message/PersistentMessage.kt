@@ -8,18 +8,20 @@ import javax.persistence.*
 @Table(name = "messages")
 @Entity
 data class PersistentMessage(
+
         @Id
         @GeneratedValue
-        val id: Long? = null,
+        val id: Long,
 
         val text: String,
 
         @Column(name = "send_date")
         val sendDate: ZonedDateTime,
 
+
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
-        val user: PersistentUser,
+        val user: PersistentUser? = null,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "message_group_id", nullable = false)

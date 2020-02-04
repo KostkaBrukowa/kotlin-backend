@@ -16,7 +16,7 @@ import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 class PartyRequestTestBuilder {
 
     private static def defaults = [
-            id    : '0',
+            id    : 0,
             user  : UserTestBuilder.defaultUser(),
             party : PartyTestBuilder.defaultParty(),
             status: PartyRequestStatus.IN_PROGRESS,
@@ -29,10 +29,10 @@ class PartyRequestTestBuilder {
 
         def allArgs = defaults + args
         return new PartyRequest(
-                allArgs.id as String,
+                allArgs.id as Long,
+                allArgs.status as PartyRequestStatus,
                 allArgs.user as User,
                 allArgs.party as Party,
-                allArgs.status as PartyRequestStatus
         )
     }
 }

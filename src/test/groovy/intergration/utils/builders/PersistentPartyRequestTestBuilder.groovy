@@ -27,9 +27,9 @@ class PersistentPartyRequestTestBuilder {
         def allArgs = defaults + args
         return new PersistentPartyRequest(
                 allArgs.id as Long,
+                allArgs.status as PartyRequestStatus,
                 allArgs.user as PersistentUser,
                 allArgs.party as PersistentParty,
-                allArgs.status as PartyRequestStatus
         )
     }
 

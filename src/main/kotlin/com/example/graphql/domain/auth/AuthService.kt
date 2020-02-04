@@ -19,7 +19,7 @@ class AuthService(
         val user = User(email = email, password = passwordEncoder.encode(password))
         val savedUser = userRepository.saveUser(user)
 
-        jwtAuthentication.authenticateUser(savedUser.id, context.request, context.response)
+        jwtAuthentication.authenticateUser(savedUser.id.toString(), context.request, context.response)
 
         return savedUser
     }
@@ -32,7 +32,7 @@ class AuthService(
             return null
         }
 
-        jwtAuthentication.authenticateUser(user.id, context.request, context.response)
+        jwtAuthentication.authenticateUser(user.id.toString(), context.request, context.response)
 
         return user
     }
