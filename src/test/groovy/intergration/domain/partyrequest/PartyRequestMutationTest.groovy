@@ -7,6 +7,7 @@ import com.example.graphql.domain.partyrequest.PartyRequestStatus
 import intergration.BaseIntegrationSpec
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Unroll
 
 import java.time.ZonedDateTime
@@ -15,7 +16,7 @@ import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPar
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
 
-class PartyRequestTest extends BaseIntegrationSpec {
+class PartyRequestMutationTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentUserRepository userRepository
@@ -27,16 +28,17 @@ class PartyRequestTest extends BaseIntegrationSpec {
     PersistentPartyRequestRepository partyRequestRepository
 
     @Unroll
-    def "Should add a participant to a party when user accepts/declines the request, and party request status should be #requestStatus "() {
+    def "Should add a participant to a party when user #mutation, and party request status should be #requestStatus "() {
         given:
         authenticate()
 
         and:
-        def aParty = aParty(partyRepository)
+        def partyOwner = aClient(userRepository)
+        def aParty = aParty([owner: partyOwner, participants: [partyOwner]], partyRepository)
         def aPartyRequest = aPartyRequest([user: baseUser, party: aParty], partyRequestRepository)
 
         and:
-        def modifyPartyRequestStatus = ("""${mutation}(requestId: "${aPartyRequest.id}")""")
+        def modifyPartyRequestStatus = ("""${mutation}(partyRequestId: "${aPartyRequest.id}")""")
 
         when:
         postMutation(modifyPartyRequestStatus, "acceptParty")
@@ -46,17 +48,22 @@ class PartyRequestTest extends BaseIntegrationSpec {
         def actualPartyParticipants = userRepository.findAllPartyParticipants(aParty.id)
 
         then:
-        actualPartyRequest.get().status == PartyRequestStatus.ACCEPTED
-        actualPartyParticipants.size() == 1
-        participantsSize == 0 || actualPartyParticipants.every { it.id == requestedClient.id }
+        actualPartyRequest.get().status == requestStatus
+        actualPartyParticipants.size() == participantsSize
+        if (requestStatus == PartyRequestStatus.ACCEPTED) {
+            assert actualPartyParticipants.any { it.id == baseUser.id }
+        } else {
+            assert participantsSize == 1
+        }
 
         where:
         mutation              | participantsSize | requestStatus
-        "acceptPartyRequest"  | 1                | PartyRequestStatus.ACCEPTED
-        "declinePartyRequest" | 0                | PartyRequestStatus.DECLINED
+        "acceptPartyRequest"  | 2                | PartyRequestStatus.ACCEPTED
+        "declinePartyRequest" | 1                | PartyRequestStatus.DECLINED
     }
 
-    def "Should return an error when different user tries to accept other user's request"() {
+    @Unroll
+    def "Should return an error when different user tries to #mutation other user's request"() {
         given:
         authenticate()
 
@@ -65,19 +72,20 @@ class PartyRequestTest extends BaseIntegrationSpec {
 
         def aParty = aParty(owner: baseUser, partyRepository)
         def aPartyRequest = aPartyRequest([
-                user : differentUserThanCurrentlyLogged,
-                party: aParty
+                user  : differentUserThanCurrentlyLogged,
+                party : aParty,
+                status: mutation == "acceptPartyRequest" ? PartyRequestStatus.DECLINED : PartyRequestStatus.ACCEPTED
         ], partyRequestRepository)
 
         and:
-        def acceptPartyRequestMutation = ("""${mutation}(requestId: "${aPartyRequest.id}")""")
+        def changeRequestStatusMutation = ("""${mutation}(partyRequestId: "${aPartyRequest.id}")""")
 
         when:
-        def response = postMutation(acceptPartyRequestMutation, "acceptParty", true)
+        def response = postMutation(changeRequestStatusMutation, "acceptPartyRequest", true)
 
         then:
-        response[0].errorType == 'DataFetchingError'
-        response[0].description.contains('User is not authorised to perform this action')
+        response[0].errorType == 'DataFetchingException'
+        response[0].message.contains('User is not authorised to perform this action')
 
         where:
         mutation << ["acceptPartyRequest", "declinePartyRequest"]
@@ -98,27 +106,25 @@ class PartyRequestTest extends BaseIntegrationSpec {
         ], partyRequestRepository)
 
         and:
-        def acceptPartyRequestMutation = ("""removePartyRequest(requestId: "${aPartyRequest.id}")""")
+        def removePartyRequestMutation = ("""removePartyRequest(partyRequestId: "${aPartyRequest.id}")""")
 
         when:
-        def response = postMutation(acceptPartyRequestMutation, "acceptParty", true)
-        def x = List.of('fds')
+        def response = postMutation(removePartyRequestMutation, "removePartyRequest", error)
 
         then:
         if (error) {
-            assert response[0].errorType == 'DataFetchingError'
-            assert response[0].description.contains('User is not authorised to perform this action')
+            assert response[0].errorType == 'DataFetchingException'
+            assert response[0].message.contains('User is not authorised to perform this action')
         } else {
             assert response == true
         }
-        x hasSize
 
 
         where:
-        loggedInEntity | owner         | requestee     | error
-        "owner"        | "baseUser"    | "otherClient" | false
-        "requestee"    | "otherClient" | "baseUser"    | false
-        "otherUser"    | "otherClient" | "otherClient" | true
+        owner         | requestee     | error
+        "baseUser"    | "otherClient" | false
+        "otherClient" | "baseUser"    | false
+        "otherClient" | "otherClient" | true
     }
 
     @Unroll
@@ -199,6 +205,7 @@ class PartyRequestTest extends BaseIntegrationSpec {
         response == null
     }
 
+    @Ignore
     def "Should not send a request when party has already been finished"() {
         given:
         authenticate()

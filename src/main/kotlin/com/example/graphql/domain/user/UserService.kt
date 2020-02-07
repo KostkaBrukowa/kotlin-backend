@@ -1,14 +1,16 @@
 package com.example.graphql.domain.user
 
 import com.example.graphql.domain.party.PartyRepository
+import com.example.graphql.domain.partyrequest.PartyRequestRepository
+import com.example.graphql.resolvers.partyrequest.PartyRequestType
+import com.example.graphql.resolvers.partyrequest.toResponse
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.user.toResponse
 import org.springframework.stereotype.Component
 
 @Component
 class UserService(
-        private val userRepository: UserRepository,
-        private val partyRepository: PartyRepository
+        private val userRepository: UserRepository
 ) {
 
     fun getUserById(id: Long): User? {
@@ -19,10 +21,5 @@ class UserService(
         return userRepository.findAllPartyParticipants(partyId)
     }
 
-    fun findAllParticipantsByPartiesIds(partiesIds: Set<Long>): Map<Long, List<UserType>> {
-        val parties = partyRepository.findPartiesWithParticipants(partiesIds)
-
-        return parties.associateBy({ it.id }, { it.participants.map { participant -> participant.toResponse() } })
-    }
 }
 

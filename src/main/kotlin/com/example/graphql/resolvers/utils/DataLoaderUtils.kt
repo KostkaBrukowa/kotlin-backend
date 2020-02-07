@@ -1,14 +1,15 @@
 package com.example.graphql.resolvers.utils
 
+import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
 import org.dataloader.DataLoader
 import org.dataloader.MappedBatchLoader
 import java.util.concurrent.CompletableFuture
 
 fun <T>dataLoader(
-        providerFunction: (ids: Set<Long>) -> Map<Long, List<T>>
-): DataLoader<String, List<T>>  {
-    val mapBatchLoader: MappedBatchLoader<String, List<T>> = MappedBatchLoader { ids ->
+        providerFunction: (ids: Set<Long>) -> Map<Long, T>
+): DataLoader<String, T>  {
+    val mapBatchLoader: MappedBatchLoader<String, T> = MappedBatchLoader { ids ->
         CompletableFuture.supplyAsync {
             val userToRequestsMap = providerFunction(ids.map { it.toLong() }.toSet())
 
@@ -19,14 +20,22 @@ fun <T>dataLoader(
     return DataLoader.newMappedDataLoader(mapBatchLoader)
 }
 
-fun <Source, Result> dataFetcher(
+fun <Source : GQLResponseType, Result> dataFetcher(
         loaderName: String,
-        environment: DataFetchingEnvironment,
-        idExtractor: (model: Source) -> String
-): CompletableFuture<List<Result>> {
-    val id = idExtractor(environment.getSource<Source>())
+        environment: DataFetchingEnvironment
+): CompletableFuture<Result> {
+    val id = environment.getSource<Source>().id
 
     return environment
-            .getDataLoader<String, List<Result>>(loaderName)
+            .getDataLoader<String, Result>(loaderName)
             .load(id)
+}
+
+abstract class DataFetcherOverride<Source : GQLResponseType, Result>(
+        private val loaderName: String
+) : DataFetcher<CompletableFuture<Result>> {
+
+    override fun get(environment: DataFetchingEnvironment): CompletableFuture<Result> {
+        return dataFetcher<Source, Result>(loaderName, environment)
+    }
 }

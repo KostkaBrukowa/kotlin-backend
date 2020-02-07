@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PartyQuery(
-        private val partyService: PartyService,
-        private val userService: UserService,
-        private val partyRequestService: PartyRequestService
+        private val partyService: PartyService
 ) : Query {
 
     @Authenticated(role = Roles.USER)
@@ -21,8 +19,5 @@ class PartyQuery(
             partyService.getAllParties(userId).map { it.toResponse() }
 
     @Authenticated(role = Roles.USER)
-    fun getSingleParty(partyId: Long): Party? = partyService.getSingleParty(partyId)
-
-    @Authenticated(role = Roles.USER)
-    fun getPartyParticipants(partyId: Long) = userService.getAllPartyParticipants(partyId)
+    fun getSingleParty(partyId: Long): PartyType? = partyService.getSingleParty(partyId)?.toResponse()
 }

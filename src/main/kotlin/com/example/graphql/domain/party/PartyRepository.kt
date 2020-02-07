@@ -16,4 +16,8 @@ interface PartyRepository {
     fun findPartiesWithParticipants(partiesIds: Set<Long>): List<Party>
 
     fun findPartiesWithPartyRequests(partiesIds: Set<Long>): List<Party>
+
+    fun removeParticipant(partyId: Long, participantId: Long)
+
+    fun addParticipant(partyId: Long, participantId: Long)
 }

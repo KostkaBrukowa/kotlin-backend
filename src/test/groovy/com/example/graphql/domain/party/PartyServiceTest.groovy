@@ -1,6 +1,6 @@
 package com.example.graphql.domain.party
 
-
+import com.example.graphql.domain.partyrequest.PartyRequestRepository
 import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.UserTestBuilder
 import spock.lang.Specification
@@ -8,8 +8,8 @@ import spock.lang.Specification
 class PartyServiceTest extends Specification {
 
     PartyRepository partyRepository = Mock()
-    PartyRequestService partyRequestService = Stub()
-    PartyService partyService = new PartyService(partyRepository, partyRequestService)
+    PartyRequestRepository partyRequestRepository = Stub()
+    PartyService partyService = new PartyService(partyRepository, partyRequestRepository)
 
     def "service should save new party with distinct participants and owner"() {
         given:

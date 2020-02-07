@@ -21,9 +21,6 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
     override fun findUsersWithPartyRequests(usersIds: Set<Long>): List<User> {
         return userRepository.findUsersWithPartyRequests(usersIds.map { it }).map {
             it.toDomain()
-                    .copy(partyRequests = it.partyRequests.map {
-                        it.toDomain().copy()
-                    })
         }
     }
 

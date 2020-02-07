@@ -20,9 +20,7 @@ import javax.validation.constraints.FutureOrPresent
 @Validated
 @Component
 class PartyMutation(
-        private val partyService: PartyService,
-        private val userService: UserService,
-        private val partyRequestService: PartyRequestService
+        private val partyService: PartyService
 ) : Mutation {
 
     @Authenticated(role = Roles.USER)
@@ -34,8 +32,8 @@ class PartyMutation(
     @Authenticated(role = Roles.USER)
     fun updateParty(
             id: Long,
-            @Valid newPartyInput: NewPartyInput
-    ) = partyService.updateParty(id, newPartyInput.toDomain())
+            @Valid editPartyInput: EditPartyInput
+    ) = partyService.updateParty(id, editPartyInput.toDomain())
 
     @Authenticated(role = Roles.USER)
     fun deleteParty(
@@ -48,29 +46,6 @@ class PartyMutation(
             partyId: Long,
             participantId: Long,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyService.removeParticipant(partyId, participantId, context)
+    ) = partyService.removeParticipant(partyId, participantId, context.subject)
 }
 
-data class NewPartyInput(
-        @field:Length(min = 3, max = 256)
-        val name: String,
-
-        @field:FutureOrPresent
-        val startDate: ZonedDateTime,
-
-        @field:FutureOrPresent
-        val endDate: ZonedDateTime?,
-
-        val description: String?,
-
-        val participants: List<Long>?
-) {
-
-    fun toDomain(): Party = Party(
-            name = this.name,
-            description = this.description,
-            startDate = this.startDate,
-            endDate = this.endDate,
-            participants = this.participants?.map { it -> User(id = it) } ?: emptyList()
-    )
-}

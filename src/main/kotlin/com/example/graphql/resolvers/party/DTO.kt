@@ -5,12 +5,15 @@ import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.user.UserType
+import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
+import org.hibernate.validator.constraints.Length
 import java.time.ZonedDateTime
+import javax.validation.constraints.FutureOrPresent
 
 data class PartyType(
         @GraphQLID
-        val id: String = "0",
+        override val id: String = "0",
 
         val name: String,
 
@@ -22,7 +25,7 @@ data class PartyType(
 
         val endDate: ZonedDateTime? = null
 
-) {
+): GQLResponseType {
 
     lateinit var partyParticipants: List<UserType>
 
@@ -39,3 +42,49 @@ fun Party.toResponse() = PartyType(
         startDate = this.startDate,
         endDate = this.endDate
 )
+
+
+data class NewPartyInput(
+        @field:Length(min = 3, max = 256)
+        val name: String,
+
+        @field:FutureOrPresent
+        val startDate: ZonedDateTime,
+
+        @field:FutureOrPresent
+        val endDate: ZonedDateTime?,
+
+        val description: String?,
+
+        val participants: List<Long>?
+) {
+
+    fun toDomain(): Party = Party(
+            name = this.name,
+            description = this.description,
+            startDate = this.startDate,
+            endDate = this.endDate,
+            participants = this.participants?.map { it -> User(id = it) } ?: emptyList()
+    )
+}
+
+data class EditPartyInput(
+        @field:Length(min = 3, max = 256)
+        val name: String,
+
+        @field:FutureOrPresent
+        val startDate: ZonedDateTime,
+
+        @field:FutureOrPresent
+        val endDate: ZonedDateTime?,
+
+        val description: String?
+) {
+
+    fun toDomain(): Party = Party(
+            name = this.name,
+            description = this.description,
+            startDate = this.startDate,
+            endDate = this.endDate
+    )
+}

@@ -43,7 +43,7 @@ data class PersistentUser(
 
         @ManyToMany(mappedBy = "participants")
         @Column(name = "party_id")
-        val joinedParties: List<PersistentParty> = emptyList()
+        val joinedParties: Set<PersistentParty> = emptySet()
 ) {
 
     fun toDomain() = User(

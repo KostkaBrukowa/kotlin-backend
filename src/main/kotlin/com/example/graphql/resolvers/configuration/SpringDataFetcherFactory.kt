@@ -21,6 +21,6 @@ class SpringDataFetcherFactory : DataFetcherFactory<Any>, BeanFactoryAware {
         // Strip out possible `Input` and `!` suffixes added to by the SchemaGenerator
         val targetedTypeName = environment?.fieldDefinition?.name
 
-        return beanFactory.getBean("${targetedTypeName}DataFetcher") as DataFetcher<Any>
+        return beanFactory.getBean("${targetedTypeName}DataFetcher".capitalize()) as DataFetcher<Any>
     }
 }
