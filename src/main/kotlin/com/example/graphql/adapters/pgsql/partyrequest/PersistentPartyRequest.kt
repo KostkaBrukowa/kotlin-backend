@@ -6,7 +6,7 @@ import com.example.graphql.domain.partyrequest.PartyRequestStatus
 import com.example.graphql.domain.user.PersistentUser
 import javax.persistence.*
 
-@Table(name="party_requests")
+@Table(name = "party_requests")
 @Entity
 data class PersistentPartyRequest(
 
@@ -19,17 +19,22 @@ data class PersistentPartyRequest(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
-        val user: PersistentUser,
+        val user: PersistentUser? = null,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "party_id", nullable = false)
-        val party: PersistentParty
-){
+        val party: PersistentParty? = null
+) {
 
-        fun toDomain(): PartyRequest = PartyRequest(
-                id = this.id,
-                user = null,
-                party = null,
-                status = this.status
-        )
+    fun toDomain(): PartyRequest = PartyRequest(
+            id = this.id,
+            user = null,
+            party = null,
+            status = this.status
+    )
 }
+
+fun PartyRequest.toPersistentEntity() = PersistentPartyRequest(
+        id = this.id,
+        status = this.status
+)

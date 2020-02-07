@@ -40,7 +40,7 @@ class PersistentPartyTestBuilder {
                 allArgs.endDate instanceof ZonedDateTime ? allArgs.endDate : ZonedDateTime.parse(allArgs.endDate) as ZonedDateTime,
                 allArgs.owner as PersistentUser,
                 allArgs.messageGroup as PersistentMessageGroup,
-                allArgs.participants as List<PersistentUser>,
+                allArgs.participants as Set<PersistentUser>,
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.expenses as List<PersistentExpense>,
         )

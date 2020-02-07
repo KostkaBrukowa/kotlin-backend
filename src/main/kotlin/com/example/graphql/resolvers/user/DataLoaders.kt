@@ -1,7 +1,10 @@
 package com.example.graphql.resolvers.user
 
 import com.example.graphql.domain.partyrequest.PartyRequestService
+import com.example.graphql.domain.user.UserDataLoaderService
+import com.example.graphql.resolvers.partyrequest.PARTY_REQUEST_RECEIVERS_LOADER_NAME
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
+import com.example.graphql.resolvers.utils.DataFetcherOverride
 import com.example.graphql.resolvers.utils.dataFetcher
 import com.example.graphql.resolvers.utils.dataLoader
 import graphql.schema.DataFetcher
@@ -14,18 +17,15 @@ import java.util.concurrent.CompletableFuture
 const val USER_PARTY_REQUEST_LOADER_NAME = "userPartyRequestLoader"
 
 @Component
-class UserDataLoaderBuilder(private val partyRequestService: PartyRequestService) {
+class UserDataLoaderBuilder(private val userDataLoaderService: UserDataLoaderService) {
 
     fun getPartyRequestDataLoader(): DataLoader<String, List<PartyRequestType>> {
-        return dataLoader { ids -> partyRequestService.findAllByUsersIds(ids) }
+        return dataLoader { ids -> userDataLoaderService.userToPartyRequestsDataLoaderMap(ids) }
     }
 }
 
-@Component("userPartyRequestsDataFetcher")
+@Component("UserPartyRequestsDataFetcher")
 @Scope("prototype")
-class UserPartyRequestsDataFetcher : DataFetcher<CompletableFuture<List<PartyRequestType>>> {
-
-    override fun get(environment: DataFetchingEnvironment): CompletableFuture<List<PartyRequestType>> {
-        return dataFetcher<UserType, PartyRequestType>(USER_PARTY_REQUEST_LOADER_NAME, environment) { it.id }
-    }
-}
+class UserPartyRequestsDataFetcher : DataFetcherOverride<UserType, List<PartyRequestType>>(
+        USER_PARTY_REQUEST_LOADER_NAME
+)

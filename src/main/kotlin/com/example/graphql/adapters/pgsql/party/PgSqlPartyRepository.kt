@@ -8,22 +8,22 @@ import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
 @Component
-class PgSqlPartyRepository(private val persistentPartyRepository: PersistentPartyRepository) : PartyRepository {
+class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepository) : PartyRepository {
 
     @Transactional
-    override fun getAllByOwnerId(id: Long): List<Party> = persistentPartyRepository.getAllByOwnerId(id).map {
+    override fun getAllByOwnerId(id: Long): List<Party> = partyRepository.getAllByOwnerId(id).map {
         it.toDomain().copy(owner = it.owner?.toDomain())
     }
 
     @Transactional
     override fun getTopById(id: Long): Party? {
-        val party = persistentPartyRepository.getTopById(id)
+        val party = partyRepository.getTopById(id)
 
         return party?.toDomain()?.copy(owner = party.owner?.toDomain())
     }
 
     override fun getPartyWithOwnerAndParticipants(id: Long): Party? {
-        val party = persistentPartyRepository.getPartyWithOwnerAndParticipants(id)
+        val party = partyRepository.getPartyWithOwnerAndParticipants(id)
 
         return party?.toDomain()?.copy(
                 owner = party.owner?.toDomain(),
@@ -32,38 +32,49 @@ class PgSqlPartyRepository(private val persistentPartyRepository: PersistentPart
     }
 
     override fun findPartiesWithParticipants(partiesIds: Set<Long>): List<Party> {
-        return persistentPartyRepository.findPartiesWithParticipants(partiesIds.toList()).map {
+        return partyRepository.findPartiesWithParticipants(partiesIds.toList()).map {
             it.toDomain().copy(participants = it.participants.map { participant -> participant.toDomain() })
         }
     }
 
     override fun findPartiesWithPartyRequests(partiesIds: Set<Long>): List<Party> {
-        return persistentPartyRepository.findPartiesWithPartyRequests(partiesIds.toList()).map {
+        return partyRepository.findPartiesWithPartyRequests(partiesIds.toList()).map {
             it.toDomain().copy(partyRequests = it.partyRequests.map { request -> request.toDomain() })
         }
     }
 
+    override fun removeParticipant(partyId: Long, participantId: Long) {
+        partyRepository.removeParticipant(partyId, participantId)
+    }
+
+    override fun addParticipant(partyId: Long, participantId: Long) {
+        partyRepository.addParticipant(partyId, participantId)
+    }
+
+    @Transactional
     override fun saveNewParty(party: Party): Party {
         val newParty = party.toPersistentEntity().copy(
                 owner = party.owner?.toPersistentEntity(),
                 participants = party.participants.map {
                     it.toPersistentEntity()
-                }
+                }.toSet()
         )
 
-        return persistentPartyRepository.save(newParty).toDomain()
+        val savedParty = partyRepository.save(newParty)
+
+        return savedParty.toDomain().copy(owner = savedParty.owner?.toDomain())
     }
 
     override fun updateParty(updatedParty: Party): Party {
-        val partyToUpdate = persistentPartyRepository.getTopById(updatedParty.id)?.apply {
+        val partyToUpdate = partyRepository.getTopById(updatedParty.id)?.apply {
             name = updatedParty.name
             description = updatedParty.description ?: ""
             startDate = updatedParty.startDate
             endDate = updatedParty.endDate
         } ?: throw Exception("Party not found")
 
-        return persistentPartyRepository.save(partyToUpdate).toDomain()
+        return partyRepository.save(partyToUpdate).toDomain()
     }
 
-    override fun removeParty(id: Long) = persistentPartyRepository.deleteById(id)
+    override fun removeParty(id: Long) = partyRepository.deleteById(id)
 }

@@ -34,11 +34,14 @@ data class PersistentParty(
         @JoinColumn(name = "messagegroup_id")
         val messageGroup: PersistentMessageGroup? = null,
 
-        @ManyToMany(fetch = FetchType.LAZY)
+        @ManyToMany(
+                fetch = FetchType.LAZY,
+                cascade = [CascadeType.MERGE]
+        )
         @JoinTable(name = "party_user", inverseJoinColumns = [JoinColumn(name = "user_id")], joinColumns = [JoinColumn(name = "party_id")])
-        val participants: List<PersistentUser> = emptyList(),
+        val participants: Set<PersistentUser> = emptySet(),
 
-        @OneToMany(mappedBy = "party", fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "party", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
         val partyRequests: List<PersistentPartyRequest> = emptyList(),
 
         @OneToMany(mappedBy = "party")
@@ -52,6 +55,10 @@ data class PersistentParty(
             startDate = this.startDate,
             endDate = this.endDate
     )
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }
 
 fun Party.toPersistentEntity() = PersistentParty(

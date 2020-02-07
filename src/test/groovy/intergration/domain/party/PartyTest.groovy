@@ -11,6 +11,7 @@ import intergration.BaseIntegrationSpec
 import org.apache.groovy.json.internal.LazyMap
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Unroll
 
 import java.time.ZonedDateTime
 
@@ -81,7 +82,7 @@ class PartyTest extends BaseIntegrationSpec {
                 name       : 'test name',
                 description: 'test description',
                 startDate  : tenDaysFromNow,
-                owner: aClient(userRepository)
+                owner      : aClient(userRepository)
         ], partyRepository).id
 
         and:
@@ -91,7 +92,7 @@ class PartyTest extends BaseIntegrationSpec {
         def partyResponse = postQuery(getSinglePartyQuery, "getSingleParty") as LazyMap
 
         then:
-        partyResponse.id == partyId
+        partyResponse.id == partyId.toString()
         partyResponse.name == "test name"
         partyResponse.description == "test description"
         partyResponse.startDate == tenDaysFromNow.toString()
@@ -136,7 +137,7 @@ class PartyTest extends BaseIntegrationSpec {
         participantsResponse.size() == 1
     }
 
-    def "Should return party requests for all participants"() {
+    def "Should create party requests for all new participants"() {
         given:
         authenticate()
 
@@ -160,9 +161,6 @@ class PartyTest extends BaseIntegrationSpec {
         }
 
         and:
-        def getSinglePartyQuery = { String id -> """getSingleParty(partyId: "${id}"){ id, partyRequests { user { id } } }""" }
-
-        and:
         String firstUserId = aClient(userRepository).id
         String secondUserId = aClient(userRepository).id
 
@@ -172,7 +170,6 @@ class PartyTest extends BaseIntegrationSpec {
         when:
 
         def partyRequestsResponse = findPartyRequestsByPartyId(newPartyId)
-
 
         then:
         partyRequestsResponse.size() == 2
@@ -196,7 +193,7 @@ class PartyTest extends BaseIntegrationSpec {
                 description: 'description before update',
                 startDate  : tenDaysFromNow,
                 endDate    : elevenDaysFromNow,
-                owner: baseUser
+                owner      : baseUser
         ], partyRepository).id
 
         and:
@@ -204,7 +201,7 @@ class PartyTest extends BaseIntegrationSpec {
             """
             updateParty(
                 id: "${id}" 
-                newPartyInput: {
+                editPartyInput: {
                   name: "updated party name"
                   description: "updated party description"
                   startDate: "${elevenDaysFromNow}"
@@ -283,6 +280,41 @@ class PartyTest extends BaseIntegrationSpec {
         then:
         partyResponse == null
         participantsResponse.empty
+    }
+
+    @Unroll
+    def "Should delete or return error(#error) a participant from a party when owner is #owner and participant is #participant "() {
+        given:
+        authenticate()
+
+        and:
+        def actualOwner = owner == "loggedInUser" ? baseUser : aClient(userRepository)
+        def actualParticipant = participant == "loggedInUser" ? baseUser : aClient(userRepository)
+        def aParty = aParty([owner: actualOwner, participants: [actualOwner, actualParticipant]], partyRepository)
+
+        and:
+        def removeParticipantMutation = ("""removeParticipant(partyId: "${aParty.id}", participantId: "${actualParticipant.id}")""")
+
+        when:
+        def response = postMutation(removeParticipantMutation, "removeParticipant", error)
+
+        and:
+        def participantsResponse = userRepository.findAllPartyParticipants(aParty.id)
+
+        then:
+        if (error) {
+            assert response[0].errorType == 'DataFetchingException'
+            assert response[0].message.contains('User is not authorised to perform this action')
+        } else {
+            assert response == true
+            assert participantsResponse.size() == 1
+        }
+
+        where:
+        owner          | participant       | error
+        "loggedInUser" | "otherClient"     | false
+        "otherClient"  | "loggedInUser"    | false
+        "otherClient"  | "differentClient" | true
     }
 
     def findPartyRequestsByPartyId(String partyId) {
