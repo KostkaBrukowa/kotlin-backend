@@ -28,11 +28,3 @@ data class PersistentPayment(
         @Column(name = "payment_status")
         val payment_status: PaymentStatus
 )
-
-//enum class PaymentStatus {
-//    ACCEPTED,
-//    DECLINED,
-//    IN_PROGRESS,
-//    PAID,
-//}
-//
