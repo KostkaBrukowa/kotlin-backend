@@ -17,5 +17,6 @@ enum class PaymentStatus {
     DECLINED,
     IN_PROGRESS,
     PAID,
+    CONFIRMED
 }
 
