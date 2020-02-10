@@ -21,5 +21,4 @@ class PartyRequestDataLoaderService(private val partyRequestRepository: PartyReq
 
         return partyRequests.associateBy({ it.id }, { it.user!!.toResponse() })
     }
-
 }

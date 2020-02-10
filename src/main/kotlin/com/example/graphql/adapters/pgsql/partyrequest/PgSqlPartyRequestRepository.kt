@@ -1,6 +1,6 @@
 package com.example.graphql.adapters.pgsql.partyrequest
 
-import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
+import com.example.graphql.adapters.pgsql.utils.toNullable
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.toPersistentEntity
 import com.example.graphql.domain.partyrequest.PartyRequest
@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PgSqlPartyRequestRepository(
-        private val persistentPartyRequestRepository: PersistentPartyRequestRepository,
-        private val persistentPartyRepository: PersistentPartyRepository
+        private val persistentPartyRequestRepository: PersistentPartyRequestRepository
 ) : PartyRequestRepository {
     override fun createPartyRequestsForParticipants(participants: List<User>, party: Party): List<PartyRequest> {
         val persistentParty = party.toPersistentEntity()
@@ -23,24 +22,21 @@ class PgSqlPartyRequestRepository(
                     party = persistentParty,
                     status = PartyRequestStatus.IN_PROGRESS
             )
-        }).map { it.toDomain() }
+        }).map { it.toDomainWithRelations() }
     }
 
     override fun findAllByParty(partyId: Long): List<PartyRequest> =
-            persistentPartyRequestRepository.findAllByPartyId(partyId = partyId).map { it.toDomain() }
+            persistentPartyRequestRepository.findAllByPartyId(partyId = partyId).map { it.toDomainWithRelations() }
 
     override fun findAllByUserId(userId: Long): List<PartyRequest> =
-            persistentPartyRequestRepository.findAllByUserId(userId).map { it.toDomain() }
+            persistentPartyRequestRepository.findAllByUserId(userId).map { it.toDomainWithRelations() }
 
     override fun findByUserIdAndPartyId(userId: Long, partyId: Long): PartyRequest? {
-        return persistentPartyRequestRepository.findByUserIdAndPartyId(userId, partyId)?.toDomain()
+        return persistentPartyRequestRepository.findByUserIdAndPartyId(userId, partyId)?.toDomainWithRelations()
     }
 
-    override fun findByIdWithUser(partyRequestId: Long): PartyRequest {
-        val request = persistentPartyRequestRepository.getOne(partyRequestId)
-
-        return request.toDomain().copy(user = request.user?.toDomain(), party = request.party?.toDomain())
-    }
+    override fun findByIdWithUser(partyRequestId: Long): PartyRequest =
+            persistentPartyRequestRepository.getOne(partyRequestId).toDomainWithRelations()
 
     override fun updateStatus(partyRequest: PartyRequest): Boolean {
         persistentPartyRequestRepository.updateStatus(partyRequest.id, partyRequest.status)
@@ -49,10 +45,9 @@ class PgSqlPartyRequestRepository(
     }
 
     override fun findByIdWithUserAndPartyOwner(partyRequestId: Long): PartyRequest? {
-        val request = persistentPartyRequestRepository.findByIdWithUserAndPartyOwner(partyRequestId)
+        val request = persistentPartyRequestRepository.findById(partyRequestId).toNullable()
 
-        return request?.toDomain()?.copy(
-                user = request.user?.toDomain(),
+        return request?.toDomainWithRelations()?.copy(
                 party = request.party?.toDomain()?.copy(owner = request.party.owner?.toDomain())
         )
     }
@@ -64,10 +59,15 @@ class PgSqlPartyRequestRepository(
     }
 
     override fun findPartyRequestsWithParties(ids: Set<Long>): List<PartyRequest> {
-        return persistentPartyRequestRepository.findAllById(ids).map { it.toDomain().copy(party = it.party?.toDomain()) }
+        return persistentPartyRequestRepository.findAllById(ids).map { it.toDomainWithRelations() }
     }
 
     override fun findPartyRequestsWithUsers(ids: Set<Long>): List<PartyRequest> {
-        return persistentPartyRequestRepository.findAllById(ids).map { it.toDomain().copy(user = it.user?.toDomain()) }
+        return persistentPartyRequestRepository.findAllById(ids).map { it.toDomainWithRelations() }
     }
 }
+
+private fun PersistentPartyRequest.toDomainWithRelations() = this.toDomain().copy(
+        user = this.user?.toDomain(),
+        party = this.party?.toDomain()
+)

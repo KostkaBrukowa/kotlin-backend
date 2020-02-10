@@ -12,20 +12,12 @@ interface PersistentPartyRepository : JpaRepository<PersistentParty, Long> {
     fun getTopById(id: Long): PersistentParty?
 
     @Query("""
-        SELECT p
-        FROM PersistentParty as p
-        LEFT JOIN FETCH p.participants as ps
-        WHERE p.id = :partyId
-    """)
-    fun getPartyWithOwnerAndParticipants(partyId: Long): PersistentParty?
-
-    @Query("""
         SELECT distinct p
         FROM PersistentParty as p
         LEFT JOIN FETCH p.partyRequests as pr
         WHERE p.id IN (:partiesIds)
     """)
-    fun findPartiesWithPartyRequests(@Param("partiesIds") partiesIds: List<Long>): List<PersistentParty>
+    fun findPartiesWithPartyRequests(@Param("partiesIds") partiesIds: Set<Long>): List<PersistentParty>
 
     @Query("""
         SELECT distinct p
@@ -33,7 +25,7 @@ interface PersistentPartyRepository : JpaRepository<PersistentParty, Long> {
         LEFT JOIN FETCH p.participants
         WHERE p.id in (:partiesIds)
     """)
-    fun findPartiesWithParticipants(@Param("partiesIds") partiesIds: List<Long>): List<PersistentParty>
+    fun findPartiesWithParticipants(@Param("partiesIds") partiesIds: Set<Long>): List<PersistentParty>
 
     @Transactional
     @Modifying

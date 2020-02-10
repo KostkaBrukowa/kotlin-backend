@@ -18,7 +18,6 @@ class SpringDataFetcherFactory : DataFetcherFactory<Any>, BeanFactoryAware {
     @Suppress("UNCHECKED_CAST")
     override fun get(environment: DataFetcherFactoryEnvironment?): DataFetcher<Any> {
 
-        // Strip out possible `Input` and `!` suffixes added to by the SchemaGenerator
         val targetedTypeName = environment?.fieldDefinition?.name
 
         return beanFactory.getBean("${targetedTypeName}DataFetcher".capitalize()) as DataFetcher<Any>

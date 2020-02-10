@@ -14,11 +14,11 @@ data class PersistentMessageGroup(
         val id: Long? = null,
 
 
+        @OneToOne(fetch = FetchType.LAZY, optional = true)
+        val party: PersistentParty? = null,
+
         @OneToMany(mappedBy = "messageGroup")
         val messages: List<PersistentMessage>,
-
-        @OneToOne(fetch = FetchType.LAZY, optional = true)
-        val party: PersistentParty?,
 
         @ManyToMany
         @JoinTable(name = "messagegroup_user")
