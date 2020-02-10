@@ -19,12 +19,12 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
             userRepository.findAllPartyParticipants(partyId).map { it.toDomain() }
 
     override fun findUsersWithPartyRequests(usersIds: Set<Long>): List<User> {
-        return userRepository.findUsersWithPartyRequests(usersIds.map { it }).map {
+        return userRepository.findUsersWithPartyRequests(usersIds).map {
             it.toDomain()
         }
     }
 
     override fun findUsersById(usersIds: List<Long>): List<User> {
-        return userRepository.findAllById(usersIds.map { it }).map { it.toDomain() }
+        return userRepository.findAllById(usersIds).map { it.toDomain() }
     }
 }

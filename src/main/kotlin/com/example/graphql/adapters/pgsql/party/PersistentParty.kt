@@ -34,10 +34,7 @@ data class PersistentParty(
         @JoinColumn(name = "messagegroup_id")
         val messageGroup: PersistentMessageGroup? = null,
 
-        @ManyToMany(
-                fetch = FetchType.LAZY,
-                cascade = [CascadeType.MERGE]
-        )
+        @ManyToMany(fetch = FetchType.LAZY)
         @JoinTable(name = "party_user", inverseJoinColumns = [JoinColumn(name = "user_id")], joinColumns = [JoinColumn(name = "party_id")])
         val participants: Set<PersistentUser> = emptySet(),
 
@@ -57,7 +54,13 @@ data class PersistentParty(
     )
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + startDate.hashCode()
+        result = 31 * result + endDate.hashCode()
+
+        return result
     }
 }
 

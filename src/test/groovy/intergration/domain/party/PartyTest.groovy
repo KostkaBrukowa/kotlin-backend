@@ -57,7 +57,14 @@ class PartyTest extends BaseIntegrationSpec {
         aParty([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient]], partyRepository)
 
         and:
-        def getAllPartiesQuery = """getAllParties(userId: "${baseUserId}"){ name, owner { id } partyParticipants { id }, partyPartyRequests { id } }"""
+        def getAllPartiesQuery = """
+            getAllParties(userId: "${baseUserId}") {
+                name,
+                owner { id }
+                partyParticipants { id } 
+                partyPartyRequests { id } 
+            }
+        """
 
         when:
         def response = postQuery(getAllPartiesQuery, "getAllParties") as ArrayList<LazyMap>
@@ -268,7 +275,7 @@ class PartyTest extends BaseIntegrationSpec {
         ], partyRepository).id
 
         and:
-        def deletePartyMutation = """deleteParty( id: "${partyId}" )"""
+        def deletePartyMutation = """deleteParty( id: "${partyId}")"""
 
         when:
         postMutation(deletePartyMutation, "deleteParty")
@@ -293,7 +300,12 @@ class PartyTest extends BaseIntegrationSpec {
         def aParty = aParty([owner: actualOwner, participants: [actualOwner, actualParticipant]], partyRepository)
 
         and:
-        def removeParticipantMutation = ("""removeParticipant(partyId: "${aParty.id}", participantId: "${actualParticipant.id}")""")
+        def removeParticipantMutation = ("""
+            removeParticipant(
+                partyId: "${aParty.id}",
+                participantId: "${actualParticipant.id}"
+            )
+        """)
 
         when:
         def response = postMutation(removeParticipantMutation, "removeParticipant", error)

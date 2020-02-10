@@ -23,13 +23,5 @@ interface PersistentPartyRequestRepository : JpaRepository<PersistentPartyReques
         WHERE id = :requestId
     """)
     fun updateStatus(@Param("requestId") requestId: Long, @Param("status") status: PartyRequestStatus)
-
-
-    @Query("""
-        SELECT request
-        from PersistentPartyRequest as request
-        WHERE request.id = :partyRequestId
-    """)
-    fun findByIdWithUserAndPartyOwner(@Param("partyRequestId") partyRequestId: Long): PersistentPartyRequest?
 }
 

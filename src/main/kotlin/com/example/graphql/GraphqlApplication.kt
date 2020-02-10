@@ -38,19 +38,6 @@ class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecur
 
 @SpringBootApplication()
 class GraphqlApplication(userRepository: PersistentUserRepository) {
-    init {
-        //        // TODO REMOVE BEFORE PROD
-//        userRepository.save(PersistentUser(
-//                id = 123,
-//                partyRequests = emptyList(),
-//                messageGroups = emptyList(),
-//                password = "dkfsA,",
-//                name = "fjadks",
-//                expenses = emptyList(),
-//                email = "dfka",
-//                bankAccount = null
-//        ))
-    }
 
     @Bean
     fun dataFetcherFactoryProvider(springDataFetcherFactory: SpringDataFetcherFactory, objectMapper: ObjectMapper) =

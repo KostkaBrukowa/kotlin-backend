@@ -1,12 +1,12 @@
 package com.example.graphql.domain.party
 
-import com.example.graphql.domain.partyrequest.EntityNotFoundException
 import com.example.graphql.domain.partyrequest.PartyRequestRepository
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.party.toResponse
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.partyrequest.toResponse
+import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
 
