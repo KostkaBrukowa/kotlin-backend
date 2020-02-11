@@ -1,6 +1,5 @@
 package com.example.graphql.resolvers.expense
 
-import com.example.graphql.domain.expense.Expense
 import org.hibernate.validator.constraints.Length
 import java.time.ZonedDateTime
 import javax.validation.constraints.PastOrPresent
@@ -21,5 +20,5 @@ data class NewExpenseInput(
         val partyId: Long,
 
         val participants: List<Long>
-) {
-}
+)
+
