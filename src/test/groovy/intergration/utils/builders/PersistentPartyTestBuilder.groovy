@@ -47,6 +47,14 @@ class PersistentPartyTestBuilder {
     }
 
     static PersistentParty aParty(Map props = [:], PersistentPartyRepository repository) {
+        if(props.containsKey("participants")) {
+            if(props.containsKey("owner") && props.participants.every {it.id != props.owner.id}){
+                props.participants.add(props.owner)
+            }
+        } else {
+            props.participants = [props.owner]
+        }
+
         return repository.save(defaultPersistentParty(props))
     }
 }

@@ -6,13 +6,13 @@ import com.example.graphql.domain.user.User
 import java.time.ZonedDateTime
 
 data class Expense(
-        val id: Long,
-        val amount: String,
+        val id: Long = 0,
+        val amount: Float,
         val expenseDate: ZonedDateTime,
         val description: String,
 
 
-        val user: User,
-        val party: Party,
-        val payments: List<Payment>
+        val user: User? = null,
+        val party: Party? = null,
+        val payments: List<Payment> = emptyList()
 )

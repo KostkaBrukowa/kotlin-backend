@@ -20,6 +20,8 @@ class PartyService(
 
     fun getSingleParty(partyId: Long) = partyRepository.getTopById(partyId)
 
+    fun findPartiesWithParticipants(partiesIds: Set<Long>) = partyRepository.findPartiesWithParticipants(partiesIds)
+
 
     // CREATE
     fun createParty(party: Party, userId: Long): Party {
