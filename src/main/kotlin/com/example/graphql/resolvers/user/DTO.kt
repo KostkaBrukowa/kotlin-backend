@@ -6,11 +6,13 @@ import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
+import javax.validation.constraints.Email
 
 data class UserType(
         @GraphQLID
         override val id: String = "0",
 
+        @field:Email
         val email: String = "",
 
         val name: String? = null,

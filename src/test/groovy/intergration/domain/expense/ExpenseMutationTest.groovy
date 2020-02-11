@@ -32,15 +32,21 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
     @Autowired
     PersistentPaymentRepository paymentRepository
 
-    def createExpenseMutation(Map props) {
+    def createExpenseMutation(Map props = [:]) {
+        String amount = props.containsKey("amount") ? props.amount : "42.42"
+        ZonedDateTime expenseDate = props.containsKey("expenseDate") ? props.expenseDate : ZonedDateTime.now().minusDays(1)
+        String description = props.containsKey("description") ? props.description : "I bought a booze"
+        Long partyId = props.containsKey("partyId") ? props.partyId : aParty([owner: baseUser], partyRepository).id
+        String participantsIds = (props.containsKey("participants") ? props.participants : []).join(", ")
+
         return """
             createExpense(
                 newExpenseInput: {
-                    amount: ${props.containsKey("amount") ? props.amount : "42,42"}
-                    expenseDate: "${props.containsKey("expenseDate") ? props.expenseDate : ZonedDateTime.now().minusDays(1)}"
-                    description: "${props.containsKey("description") ? props.description : "I bought a booze"}"
-                    partyId: "${props.containsKey("partyId") ? props.partyId : aParty(partyRepository).id}"
-                    participants: [${(props.containsKey("participants") ? props.participants : []).join(", ")}]
+                    amount: ${amount}
+                    expenseDate: "${expenseDate}"
+                    description: "${description}"
+                    partyId: "${partyId}"
+                    participants: [${participantsIds}]
                 }
             ) { id }
         """
@@ -52,11 +58,11 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         and:
         def yesterday = ZonedDateTime.now().minusDays(1)
-        def aParty = aParty([owner: baseUser], partyRepository)
+        def aParty = aParty([owner: baseUser, participants: [baseUser]], partyRepository)
 
         and:
         def createExpenseMutation = createExpenseMutation(
-                amount: "42,42",
+                amount: "42.42",
                 expenseDate: yesterday,
                 description: "I bought a booze for everyone",
                 partyId: aParty.id
@@ -72,11 +78,12 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         actualExpense.id == newExpenseId.toLong()
         actualExpense.description == "I bought a booze for everyone"
         actualExpense.expenseDate == yesterday
-        actualExpense.amount == "42,42"
+        actualExpense.amount == 42.42f
         actualExpense.party.id == aParty.id
     }
 
-    @Ignore // TODO REMOVE WHEN PAYMENTS ARE DONE
+    @Ignore
+    // TODO REMOVE WHEN PAYMENTS ARE DONE
     def "There should be as many expense payments as there is expense participants"() {
         given:
         authenticate()
@@ -85,10 +92,15 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         def firstExpenseParticipant = aClient(userRepository)
         def secondExpenseParticipant = aClient(userRepository)
         def thirdExpenseParticipant = aClient(userRepository)
+        def aParty = aParty([
+                owner       : baseUser,
+                participants: [firstExpenseParticipant, secondExpenseParticipant, thirdExpenseParticipant]
+        ], partyRepository)
 
         and:
         def createExpenseMutation = createExpenseMutation(
-                participants: [firstExpenseParticipant.id, secondExpenseParticipant.id, thirdExpenseParticipant.id]
+                participants: [firstExpenseParticipant.id, secondExpenseParticipant.id, thirdExpenseParticipant.id],
+                partyId: aParty.id
         )
 
         when:
@@ -111,8 +123,10 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         authenticate()
 
         and:
+        def aParty = aParty([owner: baseUser], partyRepository)
         def createExpenseMutation = createExpenseMutation(
-                participants: [baseUser.id]
+                participants: [baseUser.id],
+                partyId: aParty.id
         )
 
         when:
@@ -128,14 +142,15 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
     }
 
     @Unroll
-    def "Should not accept negative value for expense amount"() {
+    def "Should not accept invalid values #message"() {
         given:
         authenticate()
 
         and:
         def createExpenseMutation = createExpenseMutation(
                 amount: amount,
-                expenseDate: expenseDate
+                expenseDate: expenseDate,
+                description: description
         )
 
         when:
@@ -145,14 +160,15 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         def actualExpenses = expenseRepository.findAll()
 
         then:
-        actualExpenses.empty
         response[0].errorType == errorType
         response[0].message.contains(message)
+        actualExpenses.empty
 
         where:
-        amount   | expenseDate                      | errorType         | message
-        "42,42"  | ZonedDateTime.now().plusDays(1)  | "ValidationError" | "Expense date must be in the past"
-        "-42,42" | ZonedDateTime.now().minusDays(1) | "ValidationError" | "Amount must be positive"
+        amount   | description       | expenseDate                      | errorType         | message
+        "42.42"  | "more than three" | ZonedDateTime.now().plusDays(1)  | "ValidationError" | "must be a date in the past or in the present"
+        "-42.42" | "more than three" | ZonedDateTime.now().minusDays(1) | "ValidationError" | "must be greater than 0"
+        "42.42"  | "ab"              | ZonedDateTime.now().minusDays(1) | "ValidationError" | "length must be between 3 and 256"
     }
 
     def "Should save payer as the logged in user"() {
@@ -173,7 +189,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         actualExpense.user.id == baseUser.id
     }
 
-    def "Should throw an error when party that user wants to save expense in does not exist"() {
+    def "Should throw an error when party that user wants to save expense to, does not exist"() {
         given:
         authenticate()
 
@@ -191,7 +207,66 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         then:
         actualExpenses.empty
         response[0].errorType == 'ValidationError'
-        response[0].message.contains("Party with such id must exist in database")
+        response[0].message.contains('Party with such id was not found')
+    }
+
+    def "Should not allow to add a user as a request participant if the user is not a party participant"() {
+        given:
+        authenticate()
+
+        and:
+        def expenseParticipant = aClient(userRepository)
+        def aParty = aParty([
+                owner       : baseUser,
+                participants: [baseUser]
+        ], partyRepository)
+
+        and:
+        def createExpenseMutation = createExpenseMutation(
+                participants: [expenseParticipant.id],
+                partyId: aParty.id
+        )
+
+        when:
+        def response = postMutation(createExpenseMutation, "createExpense", true)
+
+        and:
+        def actualExpenses = expenseRepository.findAll()
+        def actualPayments = paymentRepository.findAll()
+
+        then:
+        response[0].errorType == 'ValidationError'
+        response[0].message.contains('Not all users were party participants')
+        actualExpenses.empty
+        actualPayments.empty
+    }
+
+    def "Should not allow user, who's not party participant to add a expense to a party"() {
+        given:
+        authenticate()
+
+        and:
+        def anOwner = aClient(userRepository)
+        def aParty = aParty([
+                owner       : anOwner,
+                participants: [anOwner]
+        ], partyRepository)
+
+        and:
+        def createExpenseMutation = createExpenseMutation(
+                partyId: aParty.id
+        )
+
+        when:
+        def response = postMutation(createExpenseMutation, "createExpense", true)
+
+        and:
+        def actualExpenses = expenseRepository.findAll()
+
+        then:
+        response[0].errorType == 'DataFetchingException'
+        response[0].message.contains('User is not authorised to perform this action')
+        actualExpenses.empty
     }
 //    @Unroll
 //    def "Should mark expense status as resolved only when all payments are confirmed"() {

@@ -2,9 +2,7 @@ package com.example.graphql.schema.exceptions
 
 import ValidationGraphQLError
 import asValidationDataFetchingGraphQLError
-import com.example.graphql.schema.exceptions.handlers.UnauthenticatedException
-import com.example.graphql.schema.exceptions.handlers.UnauthenticatedGraphQLError
-import com.example.graphql.schema.exceptions.handlers.ValidationException
+import com.example.graphql.schema.exceptions.handlers.*
 import com.expediagroup.graphql.spring.exception.SimpleKotlinGraphQLError
 import graphql.GraphQLError
 import graphql.execution.DataFetcherExceptionHandler
@@ -25,6 +23,7 @@ class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
             is ValidationException -> ValidationGraphQLError(exception.constraintErrors, path, exception, sourceLocation)
             is ConstraintViolationException -> exception.asValidationDataFetchingGraphQLError(exception, path, sourceLocation)
             is UnauthenticatedException -> UnauthenticatedGraphQLError(exception, path, sourceLocation)
+            is SimpleValidationException -> SimpleValidationGraphQLError(exception, path, sourceLocation)
             else -> SimpleKotlinGraphQLError(exception = exception, locations = listOf(sourceLocation), path = path.toList())
         }
         log.warn(error.message, exception)
