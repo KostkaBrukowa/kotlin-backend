@@ -23,6 +23,9 @@ data class PersistentExpense(
 
         val description: String,
 
+        @Enumerated(EnumType.STRING)
+        val expenseStatus: ExpenseStatus,
+
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
@@ -35,11 +38,13 @@ data class PersistentExpense(
         @OneToMany(mappedBy = "expense")
         val payments: List<PersistentPayment> = emptyList()
 ) {
+
     fun toDomain() = Expense(
             id = this.id,
             amount = this.amount,
             expenseDate = this.expenseDate,
-            description = this.description
+            description = this.description,
+            expenseStatus = this.expenseStatus
     )
 }
 
@@ -47,6 +52,7 @@ fun Expense.toPersistentEntity() = PersistentExpense(
         amount = this.amount,
         expenseDate = this.expenseDate,
         description = this.description,
+        expenseStatus = this.expenseStatus,
         user = this.user?.toPersistentEntity(),
         party = this.party?.toPersistentEntity()
 )
