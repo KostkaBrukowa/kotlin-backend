@@ -4,6 +4,7 @@ import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.partyrequest.PartyRequest
+import com.example.graphql.domain.payment.Payment
 
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
@@ -16,6 +17,7 @@ class UserTestBuilder {
             joinedParties   : [],
             expenses        : [],
             messageGroups   : [],
+            payments        : [],
             name            : 'testname',
             bankAccount     : '3921321938',
             password        : '@fdaksl228@*##8',
@@ -39,6 +41,7 @@ class UserTestBuilder {
                 allArgs.partyRequests as List<PartyRequest>,
                 allArgs.joinedParties as List<Party>,
                 allArgs.expenses as List<Expense>,
+                allArgs.payments as List<Payment>,
                 allArgs.messageGroups as List<MessageGroup>
         )
     }

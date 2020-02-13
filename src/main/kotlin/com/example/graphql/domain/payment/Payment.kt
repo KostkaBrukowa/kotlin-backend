@@ -5,12 +5,12 @@ import com.example.graphql.domain.user.User
 
 data class Payment(
         val id: Long = 0,
-        val amount: String?,
+        val amount: Float?,
         val confirmImageUrl: String?,
 
 
-        val expense: Expense,
-        val user: User,
+        val expense: Expense? = null,
+        val user: User? = null,
         val status: PaymentStatus = PaymentStatus.IN_PROGRESS
 )
 

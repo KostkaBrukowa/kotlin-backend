@@ -1,5 +1,8 @@
 package com.example.graphql.resolvers.configuration
 
+import com.example.graphql.resolvers.expense.EXPENSE_PARTY_LOADER_NAME
+import com.example.graphql.resolvers.expense.EXPENSE_PAYER_LOADER_NAME
+import com.example.graphql.resolvers.expense.ExpenseDataLoaderBuilder
 import com.example.graphql.resolvers.party.PARTY_PARTICIPANTS_LOADER_NAME
 import com.example.graphql.resolvers.party.PARTY_PARTY_REQUEST_LOADER_NAME
 import com.example.graphql.resolvers.party.PartyDataLoaderBuilder
@@ -18,7 +21,8 @@ import org.springframework.context.annotation.Configuration
 class DataLoaderConfiguration(
         private val userDataLoaderBuilder: UserDataLoaderBuilder,
         private val partyDataLoaderBuilder: PartyDataLoaderBuilder,
-        private val partyRequestDataLoadersBuilder: PartyRequestDataLoadersBuilder
+        private val partyRequestDataLoadersBuilder: PartyRequestDataLoadersBuilder,
+        private val expenseDataLoaderBuilder: ExpenseDataLoaderBuilder
 ) {
 
     @Bean
@@ -32,6 +36,8 @@ class DataLoaderConfiguration(
                 registry.register(PARTY_PARTY_REQUEST_LOADER_NAME, partyDataLoaderBuilder.getPartyRequestsDataLoader())
                 registry.register(PARTY_REQUEST_PARTIES_LOADER_NAME, partyRequestDataLoadersBuilder.getPartiesDataLoader())
                 registry.register(PARTY_REQUEST_RECEIVERS_LOADER_NAME, partyRequestDataLoadersBuilder.getReceiversDataLoader())
+                registry.register(EXPENSE_PAYER_LOADER_NAME, expenseDataLoaderBuilder.getPayerDataLoader())
+                registry.register(EXPENSE_PARTY_LOADER_NAME, expenseDataLoaderBuilder.getPartyDataLoader())
 
                 return registry
             }

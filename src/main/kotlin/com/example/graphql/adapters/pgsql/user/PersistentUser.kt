@@ -5,6 +5,7 @@ import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
+import com.example.graphql.domain.payment.PersistentPayment
 import javax.persistence.*
 
 @Table(name = "users")
@@ -37,6 +38,9 @@ data class PersistentUser(
 
         @OneToMany(mappedBy = "user")
         val expenses: List<PersistentExpense> = emptyList(),
+
+        @OneToMany(mappedBy = "user")
+        val payments: Set<PersistentPayment> = emptySet(),
 
         @ManyToMany(mappedBy = "users")
         val messageGroups: List<PersistentMessageGroup> = emptyList(),

@@ -4,6 +4,7 @@ import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.partyrequest.PartyRequest
+import com.example.graphql.domain.payment.Payment
 import com.expediagroup.graphql.annotations.GraphQLIgnore
 
 data class User(
@@ -27,6 +28,8 @@ data class User(
         val joinedParties: List<Party> = emptyList(),
 
         val expenses: List<Expense> = emptyList(),
+
+        val payments: List<Payment> = emptyList(),
 
         val messageGroups: List<MessageGroup> = emptyList()
 )

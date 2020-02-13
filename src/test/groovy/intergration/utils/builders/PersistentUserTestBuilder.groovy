@@ -1,10 +1,11 @@
 package intergration.utils.builders
 
+import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
-import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
+import com.example.graphql.domain.payment.PersistentPayment
 import com.example.graphql.domain.user.PersistentUser
 import org.apache.commons.lang.RandomStringUtils
 import org.springframework.transaction.annotation.Propagation
@@ -18,6 +19,7 @@ class PersistentUserTestBuilder {
             email           : 'test@email.com',
             partyRequests   : [],
             expenses        : [],
+            payments        : [],
             messageGroups   : [],
             joinedParties   : [],
             ownedParties    : [],
@@ -44,6 +46,7 @@ class PersistentUserTestBuilder {
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.ownedParties as List<PersistentParty>,
                 allArgs.expenses as List<PersistentExpense>,
+                allArgs.payments as Set<PersistentPayment>,
                 allArgs.messageGroups as List<PersistentMessageGroup>,
                 allArgs.joinedParties as Set<PersistentParty>,
         )

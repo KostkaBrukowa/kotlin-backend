@@ -1,6 +1,5 @@
 package com.example.graphql.resolvers.party
 
-import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
@@ -31,7 +30,7 @@ data class PartyType(
 
     lateinit var partyPartyRequests: List<PartyRequestType>
 
-    fun expenses(): List<Expense> = emptyList()
+//    fun expenses(): List<ExpenseType> = emptyList()
 }
 
 fun Party.toResponse() = PartyType(

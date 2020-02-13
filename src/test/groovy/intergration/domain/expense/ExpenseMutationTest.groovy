@@ -5,6 +5,8 @@ import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.domain.expense.ExpenseStatus
+import com.example.graphql.domain.payment.PaymentStatus
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
@@ -12,7 +14,9 @@ import spock.lang.Unroll
 
 import java.time.ZonedDateTime
 
+import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
 
 class ExpenseMutationTest extends BaseIntegrationSpec {
@@ -268,9 +272,250 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         response[0].message.contains('User is not authorised to perform this action')
         actualExpenses.empty
     }
-//    @Unroll
-//    def "Should mark expense status as resolved only when all payments are confirmed"() {
-//        expect:
-//        false
-//    }
+
+    def "Should update existing expense"() {
+        given:
+        authenticate()
+
+        and:
+        def twoDaysBefore = ZonedDateTime.now().minusDays(1)
+        def aParty = aParty([owner: baseUser, participants: [baseUser]], partyRepository)
+        def anExpense = anExpense([
+                user       : baseUser,
+                party      : aParty,
+                expenseDate: ZonedDateTime.now().minusDays(1),
+                description: "description before update"
+        ], expenseRepository)
+
+        and:
+        def updateExpenseMutation = """
+            updateExpense(
+                updateExpenseInput: {
+                    id: ${anExpense.id}
+                    expenseDate: "${twoDaysBefore}"
+                    description: "description after update"
+                }
+            ) { id }
+        """
+
+        when:
+        String newExpenseId = postMutation(updateExpenseMutation, "updateExpense").id
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+
+        then:
+        actualExpense.id == newExpenseId.toLong()
+        actualExpense.description == "description after update"
+        actualExpense.expenseDate == twoDaysBefore
+    }
+
+    // TODO REMOVE IGNORE WHEN PAYMENTS ARE DONE
+    @Ignore
+    def "Should update expense's amount with different mutation, and should mark all payments as in progress"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : aClient(userRepository),
+                party        : aParty(partyRepository),
+                amount       : 44.44,
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
+        ], expenseRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+
+
+        and:
+        def createExpenseMutation = """
+            updateExpenseAmount(
+                updateExpenseAmountInput: {
+                    id: ${anExpense.id}
+                    amount: 142.44
+                }
+            ) { id }
+        """
+
+        when:
+        String newExpenseId = postMutation(createExpenseMutation, "updateExpenseAmount").id
+
+        and:
+        def actualExpense = expenseRepository.findById(newExpenseId.toLong()).get()
+        def actualPayments = paymentRepository.findAllByExpenseId(newExpenseId.toLong())
+
+        then:
+        actualExpense.id == newExpenseId.toLong()
+        actualExpense.amount == 142.44f
+        actualPayments.size() == 3
+        actualPayments.every { it.paymentStatus == PaymentStatus.IN_PROGRESS }
+    }
+
+    // TODO REMOVE IGNORE WHEN PAYMENTS ARE DONE
+    @Ignore
+    def "Should remove all payments when expense is deleted"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : aClient(userRepository),
+                party        : aParty(partyRepository),
+                amount       : 44.44,
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
+        ], expenseRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+
+
+        and:
+        def deleteExpenseMutation = """deleteExpense(expenseId: ${anExpense.id})"""
+
+        when:
+        postMutation(deleteExpenseMutation)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id)
+        def actualPayments = paymentRepository.findAllByExpenseId(anExpense.id)
+
+        then:
+        actualExpense.empty
+        actualPayments.empty
+    }
+
+    @Unroll
+    def "Should #shouldUpdate update expense amount when expense status is #expenseStatus"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : baseUser,
+                party        : aParty([owner: aClient(userRepository)], partyRepository),
+                amount       : 44.44,
+                expenseStatus: expenseStatus
+        ], expenseRepository)
+
+        and:
+        def updateExpenseAmountMutation = """
+            updateExpenseAmount(
+                updateExpenseAmountInput: {
+                    id: ${anExpense.id}
+                    amount: 142.44
+                }
+            ) { id }
+        """
+
+        when:
+        def response = postMutation(updateExpenseAmountMutation, "updateExpenseAmount", !shouldUpdate)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+
+        then:
+        if (shouldUpdate) {
+            assert actualExpense.amount == 142.44f
+        } else {
+            assert response[0].errorType == 'ValidationError'
+            assert response[0].message.contains("Expense status was not valid, status is ${expenseStatus}")
+        }
+
+        where:
+        expenseStatus                        | shouldUpdate
+        ExpenseStatus.IN_PROGRESS_REQUESTING | true
+        ExpenseStatus.IN_PROGRESS_PAYING     | false
+        ExpenseStatus.DECLINED               | false
+        ExpenseStatus.RESOLVED               | false
+    }
+
+    @Unroll
+    def "Should delete #shouldDelete existing expense when expense status is is #expenseStatus"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : baseUser,
+                party        : aParty([owner: baseUser], partyRepository),
+                amount       : 44.44,
+                expenseStatus: expenseStatus
+
+        ], expenseRepository)
+
+        and:
+        def deleteExpenseMutation = """deleteExpense(expenseId: ${anExpense.id})"""
+
+        when:
+        def response = postMutation(deleteExpenseMutation, "deleteExpense", !shouldDelete)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id)
+
+        then:
+        if (shouldDelete) {
+            assert actualExpense.empty
+        } else {
+            assert !actualExpense.empty
+            assert response[0].errorType == 'ValidationError'
+            assert response[0].message.contains("Expense status was not valid, status is ${expenseStatus}")
+        }
+
+        where:
+        expenseStatus                        | shouldDelete
+        ExpenseStatus.IN_PROGRESS_REQUESTING | true
+        ExpenseStatus.IN_PROGRESS_PAYING     | false
+        ExpenseStatus.DECLINED               | false
+        ExpenseStatus.RESOLVED               | false
+    }
+
+    @Unroll
+    def "Should change #shouldChange request status only when payments are in correct statuses #paymentStatuses"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : baseUser,
+                party        : aParty([owner: aClient(userRepository)], partyRepository),
+                amount       : 44.44,
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
+        ], expenseRepository)
+
+        paymentStatuses.forEach {
+            aPayment([expense: anExpense, payment_status: it, user: aClient(userRepository)], paymentRepository)
+        }
+
+        and:
+        def deleteExpenseMutation = """
+            changeExpenseStatus(
+                updateExpenseStatusInput: {
+                    id: ${anExpense.id},
+                    expenseStatus: IN_PROGRESS_PAYING
+                }
+            ) { id }
+        """
+
+        when:
+        def response = postMutation(deleteExpenseMutation, null, !shouldChange)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+
+        then:
+        if (shouldChange) {
+            assert actualExpense.expenseStatus == ExpenseStatus.IN_PROGRESS_PAYING
+        } else {
+            assert actualExpense.expenseStatus == ExpenseStatus.IN_PROGRESS_REQUESTING
+            assert response[0].errorType == 'ValidationError'
+            assert response[0].message.contains('Payment status was not valid, status is')
+        }
+        where:
+        paymentStatuses                                                           | shouldChange
+        [PaymentStatus.PAID, PaymentStatus.PAID, PaymentStatus.DECLINED]          | false
+        [PaymentStatus.ACCEPTED, PaymentStatus.ACCEPTED, PaymentStatus.DECLINED]  | true
+        [PaymentStatus.CONFIRMED, PaymentStatus.ACCEPTED, PaymentStatus.DECLINED] | false
+        [PaymentStatus.DECLINED, PaymentStatus.DECLINED, PaymentStatus.DECLINED]  | true
+    }
 }

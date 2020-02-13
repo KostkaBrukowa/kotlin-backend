@@ -60,16 +60,18 @@ class BaseIntegrationSpec extends Specification {
         setHeaders(["Authorization": "Bearer " + jwtClient.createJWTToken(baseUserId.toString())])
     }
 
-    protected def postQuery(String query, String queryName, Boolean errorExpected = false) {
+    protected def postQuery(String query, String queryName = null, Boolean errorExpected = false) {
         def queryString = "query { ${query} }"
+        def name = queryName != null ? queryName : query.tokenize('(').first().trim()
 
-        return postToGraphQL(queryString, queryName, errorExpected)
+        return postToGraphQL(queryString, name, errorExpected)
     }
 
-    protected def postMutation(String mutation, String mutationName, Boolean errorExpected = false) {
+    protected def postMutation(String mutation, String mutationName = null, Boolean errorExpected = false) {
         def mutationString = "mutation { ${mutation} }"
+        def name = mutationName != null ? mutationName : mutation.tokenize('(').first()
 
-        return postToGraphQL(mutationString, mutationName, errorExpected)
+        return postToGraphQL(mutationString, name, errorExpected)
     }
 
     private def postToGraphQL(String query, String queryName, Boolean errorExpected = false) {

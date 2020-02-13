@@ -35,8 +35,8 @@ class PgSqlPartyRequestRepository(
         return persistentPartyRequestRepository.findByUserIdAndPartyId(userId, partyId)?.toDomainWithRelations()
     }
 
-    override fun findByIdWithUser(partyRequestId: Long): PartyRequest =
-            persistentPartyRequestRepository.getOne(partyRequestId).toDomainWithRelations()
+    override fun findByIdWithUser(partyRequestId: Long): PartyRequest? =
+            persistentPartyRequestRepository.findById(partyRequestId).toNullable()?.toDomainWithRelations()
 
     override fun updateStatus(partyRequest: PartyRequest): Boolean {
         persistentPartyRequestRepository.updateStatus(partyRequest.id, partyRequest.status)

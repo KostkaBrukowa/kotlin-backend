@@ -11,5 +11,7 @@ interface UserRepository {
 
     fun findUsersWithPartyRequests(usersIds: Set<Long>): List<User>
 
+    fun findUsersWithExpenses(usersIds: Set<Long>): List<User>
+
     fun findUsersById(usersIds: List<Long>): List<User>
 }
