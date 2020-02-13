@@ -1,10 +1,18 @@
 package com.example.graphql.domain.expense
 
 import com.example.graphql.domain.party.Party
+import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.party.PartyService
+import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentService
+import com.example.graphql.domain.payment.PaymentStatus
 import com.example.graphql.domain.user.User
+import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.resolvers.expense.NewExpenseInput
+import com.example.graphql.resolvers.expense.UpdateExpenseAmountInput
+import com.example.graphql.resolvers.expense.UpdateExpenseInput
+import com.example.graphql.resolvers.expense.UpdateExpenseStatusInput
+import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import com.example.graphql.schema.exceptions.handlers.SimpleValidationException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
@@ -13,9 +21,28 @@ import org.springframework.stereotype.Component
 class ExpenseService(
         private val expenseRepository: ExpenseRepository,
         private val partyService: PartyService,
-        private val paymentService: PaymentService
+        private val paymentService: PaymentService,
+        private val userRepository: UserRepository,
+        private val partyRepository: PartyRepository
 ) {
+    // GET
+    fun findExpenseById(expenseId: Long, currentUserId: Long): Expense? {
+        return expenseRepository.findExpenseById(expenseId)
+    }
 
+    fun getExpensesForUser(userId: Long, currentUserId: Long): List<Expense> {
+        if (userId != currentUserId) throw UnauthorisedException()
+
+        return userRepository.findUsersWithExpenses(setOf(userId)).firstOrNull()?.expenses
+                ?: throw EntityNotFoundException("user")
+    }
+
+    fun getExpensesForParty(partyId: Long, currentUserId: Long): List<Expense> {
+        return partyRepository.findPartiesWithExpenses(setOf(partyId)).firstOrNull()?.expenses
+                ?: throw EntityNotFoundException("party")
+    }
+
+    // CREATE
     fun createExpense(expenseInput: NewExpenseInput, currentUserId: Long): Expense {
         val expenseParty = partyService.findPartiesWithParticipants(setOf(expenseInput.partyId)).firstOrNull()
                 ?: throw PartyNotFoundException()
@@ -31,6 +58,96 @@ class ExpenseService(
         return newExpense
     }
 
+    // UPDATE
+    fun updateExpense(updateExpenseInput: UpdateExpenseInput, currentUserId: Long): Expense {
+        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseInput.id)
+                ?: throw EntityNotFoundException("expense")
+
+        requireExpenseOwner(expenseToUpdate, currentUserId)
+
+        val updatedExpense = expenseToUpdate.copy(
+                description = updateExpenseInput.description,
+                expenseDate = updateExpenseInput.expenseDate
+        )
+
+        expenseRepository.updateExpense(updatedExpense)
+
+        return updatedExpense
+    }
+
+    fun updateExpenseAmount(updateExpenseAmountInput: UpdateExpenseAmountInput, currentUserId: Long): Expense {
+        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseAmountInput.id)
+                ?: throw EntityNotFoundException("expense")
+
+        requireExpenseOwner(expenseToUpdate, currentUserId)
+        requireExpenseStatuses(expenseToUpdate, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
+
+        val updatedExpense = expenseToUpdate.copy(amount = updateExpenseAmountInput.amount)
+
+        expenseRepository.updateExpense(updatedExpense)
+
+//        paymentService.resetPaymentsStatus(updatedExpense.id, PaymentStatus.IN_PROGRESS)
+
+        return updatedExpense
+    }
+
+    fun updateExpenseStatus(updateExpenseStatusInput: UpdateExpenseStatusInput, currentUserId: Long): Expense {
+        val expenseToUpdate = expenseRepository.findExpenseWithPayments(updateExpenseStatusInput.id)
+                ?: throw EntityNotFoundException("expense")
+
+        requireExpenseOwner(expenseToUpdate, currentUserId)
+        requireExpenseStatusForUpdate(expenseToUpdate, updateExpenseStatusInput.expenseStatus)
+
+        val updatedExpense = expenseToUpdate.copy(expenseStatus = updateExpenseStatusInput.expenseStatus)
+
+        expenseRepository.updateExpense(updatedExpense)
+
+        return updatedExpense
+    }
+
+    private fun requireExpenseStatusForUpdate(expense: Expense, statusToBeChangedTo: ExpenseStatus) {
+        when (statusToBeChangedTo) {
+            ExpenseStatus.IN_PROGRESS_REQUESTING -> {
+                requireExpenseStatuses(expense, listOf(ExpenseStatus.DECLINED))
+            }
+            ExpenseStatus.IN_PROGRESS_PAYING -> {
+                requireExpenseStatuses(expense, listOf(ExpenseStatus.DECLINED, ExpenseStatus.IN_PROGRESS_REQUESTING))
+                requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.ACCEPTED, PaymentStatus.DECLINED))
+            }
+            ExpenseStatus.DECLINED -> {
+                requireExpenseStatuses(expense, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
+                requirePaymentsStatuses(expense.payments, listOf(
+                        PaymentStatus.IN_PROGRESS,
+                        PaymentStatus.ACCEPTED,
+                        PaymentStatus.DECLINED
+                ))
+            }
+            ExpenseStatus.RESOLVED -> {
+                requireExpenseStatuses(expense, listOf(ExpenseStatus.IN_PROGRESS_PAYING))
+                requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.CONFIRMED, PaymentStatus.DECLINED))
+            }
+        }
+    }
+
+    private fun requirePaymentsStatuses(payments: List<Payment>, availablePaymentStatuses: List<PaymentStatus>) {
+        payments.forEach {
+            if (!availablePaymentStatuses.contains(it.status)) throw PaymentStatusNotValid(it.status)
+        }
+    }
+
+    // DELETE
+    fun deleteExpense(expenseId: Long, currentUserId: Long): Boolean {
+        val expenseToDelete = expenseRepository.findExpenseById(expenseId)
+                ?: throw EntityNotFoundException("expense")
+
+        requireExpenseOwner(expenseToDelete, currentUserId)
+        requireExpenseStatuses(expenseToDelete, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
+
+        expenseRepository.removeExpense(expenseToDelete)
+
+        return true
+    }
+
     private fun requirePartyParticipantsIncludeExpenseParticipants(
             expenseParticipants: Set<Long>,
             expenseParty: Party,
@@ -41,6 +158,17 @@ class ExpenseService(
         if ((expenseParticipants - partyParticipants).isNotEmpty()) throw ExpenseParticipantNotInPartyException()
         if (!partyParticipants.contains(currentUserId)) throw UnauthorisedException()
     }
+
+    private fun requireExpenseOwner(expense: Expense, currentUserId: Long) {
+        if (expense.user == null) throw InternalError("Expense was not entirely fetched")
+        if (expense.user.id != currentUserId) throw UnauthorisedException()
+    }
+
+    private fun requireExpenseStatuses(expenseToUpdate: Expense, statuses: List<ExpenseStatus>) {
+        if (expenseToUpdate.expenseStatus != ExpenseStatus.IN_PROGRESS_REQUESTING)
+            throw ExpenseStatusNotValid(expenseToUpdate.expenseStatus)
+    }
+
 }
 
 fun NewExpenseInput.toDomain(userId: Long) = Expense(
@@ -53,3 +181,5 @@ fun NewExpenseInput.toDomain(userId: Long) = Expense(
 
 class PartyNotFoundException : SimpleValidationException("Party with such id was not found")
 class ExpenseParticipantNotInPartyException : SimpleValidationException("Not all users were party participants")
+class ExpenseStatusNotValid(status: ExpenseStatus) : SimpleValidationException("Expense status was not valid, status is $status")
+class PaymentStatusNotValid(status: PaymentStatus) : SimpleValidationException("Payment status was not valid, status is $status")

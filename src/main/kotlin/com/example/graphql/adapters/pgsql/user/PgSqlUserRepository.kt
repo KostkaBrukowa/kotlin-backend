@@ -24,6 +24,12 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
         }
     }
 
+    override fun findUsersWithExpenses(usersIds: Set<Long>): List<User> {
+        return userRepository.findUsersWithExpenses(usersIds).map {
+            it.toDomain().copy(expenses = it.expenses.map { expense -> expense.toDomain() })
+        }
+    }
+
     override fun findUsersById(usersIds: List<Long>): List<User> {
         return userRepository.findAllById(usersIds).map { it.toDomain() }
     }

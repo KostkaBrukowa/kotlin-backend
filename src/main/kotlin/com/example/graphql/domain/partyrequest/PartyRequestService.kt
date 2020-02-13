@@ -5,7 +5,6 @@ import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.party.PartyService
 import com.example.graphql.domain.party.requirePartyOwner
 import com.example.graphql.domain.user.User
-import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component

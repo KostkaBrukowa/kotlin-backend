@@ -281,15 +281,15 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         def twoDaysBefore = ZonedDateTime.now().minusDays(1)
         def aParty = aParty([owner: baseUser, participants: [baseUser]], partyRepository)
         def anExpense = anExpense([
-                user       : aClient(userRepository),
-                party      : aParty(partyRepository),
+                user       : baseUser,
+                party      : aParty,
                 expenseDate: ZonedDateTime.now().minusDays(1),
                 description: "description before update"
         ], expenseRepository)
 
         and:
         def updateExpenseMutation = """
-            createExpense(
+            updateExpense(
                 updateExpenseInput: {
                     id: ${anExpense.id}
                     expenseDate: "${twoDaysBefore}"
@@ -299,7 +299,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        String newExpenseId = postMutation(updateExpenseMutation, "createExpense").id
+        String newExpenseId = postMutation(updateExpenseMutation, "updateExpense").id
 
         and:
         def actualExpense = expenseRepository.findById(anExpense.id).get()
@@ -339,7 +339,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        String newExpenseId = postMutation(createExpenseMutation, "createExpense").id
+        String newExpenseId = postMutation(createExpenseMutation, "updateExpenseAmount").id
 
         and:
         def actualExpense = expenseRepository.findById(newExpenseId.toLong()).get()
@@ -349,7 +349,40 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         actualExpense.id == newExpenseId.toLong()
         actualExpense.amount == 142.44f
         actualPayments.size() == 3
-        actualPayments.every { it.payment_status == PaymentStatus.IN_PROGRESS }
+        actualPayments.every { it.paymentStatus == PaymentStatus.IN_PROGRESS }
+    }
+
+    // TODO REMOVE IGNORE WHEN PAYMENTS ARE DONE
+    @Ignore
+    def "Should remove all payments when expense is deleted"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : aClient(userRepository),
+                party        : aParty(partyRepository),
+                amount       : 44.44,
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
+        ], expenseRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+
+
+        and:
+        def deleteExpenseMutation = """deleteExpense(expenseId: ${anExpense.id})"""
+
+        when:
+        postMutation(deleteExpenseMutation)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id)
+        def actualPayments = paymentRepository.findAllByExpenseId(anExpense.id)
+
+        then:
+        actualExpense.empty
+        actualPayments.empty
     }
 
     @Unroll
@@ -359,11 +392,10 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: aClient(userRepository)], partyRepository),
                 amount       : 44.44,
                 expenseStatus: expenseStatus
-
         ], expenseRepository)
 
         and:
@@ -387,7 +419,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
             assert actualExpense.amount == 142.44f
         } else {
             assert response[0].errorType == 'ValidationError'
-            assert response[0].message == 'Could not update the expense amount because of expense status'
+            assert response[0].message.contains("Expense status was not valid, status is ${expenseStatus}")
         }
 
         where:
@@ -398,21 +430,23 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         ExpenseStatus.RESOLVED               | false
     }
 
+    @Unroll
     def "Should delete #shouldDelete existing expense when expense status is is #expenseStatus"() {
         given:
         authenticate()
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: baseUser], partyRepository),
                 amount       : 44.44,
                 expenseStatus: expenseStatus
 
         ], expenseRepository)
 
         and:
-        def deleteExpenseMutation = """ deleteExpense(expenseId: ${anExpense.id})"""
+        def deleteExpenseMutation = """deleteExpense(expenseId: ${anExpense.id})"""
+
         when:
         def response = postMutation(deleteExpenseMutation, "deleteExpense", !shouldDelete)
 
@@ -425,7 +459,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         } else {
             assert !actualExpense.empty
             assert response[0].errorType == 'ValidationError'
-            assert response[0].message == 'Could not update the expense amount because of expense status'
+            assert response[0].message.contains("Expense status was not valid, status is ${expenseStatus}")
         }
 
         where:
@@ -443,19 +477,28 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: aClient(userRepository)], partyRepository),
                 amount       : 44.44,
-                expenseStatus: ExpenseStatus.IN_PROGRESS_PAYING
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
         ], expenseRepository)
 
-        paymentStatuses.forEach { aPayment([expense: anExpense, payment_status: it], paymentRepository) }
+        paymentStatuses.forEach {
+            aPayment([expense: anExpense, payment_status: it, user: aClient(userRepository)], paymentRepository)
+        }
 
         and:
-        def deleteExpenseMutation = """ changeExpenseStatus(expenseId: "IN_PROGRESS_PAYING")"""
+        def deleteExpenseMutation = """
+            changeExpenseStatus(
+                updateExpenseStatusInput: {
+                    id: ${anExpense.id},
+                    expenseStatus: IN_PROGRESS_PAYING
+                }
+            ) { id }
+        """
 
         when:
-        def response = postMutation(deleteExpenseMutation, "deleteExpense", !shouldChange)
+        def response = postMutation(deleteExpenseMutation, null, !shouldChange)
 
         and:
         def actualExpense = expenseRepository.findById(anExpense.id).get()
@@ -466,7 +509,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         } else {
             assert actualExpense.expenseStatus == ExpenseStatus.IN_PROGRESS_REQUESTING
             assert response[0].errorType == 'ValidationError'
-            assert response[0].message == 'Could not update the expense amount because of one of the payment status'
+            assert response[0].message.contains('Payment status was not valid, status is')
         }
         where:
         paymentStatuses                                                           | shouldChange

@@ -1,7 +1,5 @@
 package com.example.graphql.resolvers.user
 
-import com.example.graphql.domain.expense.Expense
-import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.utils.GQLResponseType
@@ -24,9 +22,11 @@ data class UserType(
 
 //    lateinit var userJoinedParties: List<PartyRequestType>
 
-    fun expenses(): List<Expense> = emptyList()
+//    lateinit var userPayments: List<PartyRequestType>
 
-    fun messageGroups(): List<MessageGroup> = emptyList()
+//    fun expenses(): List<ExpenseType> = emptyList()
+
+//    fun messageGroups(): List<MessageGroup> = emptyList()
 }
 
 fun User.toResponse() = UserType(

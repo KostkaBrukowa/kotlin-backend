@@ -13,7 +13,7 @@ class PersistentPaymentTestBuilder {
 
     private static def defaults = [
             id             : 0,
-            amount         : 'testname',
+            amount         : 42.11,
             confirmImageUrl: null,
             payment_status : PaymentStatus.IN_PROGRESS,
             expense        : null,

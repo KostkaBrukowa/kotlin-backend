@@ -39,6 +39,12 @@ class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepositor
         }
     }
 
+    override fun findPartiesWithExpenses(partiesIds: Set<Long>): List<Party> {
+        return partyRepository.findPartiesWithExpenses(partiesIds).map {
+            it.toDomain().copy(expenses = it.expenses.map { expense -> expense.toDomain() })
+        }
+    }
+
     override fun removeParticipant(partyId: Long, participantId: Long) {
         partyRepository.removeParticipant(partyId, participantId)
     }

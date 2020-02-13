@@ -16,16 +16,24 @@ data class PersistentPayment(
         @Column(name = "confirm_image_url")
         val confirmImageUrl: String?,
 
-
         @Enumerated(EnumType.STRING)
         @Column(name = "payment_status")
-        val payment_status: PaymentStatus,
+        val paymentStatus: PaymentStatus,
+
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "expense_id", nullable = false)
-        val expense: PersistentExpense?,
+        val expense: PersistentExpense? = null,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
-        val user: PersistentUser?
-)
+        val user: PersistentUser? = null
+) {
+    fun toDomain() = Payment(
+            id = this.id,
+            amount = this.amount,
+            confirmImageUrl = this.confirmImageUrl,
+            status = this.paymentStatus
+    )
+}
+

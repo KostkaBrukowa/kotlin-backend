@@ -1,9 +1,6 @@
 package com.example.graphql.resolvers.party
 
-import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyService
-import com.example.graphql.domain.partyrequest.PartyRequestService
-import com.example.graphql.domain.user.UserService
 import com.example.graphql.schema.directives.Authenticated
 import com.example.graphql.schema.directives.Roles
 import com.expediagroup.graphql.spring.operations.Query

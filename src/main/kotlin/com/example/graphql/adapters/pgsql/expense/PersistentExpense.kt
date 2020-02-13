@@ -35,7 +35,7 @@ data class PersistentExpense(
         @JoinColumn(name = "party_id", nullable = false)
         val party: PersistentParty?,
 
-        @OneToMany(mappedBy = "expense")
+        @OneToMany(mappedBy = "expense", cascade = [CascadeType.REMOVE])
         val payments: List<PersistentPayment> = emptyList()
 ) {
 
