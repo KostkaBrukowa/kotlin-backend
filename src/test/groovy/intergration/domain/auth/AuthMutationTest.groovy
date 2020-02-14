@@ -43,15 +43,14 @@ class AuthMutationTest extends BaseIntegrationSpec {
         def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.REFRESH_TOKEN, restClient))
 
         if (loginCorrect) {
-            accessToken.subject == userResponse.id
-            refreshToken.subject == userResponse.id
+            assert accessToken.subject == userResponse.id
+            assert refreshToken.subject == userResponse.id
         } else {
-            accessToken == null
-            refreshToken == null
+            assert accessToken == null
+            assert refreshToken == null
         }
 
         where:
-
         loginMutation                                                               | loginCorrect
         'logIn(input: {email: "a@gmail.com", password: "correct password"}) { id }' | true
         'logIn(input: {email: "a@gmail.com", password: "wrong password"}) { id }'   | false

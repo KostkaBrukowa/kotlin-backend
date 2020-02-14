@@ -7,11 +7,11 @@ data class Payment(
         val id: Long = 0,
         val amount: Float?,
         val confirmImageUrl: String?,
+        val status: PaymentStatus = PaymentStatus.IN_PROGRESS,
 
 
         val expense: Expense? = null,
-        val user: User? = null,
-        val status: PaymentStatus = PaymentStatus.IN_PROGRESS
+        val user: User? = null
 )
 
 enum class PaymentStatus {

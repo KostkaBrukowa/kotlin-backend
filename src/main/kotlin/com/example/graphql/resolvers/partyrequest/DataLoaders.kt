@@ -32,7 +32,7 @@ class PartyRequestReceiverDataFetcher : DataFetcher<PartyRequestType, UserType>(
 
 @Component("PartyRequestPartyDataFetcher")
 @Scope("prototype")
-class PartyRequestPartyDataFetcher : DataFetcher<PartyRequestType, UserType>(
+class PartyRequestPartyDataFetcher : DataFetcher<PartyRequestType, PartyType>(
         PARTY_REQUEST_PARTIES_LOADER_NAME
 )
 

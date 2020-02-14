@@ -53,7 +53,7 @@ class ExpenseService(
 
         val newExpense = expenseRepository.saveNewExpense(expenseInput.toDomain(currentUserId))
 
-//        paymentService.createPaymentsForExpense(newExpense, expenseParticipants) // TODO uncomment when payment service is done
+        paymentService.createPaymentsForExpense(newExpense, expenseParticipants) // TODO uncomment when payment service is done
 
         return newExpense
     }
@@ -86,7 +86,7 @@ class ExpenseService(
 
         expenseRepository.updateExpense(updatedExpense)
 
-//        paymentService.resetPaymentsStatus(updatedExpense.id, PaymentStatus.IN_PROGRESS)
+        paymentService.resetPaymentsStatuses(updatedExpense.id)
 
         return updatedExpense
     }
@@ -159,13 +159,8 @@ class ExpenseService(
         if (!partyParticipants.contains(currentUserId)) throw UnauthorisedException()
     }
 
-    private fun requireExpenseOwner(expense: Expense, currentUserId: Long) {
-        if (expense.user == null) throw InternalError("Expense was not entirely fetched")
-        if (expense.user.id != currentUserId) throw UnauthorisedException()
-    }
-
     private fun requireExpenseStatuses(expenseToUpdate: Expense, statuses: List<ExpenseStatus>) {
-        if (expenseToUpdate.expenseStatus != ExpenseStatus.IN_PROGRESS_REQUESTING)
+        if (!statuses.contains(expenseToUpdate.expenseStatus))
             throw ExpenseStatusNotValid(expenseToUpdate.expenseStatus)
     }
 
