@@ -34,9 +34,8 @@ class PaymentMutationTest extends BaseIntegrationSpec {
 
         and:
         def aParty = aParty([owner: baseUser], partyRepository)
-        def aExpense = anExpense([party: aParty(partyRepository), user: aClient(userRepository)], expenseRepository)
+        def aExpense = anExpense([party: aParty, user: aClient(userRepository)], expenseRepository)
         def payment = aPayment([user: baseUser, expense: aExpense, status: statusFrom], paymentRepository)
-
 
         and:
         def updatePaymentStatusMutation = """
@@ -49,7 +48,7 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        def response = postMutation(updatePaymentStatusMutation)
+        def response = postMutation(updatePaymentStatusMutation, null, !shouldChange)
 
         def actualExpense = paymentRepository.findById(payment.id).get()
 
@@ -61,9 +60,9 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         }
 
         where:
-        statusFrom                | statusTo                | shouldChange
-        PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED  | true
-        PaymentStatus.IN_PROGRESS | PaymentStatus.CONFIRMED | false
+        statusFrom                | statusTo               | shouldChange
+        PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED | true
+        PaymentStatus.IN_PROGRESS | PaymentStatus.PAID     | false
     }
 
     @Unroll
@@ -74,7 +73,7 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         and:
         def theExpenseOwner = expenseOwner == 'loggedUser' ? baseUser : aClient(userRepository)
         def aParty = aParty([owner: baseUser], partyRepository)
-        def aExpense = anExpense([party: aParty(partyRepository), user: theExpenseOwner], expenseRepository)
+        def aExpense = anExpense([party: aParty, user: theExpenseOwner], expenseRepository)
         def payment = aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.PAID], paymentRepository)
 
         and:
@@ -88,7 +87,7 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        def response = postMutation(updatePaymentStatusMutation)
+        def response = postMutation(updatePaymentStatusMutation, null, !shouldChange)
 
         and:
         def actualExpense = paymentRepository.findById(payment.id).get()
@@ -97,7 +96,7 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         if (shouldChange) {
             assert actualExpense.paymentStatus == PaymentStatus.CONFIRMED
         } else {
-            assert response[0].errorType == 'ValidationError'
+            assert response[0].errorType == 'DataFetchingException'
             assert response[0].message.contains('User is not authorised to perform this action')
         }
 

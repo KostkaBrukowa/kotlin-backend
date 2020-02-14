@@ -32,7 +32,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
 
         and:
         def aParty = aParty([owner: baseUser], partyRepository)
-        def aExpense = anExpense([party: aParty(partyRepository), user: aClient(userRepository)], expenseRepository)
+        def aExpense = anExpense([party: aParty, user: aClient(userRepository)], expenseRepository)
         def payment = aPayment([
                 user           : baseUser,
                 expense        : aExpense,
@@ -57,10 +57,10 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         def response = postQuery(getSinglePaymentQuery)
 
         then:
-        response.id.toLong() == aExpense.id
-        response.amount.toLong() == 42.42
+        response.id.toLong() == payment.id
+        response.amount.toFloat() == 42.42f
         response.confirmImageUrl == 'www.google.com'
-        response.status == PaymentStatus.PAID
+        response.status == 'PAID'
         response.paymentPayer.id.toLong() == baseUser.id
         response.paymentExpense.id.toLong() == aExpense.id
     }
@@ -71,7 +71,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
 
         and:
         def aParty = aParty([owner: baseUser], partyRepository)
-        def aExpense = anExpense([party: aParty(partyRepository), user: aClient(userRepository)], expenseRepository)
+        def aExpense = anExpense([party: aParty, user: aClient(userRepository)], expenseRepository)
         def payment1 = aPayment([user: baseUser, expense: aExpense], paymentRepository)
         def payment2 = aPayment([user: baseUser, expense: aExpense], paymentRepository)
         def payment3 = aPayment([user: baseUser, expense: aExpense], paymentRepository)

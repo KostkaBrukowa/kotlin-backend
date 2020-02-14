@@ -1,7 +1,9 @@
 package com.example.graphql.domain.payment
 
 import com.example.graphql.domain.expense.PersistentExpense
+import com.example.graphql.domain.expense.toPersistentEntity
 import com.example.graphql.domain.user.PersistentUser
+import com.example.graphql.domain.user.toPersistentEntity
 import javax.persistence.*
 
 @Table(name = "payments")
@@ -37,3 +39,11 @@ data class PersistentPayment(
     )
 }
 
+fun Payment.toPersistentEntity() = PersistentPayment(
+        id = this.id,
+        amount = this.amount,
+        confirmImageUrl = this.confirmImageUrl,
+        paymentStatus = this.status,
+        expense = this.expense?.toPersistentEntity(),
+        user = this.user?.toPersistentEntity()
+)

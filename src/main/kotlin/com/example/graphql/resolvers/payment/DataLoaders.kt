@@ -13,11 +13,11 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 
-const val PAYMENT_PAYER_LOADER_NAME = "PARTY_REQUEST_PARTIES_LOADER_NAME"
-const val PAYMENT_EXPENSE_LOADER_NAME = "PARTY_REQUEST_RECEIVERS_LOADER_NAME"
+const val PAYMENT_PAYER_LOADER_NAME = "PAYMENT_PAYER_LOADER_NAME"
+const val PAYMENT_EXPENSE_LOADER_NAME = "PAYMENT_EXPENSE_LOADER_NAME"
 
 @Component
-class PartyRequestDataLoadersBuilder(private val paymentDataLoaderService: PaymentDataLoaderService) {
+class PaymentDataLoadersBuilder(private val paymentDataLoaderService: PaymentDataLoaderService) {
 
     fun getPayersDataLoader(): DataLoader<String, UserType> {
         return dataLoader { ids -> paymentDataLoaderService.paymentToUserDataLoaderMap(ids) }
@@ -28,15 +28,15 @@ class PartyRequestDataLoadersBuilder(private val paymentDataLoaderService: Payme
     }
 }
 
-@Component("PartyRequestReceiverDataFetcher")
+@Component("PaymentExpenseDataFetcher")
 @Scope("prototype")
-class PartyRequestReceiverDataFetcher : DataFetcher<PaymentType, UserType>(
+class PaymentExpenseDataFetcher : DataFetcher<PaymentType, ExpenseType>(
         PAYMENT_EXPENSE_LOADER_NAME
 )
 
-@Component("PartyRequestPartyDataFetcher")
+@Component("PaymentPayerDataFetcher")
 @Scope("prototype")
-class PartyRequestPartyDataFetcher : DataFetcher<PaymentType, UserType>(
+class PaymentPayerDataFetcher : DataFetcher<PaymentType, UserType>(
         PAYMENT_PAYER_LOADER_NAME
 )
 

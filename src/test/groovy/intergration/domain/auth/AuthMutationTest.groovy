@@ -43,8 +43,8 @@ class AuthMutationTest extends BaseIntegrationSpec {
         def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.REFRESH_TOKEN, restClient))
 
         if (loginCorrect) {
-            assert accessToken.subject == userResponse.id
-            assert refreshToken.subject == userResponse.id
+            assert accessToken.subject == userResponse.id.toString()
+            assert refreshToken.subject == userResponse.id.toString()
         } else {
             assert accessToken == null
             assert refreshToken == null

@@ -53,7 +53,7 @@ class ExpenseService(
 
         val newExpense = expenseRepository.saveNewExpense(expenseInput.toDomain(currentUserId))
 
-        paymentService.createPaymentsForExpense(newExpense, expenseParticipants) // TODO uncomment when payment service is done
+        paymentService.createPaymentsForExpense(newExpense, expenseParticipants)
 
         return newExpense
     }

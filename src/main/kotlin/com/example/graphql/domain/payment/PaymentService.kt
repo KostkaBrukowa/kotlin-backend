@@ -40,7 +40,7 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
 
     // UPDATE
     fun updatePaymentStatus(updatePaymentStatusInput: UpdatePaymentStatusInput, currentUserId: Long): Payment {
-        val payment = paymentRepository.findPaymentWithOwner(updatePaymentStatusInput.paymentId)
+        val payment = paymentRepository.findPaymentWithOwnerAndExpenseOwner(updatePaymentStatusInput.paymentId)
                 ?: throw EntityNotFoundException("payment")
 
         if (updatePaymentStatusInput.status == PaymentStatus.CONFIRMED) {
@@ -53,7 +53,7 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
 
         val updatedPayment = payment.copy(status = updatePaymentStatusInput.status)
 
-        paymentRepository.updatePaymentStatus(updatePaymentStatusInput.status)
+        paymentRepository.updatePaymentStatus(payment.id, updatePaymentStatusInput.status)
 
         return updatedPayment
     }
@@ -86,7 +86,7 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
     }
 
     fun resetPaymentsStatuses(expenseId: Long) {
-        paymentRepository.changeExpensePaymentsStatuses(PaymentStatus.IN_PROGRESS)
+        paymentRepository.changeExpensePaymentsStatuses(expenseId, PaymentStatus.IN_PROGRESS)
     }
 
     // DELETE

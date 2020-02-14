@@ -5,19 +5,21 @@ import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.utils.GQLResponseType
+import com.expediagroup.graphql.annotations.GraphQLID
 
 
 data class PaymentType(
 
+        @GraphQLID
         override val id: String,
         val amount: Float?,
         val confirmImageUrl: String?,
         val status: PaymentStatus = PaymentStatus.IN_PROGRESS
 ) : GQLResponseType {
 
-    lateinit var expense: Expense
+    lateinit var paymentExpense: Expense
 
-    lateinit var user: User
+    lateinit var paymentPayer: User
 }
 
 fun Payment.toResponse() = PaymentType(

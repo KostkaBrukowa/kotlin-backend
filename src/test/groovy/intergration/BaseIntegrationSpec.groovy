@@ -69,7 +69,7 @@ class BaseIntegrationSpec extends Specification {
 
     protected def postMutation(String mutation, String mutationName = null, Boolean errorExpected = false) {
         def mutationString = "mutation { ${mutation} }"
-        def name = mutationName != null ? mutationName : mutation.tokenize('(').first()
+        def name = mutationName != null ? mutationName : mutation.tokenize('(').first().trim()
 
         return postToGraphQL(mutationString, name, errorExpected)
     }
@@ -79,6 +79,10 @@ class BaseIntegrationSpec extends Specification {
                 path: "/graphql",
                 body: query
         ]).responseData
+
+        if (responseData.containsKey('status') && responseData.status == 500) {
+            log.error(new JsonBuilder(responseData).toPrettyString())
+        }
 
         if (errorExpected) {
             return responseData.errors

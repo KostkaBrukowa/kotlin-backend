@@ -9,6 +9,9 @@ import com.example.graphql.resolvers.party.PartyDataLoaderBuilder
 import com.example.graphql.resolvers.partyrequest.PARTY_REQUEST_PARTIES_LOADER_NAME
 import com.example.graphql.resolvers.partyrequest.PARTY_REQUEST_RECEIVERS_LOADER_NAME
 import com.example.graphql.resolvers.partyrequest.PartyRequestDataLoadersBuilder
+import com.example.graphql.resolvers.payment.PAYMENT_EXPENSE_LOADER_NAME
+import com.example.graphql.resolvers.payment.PAYMENT_PAYER_LOADER_NAME
+import com.example.graphql.resolvers.payment.PaymentDataLoadersBuilder
 import com.example.graphql.resolvers.user.USER_PARTY_REQUEST_LOADER_NAME
 import com.example.graphql.resolvers.user.UserDataLoaderBuilder
 import com.expediagroup.graphql.spring.execution.DataLoaderRegistryFactory
@@ -22,7 +25,8 @@ class DataLoaderConfiguration(
         private val userDataLoaderBuilder: UserDataLoaderBuilder,
         private val partyDataLoaderBuilder: PartyDataLoaderBuilder,
         private val partyRequestDataLoadersBuilder: PartyRequestDataLoadersBuilder,
-        private val expenseDataLoaderBuilder: ExpenseDataLoaderBuilder
+        private val expenseDataLoaderBuilder: ExpenseDataLoaderBuilder,
+        private val paymentDataLoadersBuilder: PaymentDataLoadersBuilder
 ) {
 
     @Bean
@@ -38,6 +42,8 @@ class DataLoaderConfiguration(
                 registry.register(PARTY_REQUEST_RECEIVERS_LOADER_NAME, partyRequestDataLoadersBuilder.getReceiversDataLoader())
                 registry.register(EXPENSE_PAYER_LOADER_NAME, expenseDataLoaderBuilder.getPayerDataLoader())
                 registry.register(EXPENSE_PARTY_LOADER_NAME, expenseDataLoaderBuilder.getPartyDataLoader())
+                registry.register(PAYMENT_EXPENSE_LOADER_NAME, paymentDataLoadersBuilder.getExpensesDataLoader())
+                registry.register(PAYMENT_PAYER_LOADER_NAME, paymentDataLoadersBuilder.getPayersDataLoader())
 
                 return registry
             }

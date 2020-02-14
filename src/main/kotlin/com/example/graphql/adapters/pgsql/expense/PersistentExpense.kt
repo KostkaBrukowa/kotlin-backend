@@ -49,6 +49,7 @@ data class PersistentExpense(
 }
 
 fun Expense.toPersistentEntity() = PersistentExpense(
+        id = this.id,
         amount = this.amount,
         expenseDate = this.expenseDate,
         description = this.description,

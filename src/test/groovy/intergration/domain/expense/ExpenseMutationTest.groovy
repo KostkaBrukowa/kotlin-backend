@@ -307,25 +307,24 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         actualExpense.expenseDate == twoDaysBefore
     }
 
-    // TODO REMOVE IGNORE WHEN PAYMENTS ARE DONE
     def "Should update expense's amount with different mutation, and should mark all payments as in progress"() {
         given:
         authenticate()
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: baseUser], partyRepository),
                 amount       : 44.44,
                 expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
         ], expenseRepository)
-        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED], paymentRepository)
-        aPayment([expense: anExpense, status: PaymentStatus.DECLINED], paymentRepository)
-        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
 
 
         and:
-        def createExpenseMutation = """
+        def updateExpenseAmountMutation = """
             updateExpenseAmount(
                 updateExpenseAmountInput: {
                     id: ${anExpense.id}
@@ -335,14 +334,13 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        String newExpenseId = postMutation(createExpenseMutation, "updateExpenseAmount").id
+        postMutation(updateExpenseAmountMutation)
 
         and:
-        def actualExpense = expenseRepository.findById(newExpenseId.toLong()).get()
-        def actualPayments = paymentRepository.findAllByExpenseId(newExpenseId.toLong())
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+        def actualPayments = paymentRepository.findAllByExpenseId(anExpense.id)
 
         then:
-        actualExpense.id == newExpenseId.toLong()
         actualExpense.amount == 142.44f
         actualPayments.size() == 3
         actualPayments.every { it.paymentStatus == PaymentStatus.IN_PROGRESS }
@@ -354,14 +352,14 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: baseUser], partyRepository),
                 amount       : 44.44,
                 expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
         ], expenseRepository)
-        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED], paymentRepository)
-        aPayment([expense: anExpense, status: PaymentStatus.DECLINED], paymentRepository)
-        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
 
 
         and:
