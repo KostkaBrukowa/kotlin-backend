@@ -15,7 +15,7 @@ class PersistentPaymentTestBuilder {
             id             : 0,
             amount         : 42.11,
             confirmImageUrl: null,
-            payment_status : PaymentStatus.IN_PROGRESS,
+            status         : PaymentStatus.IN_PROGRESS,
             expense        : null,
             user           : null
     ]
@@ -30,7 +30,7 @@ class PersistentPaymentTestBuilder {
                 allArgs.id as Long,
                 allArgs.amount as Float,
                 allArgs.confirmImageUrl as String,
-                allArgs.payment_status as PaymentStatus,
+                allArgs.status as PaymentStatus,
                 allArgs.expense as PersistentExpense,
                 allArgs.user as PersistentUser
         )

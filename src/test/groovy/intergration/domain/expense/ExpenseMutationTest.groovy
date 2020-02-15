@@ -9,7 +9,6 @@ import com.example.graphql.domain.expense.ExpenseStatus
 import com.example.graphql.domain.payment.PaymentStatus
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Unroll
 
 import java.time.ZonedDateTime
@@ -86,8 +85,6 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         actualExpense.party.id == aParty.id
     }
 
-    @Ignore
-    // TODO REMOVE WHEN PAYMENTS ARE DONE
     def "There should be as many expense payments as there is expense participants"() {
         given:
         authenticate()
@@ -310,26 +307,24 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         actualExpense.expenseDate == twoDaysBefore
     }
 
-    // TODO REMOVE IGNORE WHEN PAYMENTS ARE DONE
-    @Ignore
     def "Should update expense's amount with different mutation, and should mark all payments as in progress"() {
         given:
         authenticate()
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: baseUser], partyRepository),
                 amount       : 44.44,
                 expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
         ], expenseRepository)
-        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
-        aPayment([expense: anExpense, payment_status: PaymentStatus.DECLINED], paymentRepository)
-        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
 
 
         and:
-        def createExpenseMutation = """
+        def updateExpenseAmountMutation = """
             updateExpenseAmount(
                 updateExpenseAmountInput: {
                     id: ${anExpense.id}
@@ -339,35 +334,32 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        String newExpenseId = postMutation(createExpenseMutation, "updateExpenseAmount").id
+        postMutation(updateExpenseAmountMutation)
 
         and:
-        def actualExpense = expenseRepository.findById(newExpenseId.toLong()).get()
-        def actualPayments = paymentRepository.findAllByExpenseId(newExpenseId.toLong())
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+        def actualPayments = paymentRepository.findAllByExpenseId(anExpense.id)
 
         then:
-        actualExpense.id == newExpenseId.toLong()
         actualExpense.amount == 142.44f
         actualPayments.size() == 3
         actualPayments.every { it.paymentStatus == PaymentStatus.IN_PROGRESS }
     }
 
-    // TODO REMOVE IGNORE WHEN PAYMENTS ARE DONE
-    @Ignore
     def "Should remove all payments when expense is deleted"() {
         given:
         authenticate()
 
         and:
         def anExpense = anExpense([
-                user         : aClient(userRepository),
-                party        : aParty(partyRepository),
+                user         : baseUser,
+                party        : aParty([owner: baseUser], partyRepository),
                 amount       : 44.44,
                 expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
         ], expenseRepository)
-        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
-        aPayment([expense: anExpense, payment_status: PaymentStatus.DECLINED], paymentRepository)
-        aPayment([expense: anExpense, payment_status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.DECLINED], paymentRepository)
+        aPayment([expense: anExpense, user: aClient(userRepository), status: PaymentStatus.ACCEPTED], paymentRepository)
 
 
         and:
@@ -484,7 +476,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         ], expenseRepository)
 
         paymentStatuses.forEach {
-            aPayment([expense: anExpense, payment_status: it, user: aClient(userRepository)], paymentRepository)
+            aPayment([expense: anExpense, status: it, user: aClient(userRepository)], paymentRepository)
         }
 
         and:

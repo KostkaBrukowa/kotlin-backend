@@ -9,8 +9,8 @@ import org.dataloader.DataLoader
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-const val EXPENSE_PARTY_LOADER_NAME = "EXPENSE_PARTY_LOADER_NAME"
-const val EXPENSE_PAYER_LOADER_NAME = "EXPENSE_PAYER_LOADER_NAME"
+const val EXPENSE_PARTY_LOADER_NAME = "ExpensePartyDataFetcher"
+const val EXPENSE_PAYER_LOADER_NAME = "ExpensePayerDataFetcher"
 
 @Component
 class ExpenseDataLoaderBuilder(private val expenseDataLoaderService: ExpenseDataLoaderService) {
@@ -24,14 +24,10 @@ class ExpenseDataLoaderBuilder(private val expenseDataLoaderService: ExpenseData
     }
 }
 
-@Component("ExpensePartyDataFetcher")
+@Component(EXPENSE_PARTY_LOADER_NAME)
 @Scope("prototype")
-class ExpensePartyDataFetcher : DataFetcher<ExpenseType, PartyType>(
-        EXPENSE_PARTY_LOADER_NAME
-)
+class ExpensePartyDataFetcher : DataFetcher(EXPENSE_PARTY_LOADER_NAME)
 
-@Component("ExpensePayerDataFetcher")
+@Component(EXPENSE_PAYER_LOADER_NAME)
 @Scope("prototype")
-class ExpensePayerDataFetcher : DataFetcher<PartyType, UserType>(
-        EXPENSE_PAYER_LOADER_NAME
-)
+class ExpensePayerDataFetcher : DataFetcher(EXPENSE_PAYER_LOADER_NAME)

@@ -5,4 +5,6 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import org.springframework.stereotype.Component
 
 @Component
-class UserMutation(private val userService: UserService) : Mutation {}
+class UserMutation(private val userService: UserService) : Mutation {
+
+}

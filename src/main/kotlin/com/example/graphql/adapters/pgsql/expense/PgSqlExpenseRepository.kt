@@ -6,10 +6,12 @@ import com.example.graphql.domain.expense.ExpenseRepository
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.expense.toPersistentEntity
 import org.springframework.stereotype.Component
+import javax.transaction.Transactional
 
 @Component
 class PgSqlExpenseRepository(private val expenseRepository: PersistentExpenseRepository) : ExpenseRepository {
 
+    @Transactional
     override fun saveNewExpense(newExpense: Expense): Expense =
             expenseRepository.save(newExpense.toPersistentEntity()).toDomainWithRelations()
 
