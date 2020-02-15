@@ -102,7 +102,31 @@ class ExpenseService(
 
         expenseRepository.updateExpense(updatedExpense)
 
+        if (updateExpenseStatusInput.expenseStatus == ExpenseStatus.IN_PROGRESS_PAYING) {
+            updateExpensePaymentsAmounts(updatedExpense)
+        }
+
         return updatedExpense
+    }
+
+    // DELETE
+    fun deleteExpense(expenseId: Long, currentUserId: Long): Boolean {
+        val expenseToDelete = expenseRepository.findExpenseById(expenseId)
+                ?: throw EntityNotFoundException("expense")
+
+        requireExpenseOwner(expenseToDelete, currentUserId)
+        requireExpenseStatuses(expenseToDelete, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
+
+        expenseRepository.removeExpense(expenseToDelete)
+
+        return true
+    }
+
+    private fun updateExpensePaymentsAmounts(updatedExpense: Expense) {
+        val acceptedPayments = updatedExpense.payments.filter { it.status == PaymentStatus.ACCEPTED }
+        val updatedAmount = updatedExpense.amount / (acceptedPayments.size + 1)
+
+        paymentService.updatePaymentsAmount(acceptedPayments, updatedAmount)
     }
 
     private fun requireExpenseStatusForUpdate(expense: Expense, statusToBeChangedTo: ExpenseStatus) {
@@ -111,7 +135,7 @@ class ExpenseService(
                 requireExpenseStatuses(expense, listOf(ExpenseStatus.DECLINED))
             }
             ExpenseStatus.IN_PROGRESS_PAYING -> {
-                requireExpenseStatuses(expense, listOf(ExpenseStatus.DECLINED, ExpenseStatus.IN_PROGRESS_REQUESTING))
+                requireExpenseStatuses(expense, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
                 requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.ACCEPTED, PaymentStatus.DECLINED))
             }
             ExpenseStatus.DECLINED -> {
@@ -133,19 +157,6 @@ class ExpenseService(
         payments.forEach {
             if (!availablePaymentStatuses.contains(it.status)) throw PaymentStatusNotValid(it.status)
         }
-    }
-
-    // DELETE
-    fun deleteExpense(expenseId: Long, currentUserId: Long): Boolean {
-        val expenseToDelete = expenseRepository.findExpenseById(expenseId)
-                ?: throw EntityNotFoundException("expense")
-
-        requireExpenseOwner(expenseToDelete, currentUserId)
-        requireExpenseStatuses(expenseToDelete, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
-
-        expenseRepository.removeExpense(expenseToDelete)
-
-        return true
     }
 
     private fun requirePartyParticipantsIncludeExpenseParticipants(

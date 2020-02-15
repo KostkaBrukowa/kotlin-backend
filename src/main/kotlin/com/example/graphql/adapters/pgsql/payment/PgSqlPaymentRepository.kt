@@ -40,6 +40,12 @@ class PgSqlPaymentRepository(private val paymentRepository: PersistentPaymentRep
     override fun updatePaymentStatus(paymentId: Long, status: PaymentStatus) {
         paymentRepository.updatePaymentStatus(paymentId, status)
     }
+
+    override fun updatePaymentsAmounts(updatedPayments: List<Payment>, amount: Float) {
+        if(updatedPayments.isNotEmpty()) {
+            paymentRepository.updatePaymentsAmounts(updatedPayments.map { it.id }, amount)
+        }
+    }
 }
 
 private fun PersistentPayment.toDomainWithRelations(): Payment =

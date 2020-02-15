@@ -47,7 +47,6 @@ class PaymentServiceTest extends Specification {
         statusFrom                | statusTo
         PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED
         PaymentStatus.IN_PROGRESS | PaymentStatus.DECLINED
-        PaymentStatus.PAID        | PaymentStatus.DECLINED
         PaymentStatus.PAID        | PaymentStatus.CONFIRMED
         PaymentStatus.ACCEPTED    | PaymentStatus.DECLINED
         PaymentStatus.ACCEPTED    | PaymentStatus.PAID
@@ -97,6 +96,7 @@ class PaymentServiceTest extends Specification {
         PaymentStatus.DECLINED    | PaymentStatus.IN_PROGRESS
         PaymentStatus.PAID        | PaymentStatus.ACCEPTED
         PaymentStatus.PAID        | PaymentStatus.IN_PROGRESS
+        PaymentStatus.PAID        | PaymentStatus.DECLINED
         PaymentStatus.CONFIRMED   | PaymentStatus.IN_PROGRESS
         PaymentStatus.CONFIRMED   | PaymentStatus.PAID
         PaymentStatus.CONFIRMED   | PaymentStatus.DECLINED
