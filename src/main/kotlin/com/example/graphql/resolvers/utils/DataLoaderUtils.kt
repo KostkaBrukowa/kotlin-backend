@@ -20,15 +20,15 @@ fun <T>dataLoader(
     return DataLoader.newMappedDataLoader(mapBatchLoader)
 }
 
-abstract class DataFetcher<Source : GQLResponseType, Result>(
+abstract class DataFetcher(
         private val loaderName: String
-) : DataFetcher<CompletableFuture<Result>> {
+) : DataFetcher<CompletableFuture<GQLResponseType>> {
 
-    override fun get(environment: DataFetchingEnvironment): CompletableFuture<Result> {
-        val id = environment.getSource<Source>().id
+    override fun get(environment: DataFetchingEnvironment): CompletableFuture<GQLResponseType> {
+        val id = environment.getSource<GQLResponseType>().id
 
         return environment
-                .getDataLoader<String, Result>(loaderName)
+                .getDataLoader<String, GQLResponseType>(loaderName)
                 .load(id)
     }
 }

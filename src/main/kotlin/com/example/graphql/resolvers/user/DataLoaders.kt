@@ -8,7 +8,7 @@ import org.dataloader.DataLoader
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-const val USER_PARTY_REQUEST_LOADER_NAME = "userPartyRequestLoader"
+const val USER_PARTY_REQUEST_LOADER_NAME = "UserPartyRequestsDataFetcher"
 
 @Component
 class UserDataLoaderBuilder(private val userDataLoaderService: UserDataLoaderService) {
@@ -18,8 +18,6 @@ class UserDataLoaderBuilder(private val userDataLoaderService: UserDataLoaderSer
     }
 }
 
-@Component("UserPartyRequestsDataFetcher")
-@Scope("prototype")
-class UserPartyRequestsDataFetcher : DataFetcher<UserType, List<PartyRequestType>>(
-        USER_PARTY_REQUEST_LOADER_NAME
-)
+@Component(USER_PARTY_REQUEST_LOADER_NAME)
+//@Scope("prototype")
+class UserPartyRequestsDataFetcher : DataFetcher(USER_PARTY_REQUEST_LOADER_NAME)

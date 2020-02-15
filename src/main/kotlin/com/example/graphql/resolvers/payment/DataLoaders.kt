@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 
-const val PAYMENT_PAYER_LOADER_NAME = "PAYMENT_PAYER_LOADER_NAME"
-const val PAYMENT_EXPENSE_LOADER_NAME = "PAYMENT_EXPENSE_LOADER_NAME"
+const val PAYMENT_PAYER_LOADER_NAME = "PaymentPayerDataFetcher"
+const val PAYMENT_EXPENSE_LOADER_NAME = "PaymentExpenseDataFetcher"
 
 @Component
 class PaymentDataLoadersBuilder(private val paymentDataLoaderService: PaymentDataLoaderService) {
@@ -28,15 +28,11 @@ class PaymentDataLoadersBuilder(private val paymentDataLoaderService: PaymentDat
     }
 }
 
-@Component("PaymentExpenseDataFetcher")
+@Component(PAYMENT_EXPENSE_LOADER_NAME)
 @Scope("prototype")
-class PaymentExpenseDataFetcher : DataFetcher<PaymentType, ExpenseType>(
-        PAYMENT_EXPENSE_LOADER_NAME
-)
+class PaymentExpenseDataFetcher : DataFetcher(PAYMENT_EXPENSE_LOADER_NAME)
 
-@Component("PaymentPayerDataFetcher")
+@Component(PAYMENT_PAYER_LOADER_NAME)
 @Scope("prototype")
-class PaymentPayerDataFetcher : DataFetcher<PaymentType, UserType>(
-        PAYMENT_PAYER_LOADER_NAME
-)
+class PaymentPayerDataFetcher : DataFetcher(PAYMENT_PAYER_LOADER_NAME)
 
