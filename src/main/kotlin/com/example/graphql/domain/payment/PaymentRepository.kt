@@ -11,4 +11,5 @@ interface PaymentRepository {
 
     fun changeExpensePaymentsStatuses(expenseId: Long, status: PaymentStatus)
     fun updatePaymentStatus(paymentId: Long, status: PaymentStatus)
+    fun updatePaymentsAmounts(updatedPayments: List<Payment>, amount: Float)
 }

@@ -30,4 +30,13 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
         WHERE id = :paymentId
     """)
     fun updatePaymentStatus(@Param("paymentId") paymentId: Long, @Param("status") status: PaymentStatus)
+
+    @Transactional
+    @Modifying
+    @Query("""
+        UPDATE PersistentPayment 
+        SET amount = :amount
+        WHERE id in :updatedPaymentsIds
+    """)
+    fun updatePaymentsAmounts(@Param("updatedPaymentsIds") updatedPaymentsIds: Iterable<Long>, @Param("amount") amount: Float)
 }

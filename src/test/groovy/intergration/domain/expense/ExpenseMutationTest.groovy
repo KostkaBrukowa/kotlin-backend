@@ -480,7 +480,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         }
 
         and:
-        def deleteExpenseMutation = """
+        def updateExpenseStatusMutation = """
             changeExpenseStatus(
                 updateExpenseStatusInput: {
                     id: ${anExpense.id},
@@ -490,7 +490,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         """
 
         when:
-        def response = postMutation(deleteExpenseMutation, null, !shouldChange)
+        def response = postMutation(updateExpenseStatusMutation, null, !shouldChange)
 
         and:
         def actualExpense = expenseRepository.findById(anExpense.id).get()
@@ -509,5 +509,43 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         [PaymentStatus.ACCEPTED, PaymentStatus.ACCEPTED, PaymentStatus.DECLINED]  | true
         [PaymentStatus.CONFIRMED, PaymentStatus.ACCEPTED, PaymentStatus.DECLINED] | false
         [PaymentStatus.DECLINED, PaymentStatus.DECLINED, PaymentStatus.DECLINED]  | true
+    }
+
+    def "Should calculate amounts for payments after change to confirmed status"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : baseUser,
+                party        : aParty([owner: aClient(userRepository)], partyRepository),
+                amount       : 100.0,
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
+        ], expenseRepository)
+
+        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED, user: aClient(userRepository), amount: null], paymentRepository)
+        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED, user: aClient(userRepository), amount: null], paymentRepository)
+        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED, user: aClient(userRepository), amount: null], paymentRepository)
+
+        and:
+        def changeExpenseStatusMutation = """
+            changeExpenseStatus(
+                updateExpenseStatusInput: {
+                    id: ${anExpense.id},
+                    expenseStatus: IN_PROGRESS_PAYING
+                }
+            ) { id }
+        """
+
+        when:
+        postMutation(changeExpenseStatusMutation)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+        def actualPayments = paymentRepository.findAllByExpenseId(anExpense.id)
+
+        then:
+        actualExpense.expenseStatus == ExpenseStatus.IN_PROGRESS_PAYING
+        actualPayments.every { it.amount == 25.0 }
     }
 }

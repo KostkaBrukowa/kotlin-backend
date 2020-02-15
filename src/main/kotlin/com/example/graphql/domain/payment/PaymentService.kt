@@ -58,6 +58,11 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
         return updatedPayment
     }
 
+    fun updatePaymentsAmount(updatedPayments: List<Payment>, amount: Float) {
+        paymentRepository.updatePaymentsAmounts(updatedPayments, amount)
+    }
+
+
     private fun requirePaymentOwner(payment: Payment, currentUserId: Long) {
         if (payment.user == null) throw InternalError("Payment was not entirely fetched")
         if (payment.user.id != currentUserId) throw UnauthorisedException()
@@ -69,7 +74,7 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
                 requirePaymentStatuses(statusTo, listOf(PaymentStatus.ACCEPTED, PaymentStatus.DECLINED))
             }
             PaymentStatus.PAID -> {
-                requirePaymentStatuses(statusTo, listOf(PaymentStatus.DECLINED, PaymentStatus.CONFIRMED))
+                requirePaymentStatuses(statusTo, listOf(PaymentStatus.CONFIRMED))
             }
             PaymentStatus.ACCEPTED -> {
                 requirePaymentStatuses(statusTo, listOf(PaymentStatus.DECLINED, PaymentStatus.PAID))
