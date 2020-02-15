@@ -3,6 +3,7 @@ package com.example.graphql.resolvers.expense
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseStatus
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
+import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
@@ -30,7 +31,7 @@ data class ExpenseType(
 
     lateinit var expenseParty: PartyRequestType
 
-//        lateinit var expensePayments: List<PaymentType>
+    lateinit var expensePayments: List<PaymentType>
 
 }
 

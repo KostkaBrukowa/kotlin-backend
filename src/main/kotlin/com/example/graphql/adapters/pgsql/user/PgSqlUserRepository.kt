@@ -30,6 +30,22 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
         }
     }
 
+    override fun findUsersWithPayments(usersIds: Set<Long>): List<User> {
+        val payments = userRepository.findUsersWithPayments(usersIds)
+
+        return payments.map {
+            it.toDomain().copy(payments = it.payments.map { payment -> payment.toDomain() })
+        }
+    }
+
+    override fun findUsersWithJoinedParties(usersIds: Set<Long>): List<User> {
+        val parties = userRepository.findUsersWithJoinedParties(usersIds)
+
+        return parties.map {
+            it.toDomain().copy(joinedParties = it.joinedParties.map { party -> party.toDomain() })
+        }
+    }
+
     override fun findUsersById(usersIds: List<Long>): List<User> {
         return userRepository.findAllById(usersIds).map { it.toDomain() }
     }

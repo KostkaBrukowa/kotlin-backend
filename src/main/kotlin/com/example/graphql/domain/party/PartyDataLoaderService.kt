@@ -1,5 +1,7 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.resolvers.expense.ExpenseType
+import com.example.graphql.resolvers.expense.toResponse
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.partyrequest.toResponse
 import com.example.graphql.resolvers.user.UserType
@@ -20,5 +22,11 @@ class PartyDataLoaderService(private val partyRepository: PartyRepository) {
         val parties = partyRepository.findPartiesWithParticipants(partiesIds)
 
         return parties.associateBy({ it.id }, { it.participants.map { participant -> participant.toResponse() } })
+    }
+
+    fun partyToExpensesDataLoaderMap(ids: Set<Long>): Map<Long, List<ExpenseType>> {
+        val parties = partyRepository.findPartiesWithExpenses(ids)
+
+        return parties.associateBy({ it.id }, { it.expenses.map { expense -> expense.toResponse() } })
     }
 }

@@ -8,6 +8,7 @@ interface ExpenseRepository {
 
     fun findExpensesWithParties(partiesIds: Set<Long>): Set<Expense>
     fun findExpensesWithPayers(partiesIds: Set<Long>): Set<Expense>
+    fun findExpensesWithPayments(ids: Set<Long>): Set<Expense>
 
     fun updateExpense(updatedExpense: Expense)
 

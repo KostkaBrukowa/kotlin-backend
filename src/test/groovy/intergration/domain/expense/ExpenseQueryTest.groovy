@@ -55,7 +55,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
                 expenseStatus
                 expensePayer { id }
                 expenseParty { id }
-                # expensePayments { id } TODO change remove comment
+                expensePayments { id }
             }
         """)
 

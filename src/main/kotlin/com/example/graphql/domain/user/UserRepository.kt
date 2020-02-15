@@ -10,8 +10,9 @@ interface UserRepository {
     fun findAllPartyParticipants(partyId: Long): List<User>
 
     fun findUsersWithPartyRequests(usersIds: Set<Long>): List<User>
-
     fun findUsersWithExpenses(usersIds: Set<Long>): List<User>
+    fun findUsersWithPayments(usersIds: Set<Long>): List<User>
+    fun findUsersWithJoinedParties(usersIds: Set<Long>): List<User>
 
     fun findUsersById(usersIds: List<Long>): List<User>
 }

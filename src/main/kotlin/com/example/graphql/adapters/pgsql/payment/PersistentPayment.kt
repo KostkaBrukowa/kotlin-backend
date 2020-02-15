@@ -37,6 +37,14 @@ data class PersistentPayment(
             confirmImageUrl = this.confirmImageUrl,
             status = this.paymentStatus
     )
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+
+        result = 31 * result + paymentStatus.hashCode()
+
+        return result
+    }
 }
 
 fun Payment.toPersistentEntity() = PersistentPayment(

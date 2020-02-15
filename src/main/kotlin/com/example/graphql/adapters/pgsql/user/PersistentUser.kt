@@ -37,7 +37,7 @@ data class PersistentUser(
         val ownedParties: List<PersistentParty> = emptyList(),
 
         @OneToMany(mappedBy = "user")
-        val expenses: List<PersistentExpense> = emptyList(),
+        val expenses: Set<PersistentExpense> = emptySet(),
 
         @OneToMany(mappedBy = "user")
         val payments: Set<PersistentPayment> = emptySet(),
@@ -62,6 +62,18 @@ data class PersistentUser(
             partyRequests = lazyProxy(this.partyRequests)?.map { it.toDomain() } ?: emptyList(),
             isEmailConfirmed = this.isEmailConfirmed
     )
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+
+        result = 31 * result + name.hashCode()
+        result = 31 * result + email.hashCode()
+        result = 31 * result + bankAccount.hashCode()
+        result = 31 * result + password.hashCode()
+        result = 31 * result + isEmailConfirmed.hashCode()
+
+        return result
+    }
 }
 
 fun User.toPersistentEntity() = PersistentUser(

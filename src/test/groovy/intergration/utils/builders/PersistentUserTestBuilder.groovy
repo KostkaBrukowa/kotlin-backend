@@ -45,7 +45,7 @@ class PersistentUserTestBuilder {
                 allArgs.isEmailConfirmed as Boolean,
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.ownedParties as List<PersistentParty>,
-                allArgs.expenses as List<PersistentExpense>,
+                allArgs.expenses as Set<PersistentExpense>,
                 allArgs.payments as Set<PersistentPayment>,
                 allArgs.messageGroups as List<PersistentMessageGroup>,
                 allArgs.joinedParties as Set<PersistentParty>,

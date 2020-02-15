@@ -1,7 +1,10 @@
 package com.example.graphql.resolvers.user
 
 import com.example.graphql.domain.user.User
+import com.example.graphql.resolvers.expense.ExpenseType
+import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
+import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
 import javax.validation.constraints.Email
@@ -20,11 +23,11 @@ data class UserType(
 
     lateinit var userPartyRequests: List<PartyRequestType>
 
-//    lateinit var userJoinedParties: List<PartyRequestType>
+    lateinit var userJoinedParties: List<PartyType>
 
-//    lateinit var userPayments: List<PartyRequestType>
+    lateinit var userPayments: List<PaymentType>
 
-//    fun expenses(): List<ExpenseType> = emptyList()
+    lateinit var userExpenses: List<ExpenseType>
 
 //    fun messageGroups(): List<MessageGroup> = emptyList()
 }

@@ -32,5 +32,22 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
         WHERE user.id in :usersIds
     """)
     fun findUsersWithExpenses(usersIds: Set<Long>): List<PersistentUser>
+
+    @Query("""
+        SELECT distinct user
+        FROM PersistentUser as user
+        LEFT JOIN FETCH user.payments
+        WHERE user.id in :usersIds
+    """)
+    fun findUsersWithPayments(usersIds: Set<Long>): List<PersistentUser>
+
+    @Query("""
+        SELECT distinct user
+        FROM PersistentUser as user
+        LEFT JOIN FETCH user.joinedParties
+        WHERE user.id in :usersIds
+    """)
+    fun findUsersWithJoinedParties(usersIds: Set<Long>):List<PersistentUser>
+
 }
 

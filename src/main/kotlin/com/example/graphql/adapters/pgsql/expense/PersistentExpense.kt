@@ -46,6 +46,17 @@ data class PersistentExpense(
             description = this.description,
             expenseStatus = this.expenseStatus
     )
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+
+        result = 31 * result + amount.hashCode()
+        result = 31 * result + expenseDate.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + expenseStatus.hashCode()
+
+        return result
+    }
 }
 
 fun Expense.toPersistentEntity() = PersistentExpense(

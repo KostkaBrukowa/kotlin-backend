@@ -19,7 +19,7 @@ class PgSqlExpenseRepository(private val expenseRepository: PersistentExpenseRep
             expenseRepository.findById(expenseId).toNullable()?.toDomainWithRelations()
 
     override fun findExpenseWithPayments(expenseId: Long): Expense? {
-        val expense = expenseRepository.findExpenseWithPayments(expenseId)
+        val expense = expenseRepository.findExpenseWithPayments(setOf(expenseId)).firstOrNull()
 
         return expense?.toDomainWithRelations()?.copy(payments = expense.payments.map { it.toDomain() })
     }
@@ -30,6 +30,12 @@ class PgSqlExpenseRepository(private val expenseRepository: PersistentExpenseRep
 
     override fun findExpensesWithPayers(partiesIds: Set<Long>): Set<Expense> {
         return expenseRepository.findAllById(partiesIds).map { it.toDomainWithRelations() }.toSet()
+    }
+
+    override fun findExpensesWithPayments(ids: Set<Long>): Set<Expense> {
+        return expenseRepository.findExpenseWithPayments(ids).map { expense ->
+            expense.toDomainWithRelations().copy(payments = expense.payments.map { it.toDomain() })
+        }.toSet()
     }
 
     override fun updateExpense(updatedExpense: Expense) {

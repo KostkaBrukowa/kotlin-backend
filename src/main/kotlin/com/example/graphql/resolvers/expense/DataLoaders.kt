@@ -2,6 +2,7 @@ package com.example.graphql.resolvers.expense
 
 import com.example.graphql.domain.expense.ExpenseDataLoaderService
 import com.example.graphql.resolvers.party.PartyType
+import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.DataFetcher
 import com.example.graphql.resolvers.utils.dataLoader
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component
 
 const val EXPENSE_PARTY_LOADER_NAME = "ExpensePartyDataFetcher"
 const val EXPENSE_PAYER_LOADER_NAME = "ExpensePayerDataFetcher"
+const val EXPENSE_PAYMENTS_LOADER_NAME = "ExpensePaymentsDataFetcher"
 
 @Component
 class ExpenseDataLoaderBuilder(private val expenseDataLoaderService: ExpenseDataLoaderService) {
@@ -22,6 +24,10 @@ class ExpenseDataLoaderBuilder(private val expenseDataLoaderService: ExpenseData
     fun getPayerDataLoader(): DataLoader<String, UserType> {
         return dataLoader { ids -> expenseDataLoaderService.expenseToPayerDataLoaderMap(ids) }
     }
+
+    fun getPaymentsDataLoader(): DataLoader<String, List<PaymentType>> {
+        return dataLoader { ids -> expenseDataLoaderService.expenseToPaymentsDataLoaderMap(ids) }
+    }
 }
 
 @Component(EXPENSE_PARTY_LOADER_NAME)
@@ -31,3 +37,7 @@ class ExpensePartyDataFetcher : DataFetcher(EXPENSE_PARTY_LOADER_NAME)
 @Component(EXPENSE_PAYER_LOADER_NAME)
 @Scope("prototype")
 class ExpensePayerDataFetcher : DataFetcher(EXPENSE_PAYER_LOADER_NAME)
+
+@Component(EXPENSE_PAYMENTS_LOADER_NAME)
+@Scope("prototype")
+class ExpensePaymentsDataFetcher : DataFetcher(EXPENSE_PAYMENTS_LOADER_NAME)

@@ -1,5 +1,6 @@
 package intergration.domain.party
 
+import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
@@ -15,6 +16,7 @@ import spock.lang.Unroll
 
 import java.time.ZonedDateTime
 
+import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
 import static intergration.utils.builders.PersistentUserTestBuilder.defaultPersistentUser
@@ -26,6 +28,9 @@ class PartyTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPartyRepository partyRepository
+
+    @Autowired
+    PersistentExpenseRepository expenseRepository
 
     @Autowired
     PersistentPartyRequestRepository partyRequestRepository
@@ -85,24 +90,36 @@ class PartyTest extends BaseIntegrationSpec {
         def tenDaysFromNow = ZonedDateTime.now().plusDays(10)
 
         and:
-        def partyId = aParty([
+        def party = aParty([
                 name       : 'test name',
                 description: 'test description',
                 startDate  : tenDaysFromNow,
-                owner      : aClient(userRepository)
-        ], partyRepository).id
+                owner      : aClient(userRepository),
+                expenses   : []
+        ], partyRepository)
+        def expense = anExpense([user: baseUser, party: party], expenseRepository)
 
         and:
-        def getSinglePartyQuery = """getSingleParty(partyId: "${partyId}"){ id, name, description, startDate }"""
+        def getSinglePartyQuery = """
+            getSingleParty(partyId: "${party.id}"){
+                id,
+                name,
+                description,
+                startDate,
+                partyExpenses { id }
+            }
+        """
 
         when:
         def partyResponse = postQuery(getSinglePartyQuery, "getSingleParty") as LazyMap
 
         then:
-        partyResponse.id == partyId.toString()
+        partyResponse.id == party.id.toString()
         partyResponse.name == "test name"
         partyResponse.description == "test description"
         partyResponse.startDate == tenDaysFromNow.toString()
+        partyResponse.partyExpenses.size() == 1
+        partyResponse.partyExpenses[0].id.toLong() == expense.id
     }
 
     def "Should return party with only party owner as participant when create party mutation is called with no participants"() {
