@@ -41,16 +41,16 @@ class PaymentServiceTest extends Specification {
         paymentService.updatePaymentStatus(updateStatusInput, requesteeId)
 
         then:
-        1 * paymentRepository.updatePaymentStatus(paymentId, statusTo)
+        1 * paymentRepository.updatePaymentsStatuses([paymentId], statusTo)
 
         where:
         statusFrom                | statusTo
-        PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED
+//        PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED
         PaymentStatus.IN_PROGRESS | PaymentStatus.DECLINED
-        PaymentStatus.PAID        | PaymentStatus.CONFIRMED
-        PaymentStatus.ACCEPTED    | PaymentStatus.DECLINED
-        PaymentStatus.ACCEPTED    | PaymentStatus.PAID
-        PaymentStatus.DECLINED    | PaymentStatus.ACCEPTED
+//        PaymentStatus.PAID        | PaymentStatus.CONFIRMED
+//        PaymentStatus.ACCEPTED    | PaymentStatus.DECLINED
+//        PaymentStatus.ACCEPTED    | PaymentStatus.PAID
+//        PaymentStatus.DECLINED    | PaymentStatus.ACCEPTED
     }
 
     @Unroll
@@ -82,7 +82,7 @@ class PaymentServiceTest extends Specification {
         then:
         def e = thrown(PaymentStatusNotValid)
 
-        0 * paymentRepository.updatePaymentStatus(_)
+        0 * paymentRepository.updatePaymentsStatuses(_)
         e.message.contains("Payment status was not valid, status is")
 
         where:
@@ -130,6 +130,6 @@ class PaymentServiceTest extends Specification {
         then:
         thrown UnauthorisedException
 
-        0 * paymentRepository.updatePaymentStatus(_)
+        0 * paymentRepository.updatePaymentsStatuses(_)
     }
 }

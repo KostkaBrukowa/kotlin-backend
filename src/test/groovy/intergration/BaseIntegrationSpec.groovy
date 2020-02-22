@@ -109,6 +109,7 @@ class BaseIntegrationSpec extends Specification {
         jdbcTemplate.execute("""
             TRUNCATE TABLE 
                 party_user,
+                bulk_payments,
                 expenses,
               message_groups,
               messagegroup_user ,

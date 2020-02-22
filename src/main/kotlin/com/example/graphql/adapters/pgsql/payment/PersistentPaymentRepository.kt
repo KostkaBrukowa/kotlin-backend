@@ -12,7 +12,6 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
     fun findAllByExpenseId(expenseId: Long): List<PersistentPayment>
     fun findAllByUserId(userId: Long): List<PersistentPayment>
 
-
     @Transactional
     @Modifying
     @Query("""
@@ -27,9 +26,9 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
     @Query("""
         UPDATE PersistentPayment 
         SET paymentStatus = :status
-        WHERE id = :paymentId
+        WHERE id in :paymentsIds
     """)
-    fun updatePaymentStatus(@Param("paymentId") paymentId: Long, @Param("status") status: PaymentStatus)
+    fun updatePaymentStatus(@Param("paymentsIds") paymentsIds: List<Long>, @Param("status") status: PaymentStatus)
 
     @Transactional
     @Modifying
@@ -39,4 +38,13 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
         WHERE id in :updatedPaymentsIds
     """)
     fun updatePaymentsAmounts(@Param("updatedPaymentsIds") updatedPaymentsIds: Iterable<Long>, @Param("amount") amount: Float)
+
+    @Transactional
+    @Modifying
+    @Query("""
+        UPDATE payments
+        SET payment_status = 'BULKED', bulked_payment_id = :bulkPaymentId
+        WHERE id in :paymentsIds
+    """, nativeQuery = true)
+    fun convertPaymentsToBulkPayment(paymentsIds: List<Long>, bulkPaymentId: Long)
 }
