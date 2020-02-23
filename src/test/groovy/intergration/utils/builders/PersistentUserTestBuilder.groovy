@@ -4,7 +4,6 @@ import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.messagegroup.MessageGroup
-import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.payment.PersistentPayment
 import com.example.graphql.domain.user.PersistentUser
@@ -50,7 +49,6 @@ class PersistentUserTestBuilder {
                 allArgs.ownedParties as List<PersistentParty>,
                 allArgs.expenses as Set<PersistentExpense>,
                 allArgs.payments as Set<PersistentPayment>,
-                allArgs.messageGroups as List<PersistentMessageGroup>,
                 allArgs.joinedParties as Set<PersistentParty>,
                 allArgs.friends as Set<MessageGroup>,
                 allArgs.friendOf as Set<MessageGroup>,
