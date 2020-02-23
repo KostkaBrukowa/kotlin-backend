@@ -2,13 +2,16 @@ package intergration.domain.payment
 
 import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
+import com.example.graphql.adapters.pgsql.payment.PersistentBulkPaymentRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.PaymentStatus
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
+import static intergration.utils.builders.PersistentBulkPaymentBuilder.aBulkPayment
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
@@ -26,6 +29,9 @@ class PaymentMutationTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPaymentRepository paymentRepository
+
+    @Autowired
+    PersistentBulkPaymentRepository bulkPaymentRepository
 
     @Unroll
     def "Should #shouldChange change payment status when status is changed from #statusFrom to #statusTo"() {
@@ -63,6 +69,87 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         statusFrom                | statusTo               | shouldChange
         PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED | true
         PaymentStatus.IN_PROGRESS | PaymentStatus.PAID     | false
+    }
+
+    def "Should bulk payments with correct amount"() {
+        given:
+        authenticate()
+
+        and:
+        def client = aClient(userRepository)
+        def expense = anExpense([user: baseUser], expenseRepository)
+
+        and:
+        def payment1 = aPayment([amount: 10.0, expense: expense, user: client], paymentRepository)
+        def payment2 = aPayment([amount: 20.0, expense: expense, user: client], paymentRepository)
+        def payment3 = aPayment([amount: 30.0, expense: expense, user: baseUser], paymentRepository)
+        def payment4 = aPayment([amount: 40.0, expense: expense, user: baseUser], paymentRepository)
+
+        and:
+        def bulkPaymentsMutation = ({ String id ->
+            """
+            bulkPayments(
+                paymentsIds: [
+                    ${payment1.id}
+                    ${payment2.id}
+                    ${payment3.id}
+                    ${payment4.id}
+                ]
+            ) { id }
+        """
+        })
+
+        when:
+        def bulkPaymentId = postMutation(bulkPaymentsMutation(baseUser.id.toString())).id.toLong()
+
+        and:
+        def bulkPayments = jdbcTemplate.queryForList("""
+                SELECT * FROM bulk_payments
+                LEFT JOIN payments ON bulk_payments.id = payments.bulked_payment_id
+                WHERE bulk_payments.id = ${bulkPaymentId}
+        """)
+
+        and:
+        def bulkPayment = bulkPayments[0]
+
+        then:
+        bulkPayment.amount == 40
+        bulkPayment.payer_id.toLong() == baseUser.id
+        bulkPayment.receiver_id.toLong() == client.id
+        bulkPayments.every { it['bulked_payment_id'] == bulkPaymentId }
+        bulkPayments.every { it['payment_status'] == 'BULKED' }
+    }
+
+    def "Should update bulk payment status"() {
+        given:
+        authenticate()
+
+        and:
+        def client = aClient(userRepository)
+        def bulkPayment = aBulkPayment([
+                status  : BulkPaymentStatus.IN_PROGRESS,
+                payer   : baseUser,
+                receiver: client
+        ], bulkPaymentRepository)
+
+        and:
+        def updateBulkPaymentStatusMutation = """
+            updateBulkPaymentStatus(
+                updatePaymentStatusInput: {
+                    id: ${bulkPayment.id}
+                    status: 'PAID'
+                }
+            ) { id }
+        """
+
+        when:
+        postMutation(updateBulkPaymentStatusMutation)
+
+        and:
+        def actualBulkPayment = bulkPaymentRepository.findById(bulkPayment.id).get()
+
+        then:
+        actualBulkPayment.status == BulkPaymentStatus.PAID
     }
 
     @Unroll

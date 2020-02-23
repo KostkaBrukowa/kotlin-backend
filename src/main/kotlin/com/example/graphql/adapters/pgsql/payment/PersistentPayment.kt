@@ -1,5 +1,6 @@
 package com.example.graphql.domain.payment
 
+import com.example.graphql.adapters.pgsql.payment.PersistentBulkPayment
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.expense.toPersistentEntity
 import com.example.graphql.domain.user.PersistentUser
@@ -29,7 +30,11 @@ data class PersistentPayment(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
-        val user: PersistentUser? = null
+        val user: PersistentUser? = null,
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "bulked_payment_id", nullable = true)
+        val bulkedPayment: PersistentBulkPayment? = null
 ) {
     fun toDomain() = Payment(
             id = this.id,

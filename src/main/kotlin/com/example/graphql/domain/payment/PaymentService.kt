@@ -8,6 +8,7 @@ import com.example.graphql.resolvers.payment.UpdatePaymentStatusInput
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
 import javax.persistence.EntityNotFoundException
+import kotlin.contracts.contract
 
 @Component
 class PaymentService(private val paymentRepository: PaymentRepository) {
@@ -43,30 +44,26 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
         val payment = paymentRepository.findPaymentWithOwnerAndExpenseOwner(updatePaymentStatusInput.paymentId)
                 ?: throw EntityNotFoundException("payment")
 
+        requireCorrectPaymentStatus(payment.status, updatePaymentStatusInput.status)
+
         if (updatePaymentStatusInput.status == PaymentStatus.CONFIRMED) {
             requireExpenseOwner(payment.expense, currentUserId)
         } else {
-            requirePaymentOwner(payment, currentUserId)
+            requirePaymentOwner(payment.user, currentUserId)
         }
 
-        requireCorrectPaymentStatus(payment.status, updatePaymentStatusInput.status)
 
         val updatedPayment = payment.copy(status = updatePaymentStatusInput.status)
 
-        paymentRepository.updatePaymentStatus(payment.id, updatePaymentStatusInput.status)
+        paymentRepository.updatePaymentsStatuses(listOf(payment.id), updatePaymentStatusInput.status)
 
         return updatedPayment
     }
 
-    fun updatePaymentsAmount(updatedPayments: List<Payment>, amount: Float) {
-        paymentRepository.updatePaymentsAmounts(updatedPayments, amount)
+    fun updatePaymentsAmount(payments: List<Payment>, amount: Float) {
+        paymentRepository.updatePaymentsAmounts(payments, amount)
     }
 
-
-    private fun requirePaymentOwner(payment: Payment, currentUserId: Long) {
-        if (payment.user == null) throw InternalError("Payment was not entirely fetched")
-        if (payment.user.id != currentUserId) throw UnauthorisedException()
-    }
 
     private fun requireCorrectPaymentStatus(statusFrom: PaymentStatus, statusTo: PaymentStatus) {
         when (statusFrom) {
@@ -82,12 +79,8 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
             PaymentStatus.DECLINED -> {
                 requirePaymentStatuses(statusTo, listOf(PaymentStatus.ACCEPTED))
             }
-            PaymentStatus.CONFIRMED -> throw PaymentStatusNotValid(PaymentStatus.CONFIRMED)
+            PaymentStatus.CONFIRMED, PaymentStatus.BULKED -> throw PaymentStatusNotValid(PaymentStatus.CONFIRMED)
         }
-    }
-
-    private fun requirePaymentStatuses(statusTo: PaymentStatus, availableStatuses: List<PaymentStatus>) {
-        if (!availableStatuses.contains(statusTo)) throw PaymentStatusNotValid(statusTo)
     }
 
     fun resetPaymentsStatuses(expenseId: Long) {
@@ -96,3 +89,18 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
 
     // DELETE
 }
+
+fun requirePaymentStatuses(statusTo: PaymentStatus, availableStatuses: List<PaymentStatus>) {
+    if (!availableStatuses.contains(statusTo)) throw PaymentStatusNotValid(statusTo)
+}
+
+private fun requirePaymentOwner(owner: User?, currentUserId: Long) {
+    contract {
+        returns() implies (owner != null)
+    }
+
+    if (owner == null) throw InternalError("Payment was not entirely fetched")
+    if (owner.id != currentUserId) throw UnauthorisedException()
+}
+
+

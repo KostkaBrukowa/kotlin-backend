@@ -20,7 +20,7 @@ data class PersistentMessageGroup(
         @OneToMany(mappedBy = "messageGroup")
         val messages: List<PersistentMessage>,
 
-        @ManyToMany
+        @ManyToMany(fetch = FetchType.LAZY)
         @JoinTable(name = "messagegroup_user")
         val users: List<PersistentUser> = emptyList()
 )

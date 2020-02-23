@@ -32,7 +32,7 @@ data class PersistentExpense(
         val user: PersistentUser?,
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "party_id", nullable = false)
+        @JoinColumn(name = "party_id", nullable = true)
         val party: PersistentParty?,
 
         @OneToMany(mappedBy = "expense", cascade = [CascadeType.REMOVE])
