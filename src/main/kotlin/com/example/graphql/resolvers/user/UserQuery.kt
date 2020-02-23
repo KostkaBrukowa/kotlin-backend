@@ -15,4 +15,9 @@ class UserQuery(
     fun getUser(id: Long): UserType? {
         return userService.getUserById(id)?.toResponse()
     }
+
+    @Authenticated(role = Roles.USER)
+    fun findUsersFriends(userId: Long): List<UserType> {
+        return userService.findUsersFriends(userId).map { it.toResponse() }
+    }
 }

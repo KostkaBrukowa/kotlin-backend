@@ -58,8 +58,11 @@ class PersistentUserTestBuilder {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    static PersistentUser aClient(Map props = ["email": RandomStringUtils.random(5) + "@gmail.com"]
-                                  , PersistentUserRepository repository) {
+    static PersistentUser aClient(Map props = [:], PersistentUserRepository repository) {
+        if (!props.containsKey("email")) {
+            props.email = RandomStringUtils.random(5) + "@gmail.com"
+        }
+
         return repository.save(defaultPersistentUser(props))
     }
 }

@@ -25,7 +25,7 @@ class AuthService(
     }
 
     fun logInUser(email: String, password: String, context: AppGraphQLContext): User? {
-        val user = userRepository.getUserByEmail(email) ?: return null
+        val user = userRepository.findUserByEmail(email) ?: return null
         val passwordMatches = passwordEncoder.matches(password, user.password)
 
         if (!passwordMatches) {

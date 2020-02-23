@@ -8,7 +8,13 @@ import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.payment.PersistentPayment
 import javax.persistence.*
 
-@Table(name = "users")
+@Table(
+        name = "users"
+//        uniqueConstraints = [
+//            UniqueConstraint(columnNames = ["", "receiver_id"]),
+//            UniqueConstraint(columnNames = ["payer_id", "receiver_id"])
+//        ]
+)
 @Entity
 data class PersistentUser(
 

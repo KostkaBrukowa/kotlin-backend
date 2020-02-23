@@ -45,7 +45,6 @@ class UserQueryTest extends BaseIntegrationSpec {
         def aPartyRequest = aPartyRequest([party: aParty, user: client], partyRequestRepository)
         def anExpense = anExpense([party: aParty, user: client], expenseRepository)
         def aPayment = aPayment([user: client, expense: anExpense], paymentRepository)
-        def friend = aClient([friendOf: [client]], userRepository)
 
 
         and:
@@ -59,7 +58,6 @@ class UserQueryTest extends BaseIntegrationSpec {
               userJoinedParties { id }
               userPayments { id }
               userExpenses { id }
-              userFriends { id }
             }
         """
 
@@ -79,9 +77,28 @@ class UserQueryTest extends BaseIntegrationSpec {
         response.userPayments[0].id.toLong() == aPayment.id
         response.userExpenses.size == 1
         response.userExpenses[0].id.toLong() == anExpense.id
-        response.userFriends.size == 1
-        response.userFriends[0].id.toLong() == friend.id
     }
 
+    def "Should return correct users friends"() {
+        given:
+        authenticate()
 
+        and:
+        def client1 = aClient([friendOf: [baseUser]], userRepository)
+        def client2 = aClient([friendOf: [baseUser]], userRepository)
+        def client3 = aClient([friendOf: [baseUser]], userRepository)
+
+
+        and:
+        def findUsersFriendsQuery = """findUsersFriends(userId: "${baseUser.id}"){ id }"""
+
+        when:
+        def response = postQuery(findUsersFriendsQuery)
+
+        then:
+        response.size() == 3
+        response.any { it.id.toLong() == client1.id }
+        response.any { it.id.toLong() == client2.id }
+        response.any { it.id.toLong() == client3.id }
+    }
 }
