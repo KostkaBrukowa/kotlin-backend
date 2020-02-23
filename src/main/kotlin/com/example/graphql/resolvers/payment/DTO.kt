@@ -5,7 +5,6 @@ import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
-import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID

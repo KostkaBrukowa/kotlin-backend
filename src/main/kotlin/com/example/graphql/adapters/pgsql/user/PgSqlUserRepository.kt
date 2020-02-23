@@ -22,7 +22,10 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
             userRepository.findAllPartyParticipants(partyId).map { it.toDomain() }
 
     override fun findUsersFriends(userId: Long): List<User> {
-        return userRepository.findUsersFriends(userId).friends.map { it.toDomain() }
+        val user = userRepository.findUsersFriends(userId)
+        val uniqueFriends = user.friends + user.friendOf
+
+        return uniqueFriends.map { it.toDomain() }
     }
 
     override fun findUsersWithPartyRequests(usersIds: Set<Long>): List<User> {

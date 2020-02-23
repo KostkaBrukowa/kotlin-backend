@@ -1,13 +1,11 @@
 package intergration.domain.user
 
-
 import intergration.BaseIntegrationSpec
 import intergration.utils.CookiesUtils
 import intergration.utils.JWTUtils
 import intergration.utils.SecurityConstants
 import spock.lang.Unroll
 
-import static intergration.utils.AssertionUtils.assertUnauthorizedError
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
 
 class UserMutationTest extends BaseIntegrationSpec {

@@ -6,7 +6,6 @@ import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 
 import java.time.ZonedDateTime
 

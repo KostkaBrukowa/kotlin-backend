@@ -1,7 +1,6 @@
 package com.example.graphql.domain.party
 
 import com.example.graphql.domain.partyrequest.PartyRequestRepository
-import com.example.graphql.domain.partyrequest.PartyRequestService
 import com.example.graphql.domain.user.UserTestBuilder
 import spock.lang.Specification
 

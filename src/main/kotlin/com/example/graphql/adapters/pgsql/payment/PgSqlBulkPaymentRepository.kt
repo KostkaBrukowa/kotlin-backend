@@ -2,7 +2,9 @@ package com.example.graphql.adapters.pgsql.payment
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.adapters.pgsql.utils.toNullable
-import com.example.graphql.domain.payment.*
+import com.example.graphql.domain.payment.BulkPayment
+import com.example.graphql.domain.payment.BulkPaymentRepository
+import com.example.graphql.domain.payment.BulkPaymentStatus
 import org.springframework.stereotype.Component
 
 @Component

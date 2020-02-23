@@ -8,13 +8,7 @@ import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.payment.PersistentPayment
 import javax.persistence.*
 
-@Table(
-        name = "users"
-//        uniqueConstraints = [
-//            UniqueConstraint(columnNames = ["", "receiver_id"]),
-//            UniqueConstraint(columnNames = ["payer_id", "receiver_id"])
-//        ]
-)
+@Table(name = "users")
 @Entity
 data class PersistentUser(
 
@@ -86,6 +80,7 @@ data class PersistentUser(
     override fun hashCode(): Int {
         var result = id.hashCode()
 
+        result = 31 * result + id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + email.hashCode()
         result = 31 * result + bankAccount.hashCode()
@@ -93,6 +88,15 @@ data class PersistentUser(
         result = 31 * result + isEmailConfirmed.hashCode()
 
         return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as PersistentUser
+
+        return this.id == other.id
     }
 }
 

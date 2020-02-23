@@ -2,7 +2,6 @@ package intergration.utils.builders
 
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPayment
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPaymentRepository
-import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.PersistentPayment
 import com.example.graphql.domain.user.PersistentUser

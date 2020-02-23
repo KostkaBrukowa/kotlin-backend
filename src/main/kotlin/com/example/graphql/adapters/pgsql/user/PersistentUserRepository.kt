@@ -1,7 +1,6 @@
 package com.example.graphql.adapters.pgsql.user
 
 import com.example.graphql.domain.user.PersistentUser
-import com.example.graphql.domain.user.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -73,7 +72,8 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
     @Query("""
         SELECT user
         FROM PersistentUser as user
-        JOIN FETCH user.friends
+        LEFT JOIN FETCH user.friends
+        LEFT JOIN FETCH user.friendOf
         WHERE user.id = :userId
     """)
     fun findUsersFriends(@Param("userId") userId: Long): PersistentUser

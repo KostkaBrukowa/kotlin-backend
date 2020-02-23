@@ -101,4 +101,34 @@ class UserQueryTest extends BaseIntegrationSpec {
         response.any { it.id.toLong() == client2.id }
         response.any { it.id.toLong() == client3.id }
     }
+
+    def "Should return correct users inverse friends"() {
+        given:
+        authenticate()
+
+        and:
+        def client1 = aClient([friendOf: [baseUser]], userRepository)
+        def client2 = aClient([friendOf: [baseUser]], userRepository)
+        def client3 = aClient([friendOf: [baseUser]], userRepository)
+
+        and:
+        def findUsersFriendsQuery = { String id ->
+            """
+            findUsersFriends(userId: "${id}"){ id }
+        """
+        }
+
+        when:
+        def client1Response = postQuery(findUsersFriendsQuery(client1.id.toString()))
+        def client2Response = postQuery(findUsersFriendsQuery(client2.id.toString()))
+        def client3Response = postQuery(findUsersFriendsQuery(client3.id.toString()))
+
+        then:
+        client1Response.size() == 1
+        client2Response.size() == 1
+        client3Response.size() == 1
+        client1Response[0].id.toLong() == baseUser.id
+        client2Response[0].id.toLong() == baseUser.id
+        client3Response[0].id.toLong() == baseUser.id
+    }
 }

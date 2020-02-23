@@ -1,15 +1,11 @@
 package com.example.graphql.domain.partyrequest
 
-import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
-import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
+
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyTestBuilder
-import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PartyRequestStatus
-import com.example.graphql.domain.user.PersistentUser
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserTestBuilder
-import intergration.domain.party.PartyTest
 
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
