@@ -47,7 +47,21 @@ data class PersistentUser(
 
         @ManyToMany(mappedBy = "participants")
         @Column(name = "party_id")
-        val joinedParties: Set<PersistentParty> = emptySet()
+        val joinedParties: Set<PersistentParty> = emptySet(),
+
+        @ManyToMany(fetch = FetchType.LAZY)
+        @JoinTable(name = "friends",
+                joinColumns = [JoinColumn(name = "userId")],
+                inverseJoinColumns = [JoinColumn(name = "friendId")]
+        )
+        val friends: Set<PersistentUser> = emptySet(),
+
+        @ManyToMany(fetch = FetchType.LAZY)
+        @JoinTable(name = "friends",
+                joinColumns = [JoinColumn(name = "friendId")],
+                inverseJoinColumns = [JoinColumn(name = "userId")]
+        )
+        val friendOf: Set<PersistentUser> = emptySet()
 ) {
 
     fun toDomain() = User(
@@ -66,6 +80,7 @@ data class PersistentUser(
     override fun hashCode(): Int {
         var result = id.hashCode()
 
+        result = 31 * result + id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + email.hashCode()
         result = 31 * result + bankAccount.hashCode()
@@ -73,6 +88,15 @@ data class PersistentUser(
         result = 31 * result + isEmailConfirmed.hashCode()
 
         return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as PersistentUser
+
+        return this.id == other.id
     }
 }
 

@@ -7,8 +7,6 @@ import com.example.graphql.domain.partyrequest.PartyRequestStatus
 import com.example.graphql.domain.user.PersistentUser
 
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
-import static intergration.utils.builders.PersistentPartyTestBuilder.defaultPersistentParty
-import static intergration.utils.builders.PersistentUserTestBuilder.defaultPersistentUser
 
 class PersistentPartyRequestTestBuilder {
 

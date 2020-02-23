@@ -31,5 +31,9 @@ data class User(
 
         val payments: List<Payment> = emptyList(),
 
-        val messageGroups: List<MessageGroup> = emptyList()
+        val messageGroups: List<MessageGroup> = emptyList(),
+
+        val friends: List<User> = emptyList(),
+
+        val friendOf: List<User> = emptyList()
 )

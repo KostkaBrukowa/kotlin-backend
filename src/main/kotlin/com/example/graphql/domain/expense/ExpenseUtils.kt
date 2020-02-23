@@ -1,6 +1,5 @@
 package com.example.graphql.domain.expense
 
-import com.example.graphql.domain.user.User
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract

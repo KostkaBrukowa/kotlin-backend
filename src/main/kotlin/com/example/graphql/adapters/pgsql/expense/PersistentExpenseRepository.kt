@@ -1,9 +1,7 @@
 package com.example.graphql.adapters.pgsql.expense
 
-import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseStatus
 import com.example.graphql.domain.expense.PersistentExpense
-import org.springframework.data.annotation.Persistent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

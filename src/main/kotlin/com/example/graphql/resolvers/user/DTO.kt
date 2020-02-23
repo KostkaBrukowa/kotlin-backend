@@ -19,7 +19,7 @@ data class UserType(
         val name: String? = null,
 
         val bankAccount: String? = null
-): GQLResponseType {
+) : GQLResponseType {
 
     lateinit var userPartyRequests: List<PartyRequestType>
 
@@ -29,7 +29,7 @@ data class UserType(
 
     lateinit var userExpenses: List<ExpenseType>
 
-//    fun messageGroups(): List<MessageGroup> = emptyList()
+//    lateinit var  messageGroups: List<MessageGroup>
 }
 
 fun User.toResponse() = UserType(

@@ -2,7 +2,6 @@ package com.example.graphql.adapters.pgsql.payment
 
 import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentStatus
-import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PersistentPayment
 import com.example.graphql.domain.user.PersistentUser
 import javax.persistence.*
