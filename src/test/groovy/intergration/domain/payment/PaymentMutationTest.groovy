@@ -5,11 +5,13 @@ import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPaymentRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.PaymentStatus
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
+import static intergration.utils.builders.PersistentBulkPaymentBuilder.aBulkPayment
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
@@ -116,6 +118,38 @@ class PaymentMutationTest extends BaseIntegrationSpec {
         bulkPayment.receiver_id.toLong() == client.id
         bulkPayments.every { it['bulked_payment_id'] == bulkPaymentId }
         bulkPayments.every { it['payment_status'] == 'BULKED' }
+    }
+
+    def "Should update bulk payment status"() {
+        given:
+        authenticate()
+
+        and:
+        def client = aClient(userRepository)
+        def bulkPayment = aBulkPayment([
+                status  : BulkPaymentStatus.IN_PROGRESS,
+                payer   : baseUser,
+                receiver: client
+        ], bulkPaymentRepository)
+
+        and:
+        def updateBulkPaymentStatusMutation = """
+            updateBulkPaymentStatus(
+                updatePaymentStatusInput: {
+                    id: ${bulkPayment.id}
+                    status: 'PAID'
+                }
+            ) { id }
+        """
+
+        when:
+        postMutation(updateBulkPaymentStatusMutation)
+
+        and:
+        def actualBulkPayment = bulkPaymentRepository.findById(bulkPayment.id).get()
+
+        then:
+        actualBulkPayment.status == BulkPaymentStatus.PAID
     }
 
     @Unroll

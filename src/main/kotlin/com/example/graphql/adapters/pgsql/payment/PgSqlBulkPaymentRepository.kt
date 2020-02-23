@@ -2,9 +2,7 @@ package com.example.graphql.adapters.pgsql.payment
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.adapters.pgsql.utils.toNullable
-import com.example.graphql.domain.payment.BulkPayment
-import com.example.graphql.domain.payment.BulkPaymentRepository
-import com.example.graphql.domain.payment.BulkPaymentStatus
+import com.example.graphql.domain.payment.*
 import org.springframework.stereotype.Component
 
 @Component
@@ -13,7 +11,7 @@ class PgSqlBulkPaymentRepository(
         private val userRepository: PersistentUserRepository
 ) : BulkPaymentRepository {
     override fun findBulkPaymentById(bulkPaymentId: Long): BulkPayment? {
-        return bulkPaymentRepository.findById(bulkPaymentId).toNullable()?.toDomain()
+        return bulkPaymentRepository.findById(bulkPaymentId).toNullable()?.toDomainWithRelations()
     }
 
     override fun findBulkPaymentsByPayerIdOrReceiver(userId: Long): List<BulkPayment> {
@@ -21,10 +19,10 @@ class PgSqlBulkPaymentRepository(
     }
 
     override fun updateBulkPaymentStatus(id: Long, status: BulkPaymentStatus) {
-        return bulkPaymentRepository.updateBulkPaymentStatus(id, status)
+        bulkPaymentRepository.updateBulkPaymentStatus(id, status)
     }
 
-    override fun createBulkPayment(amount: Float, payerId: Long, receiverId: Long): BulkPayment? {
+    override fun createBulkPayment(amount: Float, payerId: Long, receiverId: Long): BulkPayment {
         val newBulkPayment = PersistentBulkPayment(
                 amount = amount,
                 payer = userRepository.getOne(payerId),
@@ -53,3 +51,6 @@ class PgSqlBulkPaymentRepository(
         }
     }
 }
+
+private fun PersistentBulkPayment.toDomainWithRelations(): BulkPayment =
+        this.toDomain().copy(payer = this.payer!!.toDomain(), receiver = this.receiver!!.toDomain())

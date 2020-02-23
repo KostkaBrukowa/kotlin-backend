@@ -35,7 +35,7 @@ class BulkPaymentService(
                 bulkPaymentAmount.toFloat(),
                 payerId,
                 receiverId
-        ) ?: throw InternalError("There was a problem with saving bulk payment")
+        )
 
         paymentRepository.convertPaymentsToBulkPayment(paymentsIds, newBulkPayment.id)
 
@@ -43,20 +43,21 @@ class BulkPaymentService(
     }
 
     fun updatePaymentStatus(bulkPaymentUpdateInput: UpdateBulkPaymentStatusInput, currentUserId: Long): BulkPayment {
-        val bulkPayment = bulkPaymentRepository.findBulkPaymentById(bulkPaymentUpdateInput.id)
-                ?: throw javax.persistence.EntityNotFoundException("bulk payment")
+        val (bulkPaymentId, newPaymentStatus) = bulkPaymentUpdateInput
+        val bulkPayment = bulkPaymentRepository.findBulkPaymentById(bulkPaymentId)
+                ?: throw EntityNotFoundException("bulk payment")
 
-        requireCorrectBulkPaymentStatus(bulkPayment.status, bulkPaymentUpdateInput.status)
+        requireCorrectBulkPaymentStatus(bulkPayment.status, newPaymentStatus)
 
-        if (bulkPaymentUpdateInput.status == BulkPaymentStatus.CONFIRMED) {
+        if (newPaymentStatus == BulkPaymentStatus.CONFIRMED) {
             requireBulkPaymentReceiver(bulkPayment.receiver, currentUserId)
         } else {
             requireBulkPaymentPayer(bulkPayment.payer, currentUserId)
         }
 
-        bulkPaymentRepository.updateBulkPaymentStatus(bulkPayment.id, bulkPaymentUpdateInput.status)
+        bulkPaymentRepository.updateBulkPaymentStatus(bulkPayment.id, newPaymentStatus)
 
-        return bulkPayment.copy(status = bulkPaymentUpdateInput.status)
+        return bulkPayment.copy(status = newPaymentStatus)
     }
 
     private fun requireBulkPaymentReceiver(receiver: User?, currentUserId: Long) {
@@ -84,7 +85,6 @@ class BulkPaymentService(
     private fun requireBulkPaymentStatuses(statusTo: BulkPaymentStatus, availableStatuses: List<BulkPaymentStatus>) {
         if (!availableStatuses.contains(statusTo)) throw BulkPaymentStatusNotValid(statusTo)
     }
-
 }
 
 class BulkPaymentStatusNotValid(status: BulkPaymentStatus) : SimpleValidationException("Bulk Payment status was not valid, status is $status")

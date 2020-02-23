@@ -47,8 +47,8 @@ class PgSqlPaymentRepository(
         paymentRepository.changeExpensePaymentsStatuses(expenseId, status)
     }
 
-    override fun updatePaymentsStatuses(paymentId: List<Long>, status: PaymentStatus) {
-        paymentRepository.updatePaymentStatus(paymentId, status)
+    override fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus) {
+        paymentRepository.updatePaymentStatus(paymentsIds, status)
     }
 
     @Transactional

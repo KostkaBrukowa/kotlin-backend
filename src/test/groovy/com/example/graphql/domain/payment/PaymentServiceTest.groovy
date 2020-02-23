@@ -45,12 +45,12 @@ class PaymentServiceTest extends Specification {
 
         where:
         statusFrom                | statusTo
-//        PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED
+        PaymentStatus.IN_PROGRESS | PaymentStatus.ACCEPTED
         PaymentStatus.IN_PROGRESS | PaymentStatus.DECLINED
-//        PaymentStatus.PAID        | PaymentStatus.CONFIRMED
-//        PaymentStatus.ACCEPTED    | PaymentStatus.DECLINED
-//        PaymentStatus.ACCEPTED    | PaymentStatus.PAID
-//        PaymentStatus.DECLINED    | PaymentStatus.ACCEPTED
+        PaymentStatus.PAID        | PaymentStatus.CONFIRMED
+        PaymentStatus.ACCEPTED    | PaymentStatus.DECLINED
+        PaymentStatus.ACCEPTED    | PaymentStatus.PAID
+        PaymentStatus.DECLINED    | PaymentStatus.ACCEPTED
     }
 
     @Unroll

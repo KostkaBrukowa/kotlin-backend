@@ -23,6 +23,15 @@ class PaymentMutation(
         return paymentService.updatePaymentStatus(updatePaymentStatusInput, context.subject).toResponse()
     }
 
+    @Authenticated(role = Roles.USER)
+    fun updateBulkPaymentStatus(
+            updatePaymentStatusInput: UpdateBulkPaymentStatusInput,
+            @GraphQLContext context: AppGraphQLContext
+    ): BulkPaymentType {
+        return bulkPaymentService.updatePaymentStatus(updatePaymentStatusInput, context.subject).toResponse()
+    }
+
+    @Authenticated(role = Roles.USER)
     fun bulkPayments(
             paymentsIds: List<Long>,
             @GraphQLContext context: AppGraphQLContext

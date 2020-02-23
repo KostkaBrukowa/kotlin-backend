@@ -47,6 +47,6 @@ interface PersistentBulkPaymentRepository : JpaRepository<PersistentBulkPayment,
 
 interface PersistentBulkPaymentRepositoryCustom {
 
-    fun upsert(payerId: Long, receiverId: Long): Int
+    // TODO ADD A FUNCTIONALITY FOR THIS
     fun addPaymentToBulkPayment(paymentId: Long, paymentOwnerId: Long, expenseOwnerId: Long): Int
 }

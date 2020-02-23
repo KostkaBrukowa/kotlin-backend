@@ -8,27 +8,6 @@ class PersistentBulkPaymentRepositoryCustomImpl(
         private val em: EntityManager
 ) : PersistentBulkPaymentRepositoryCustom {
 
-    override fun upsert(payerId: Long, receiverId: Long): Int {
-        val sql = """
-        INSERT INTO bulk_payments (
-            payer_id, receiver_id        
-        )
-        VALUES (
-            :payerId, :receiver_id 
-        )
-        ON CONFLICT (payer_id, receiver_id) DO NOTHING
-        """.trimIndent()
-
-        val updated = em.createNativeQuery(sql).apply {
-            setParameter("payerId", payerId)
-            setParameter("receiverId", receiverId)
-        }.executeUpdate()
-
-        em.clear()
-
-        return updated
-    }
-
     override fun addPaymentToBulkPayment(paymentId: Long, paymentOwnerId: Long, expenseOwnerId: Long): Int {
         val sql = """
         INSERT INTO bulk_payments_current_payments (

@@ -1,4 +1,5 @@
 package com.example.graphql.domain.payment
+import kotlin.math.absoluteValue
 
 fun calculateBulkPaymentAmount(payments: List<Payment>): BulkPaymentResult {
     val paymentOwnershipInfo = getPaymentsOwnershipInfo(payments)
@@ -11,12 +12,21 @@ fun calculateBulkPaymentAmount(payments: List<Payment>): BulkPaymentResult {
     val (firstUserId, secondUserId) = paymentsParticipants
     val (firstUserPaymentsAmount, secondUserPaymentsAmount) =
             calculateRespectiveUserPaymentsAmounts(firstUserId, secondUserId, paymentOwnershipInfo)
+    val bulkPaymentAmount = (firstUserPaymentsAmount - secondUserPaymentsAmount).absoluteValue
 
 
     return if (firstUserPaymentsAmount > secondUserPaymentsAmount)
-        BulkPaymentResult(firstUserId, secondUserId, firstUserPaymentsAmount - secondUserPaymentsAmount)
+        BulkPaymentResult(
+                payerId = firstUserId,
+                receiverId = secondUserId,
+                amount = bulkPaymentAmount
+        )
     else
-        BulkPaymentResult(secondUserId, firstUserId, secondUserPaymentsAmount - firstUserPaymentsAmount)
+        BulkPaymentResult(
+                payerId = secondUserId,
+                receiverId = firstUserId,
+                amount = bulkPaymentAmount
+        )
 }
 
 private fun getPaymentsOwnershipInfo(payments: List<Payment>): List<PaymentsMeta> {
