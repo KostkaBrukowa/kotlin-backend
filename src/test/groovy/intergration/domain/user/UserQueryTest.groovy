@@ -45,6 +45,7 @@ class UserQueryTest extends BaseIntegrationSpec {
         def aPartyRequest = aPartyRequest([party: aParty, user: client], partyRequestRepository)
         def anExpense = anExpense([party: aParty, user: client], expenseRepository)
         def aPayment = aPayment([user: client, expense: anExpense], paymentRepository)
+        def friend = aClient([friendOf: [client]], userRepository)
 
 
         and:
@@ -58,6 +59,7 @@ class UserQueryTest extends BaseIntegrationSpec {
               userJoinedParties { id }
               userPayments { id }
               userExpenses { id }
+              userFriends { id }
             }
         """
 
@@ -77,5 +79,9 @@ class UserQueryTest extends BaseIntegrationSpec {
         response.userPayments[0].id.toLong() == aPayment.id
         response.userExpenses.size == 1
         response.userExpenses[0].id.toLong() == anExpense.id
+        response.userFriends.size == 1
+        response.userFriends[0].id.toLong() == friend.id
     }
+
+
 }
