@@ -3,6 +3,7 @@ package intergration.utils.builders
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.PersistentExpense
+import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.payment.PersistentPayment
@@ -23,6 +24,8 @@ class PersistentUserTestBuilder {
             messageGroups   : [],
             joinedParties   : [],
             ownedParties    : [],
+            friends         : [],
+            friendOf        : [],
             name            : 'testname',
             bankAccount     : '3921321938',
             password        : '@fdaksl228@*##8',
@@ -49,6 +52,8 @@ class PersistentUserTestBuilder {
                 allArgs.payments as Set<PersistentPayment>,
                 allArgs.messageGroups as List<PersistentMessageGroup>,
                 allArgs.joinedParties as Set<PersistentParty>,
+                allArgs.friends as Set<MessageGroup>,
+                allArgs.friendOf as Set<MessageGroup>,
         )
     }
 

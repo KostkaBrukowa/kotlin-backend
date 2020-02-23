@@ -47,7 +47,21 @@ data class PersistentUser(
 
         @ManyToMany(mappedBy = "participants")
         @Column(name = "party_id")
-        val joinedParties: Set<PersistentParty> = emptySet()
+        val joinedParties: Set<PersistentParty> = emptySet(),
+
+        @ManyToMany(fetch = FetchType.LAZY)
+        @JoinTable(name = "friends",
+                joinColumns = [JoinColumn(name = "userId")],
+                inverseJoinColumns = [JoinColumn(name = "friendId")]
+        )
+        val friends: Set<PersistentUser> = emptySet(),
+
+        @ManyToMany(fetch = FetchType.LAZY)
+        @JoinTable(name = "friends",
+                joinColumns = [JoinColumn(name = "friendId")],
+                inverseJoinColumns = [JoinColumn(name = "userId")]
+        )
+        val friendOf: Set<PersistentUser> = emptySet()
 ) {
 
     fun toDomain() = User(

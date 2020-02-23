@@ -18,6 +18,8 @@ class UserTestBuilder {
             expenses        : [],
             messageGroups   : [],
             payments        : [],
+            friends         : [],
+            friendOf        : [],
             name            : 'testname',
             bankAccount     : '3921321938',
             password        : '@fdaksl228@*##8',
@@ -42,7 +44,9 @@ class UserTestBuilder {
                 allArgs.joinedParties as List<Party>,
                 allArgs.expenses as List<Expense>,
                 allArgs.payments as List<Payment>,
-                allArgs.messageGroups as List<MessageGroup>
+                allArgs.messageGroups as List<MessageGroup>,
+                allArgs.friends as List<MessageGroup>,
+                allArgs.friendOf as List<MessageGroup>,
         )
     }
 }
