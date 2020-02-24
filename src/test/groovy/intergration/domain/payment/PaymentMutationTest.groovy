@@ -11,7 +11,7 @@ import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
-import static intergration.utils.builders.PersistentBulkPaymentBuilder.aBulkPayment
+import static intergration.utils.builders.PersistentBulkPaymentTestBuilder.aBulkPayment
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment

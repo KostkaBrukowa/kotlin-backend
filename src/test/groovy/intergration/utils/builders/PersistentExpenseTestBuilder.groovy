@@ -1,6 +1,7 @@
 package intergration.utils.builders
 
 import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
+import com.example.graphql.adapters.pgsql.message.PersistentExpenseMessage
 import com.example.graphql.domain.expense.ExpenseStatus
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.party.PersistentParty
@@ -21,8 +22,8 @@ class PersistentExpenseTestBuilder {
             expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING,
             user         : null,
             party        : null,
-            payments     : []
-
+            payments     : [],
+            messages     : [],
     ]
 
     private PersistentExpenseTestBuilder() {}
@@ -39,7 +40,8 @@ class PersistentExpenseTestBuilder {
                 allArgs.expenseStatus as ExpenseStatus,
                 allArgs.user as PersistentUser,
                 allArgs.party as PersistentParty,
-                allArgs.payments as List<PersistentPayment>
+                allArgs.payments as List<PersistentPayment>,
+                allArgs.messages as Set<PersistentExpenseMessage>,
         )
     }
 

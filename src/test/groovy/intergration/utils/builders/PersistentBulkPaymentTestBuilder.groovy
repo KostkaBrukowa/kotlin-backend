@@ -1,5 +1,6 @@
 package intergration.utils.builders
 
+import com.example.graphql.adapters.pgsql.message.PersistentBulkPaymentMessage
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPayment
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPaymentRepository
 import com.example.graphql.domain.payment.BulkPaymentStatus
@@ -8,7 +9,7 @@ import com.example.graphql.domain.user.PersistentUser
 
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
-class PersistentBulkPaymentBuilder {
+class PersistentBulkPaymentTestBuilder {
 
     private static def defaults = [
             id             : 0,
@@ -17,7 +18,8 @@ class PersistentBulkPaymentBuilder {
             status         : BulkPaymentStatus.IN_PROGRESS,
             payer          : null,
             receiver       : null,
-            payments       : []
+            payments       : [],
+            messages       : [],
     ]
 
     private PersistentBulkPaymentTestBuilder() {}
@@ -33,7 +35,8 @@ class PersistentBulkPaymentBuilder {
                 allArgs.status as BulkPaymentStatus,
                 allArgs.payer as PersistentUser,
                 allArgs.receiver as PersistentUser,
-                allArgs.payments as Set<PersistentPayment>
+                allArgs.payments as Set<PersistentPayment>,
+                allArgs.messages as Set<PersistentBulkPaymentMessage>,
         )
     }
 

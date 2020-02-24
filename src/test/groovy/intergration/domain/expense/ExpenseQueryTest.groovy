@@ -1,6 +1,7 @@
 package intergration.domain.expense
 
 import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
+import com.example.graphql.adapters.pgsql.message.PersistentExpenseMessageRepository
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import java.time.ZonedDateTime
 
+import static intergration.utils.builders.MessageTestBuilder.aExpenseMessage
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
@@ -27,6 +29,9 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
     @Autowired
     PersistentPaymentRepository paymentRepository
 
+    @Autowired
+    PersistentExpenseMessageRepository messageRepository
+
     def "Should return single expense"() {
         given:
         authenticate()
@@ -34,19 +39,20 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         and:
         def aParty = aParty([owner: baseUser], partyRepository)
         def threeDaysEarlier = ZonedDateTime.now().minusDays(3)
-        def aExpense = anExpense([
+        def expense = anExpense([
                 user       : baseUser,
                 party      : aParty,
                 amount     : 42.43,
                 expenseDate: threeDaysEarlier,
                 description: "test expense description"
         ], expenseRepository)
-        def expensePayment1 = aPayment([user: baseUser, expense: aExpense], paymentRepository)
-        def expensePayment2 = aPayment([user: aClient(userRepository), expense: aExpense], paymentRepository)
+        def expensePayment1 = aPayment([user: baseUser, expense: expense], paymentRepository)
+        def expensePayment2 = aPayment([user: aClient(userRepository), expense: expense], paymentRepository)
+        def expenseMessage = aExpenseMessage([expense: expense], messageRepository)
 
         and:
         def getSingleExpenseQuery = ("""
-            getSingleExpense(expenseId: "${aExpense.id}") { 
+            getSingleExpense(expenseId: "${expense.id}") { 
                 id
                 amount
                 expenseDate
@@ -55,6 +61,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
                 expensePayer { id }
                 expenseParty { id }
                 expensePayments { id }
+                expenseMessages { id }
             }
         """)
 
@@ -62,16 +69,18 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         def response = postQuery(getSingleExpenseQuery)
 
         then:
-        response.id.toLong() == aExpense.id
+        response.id.toLong() == expense.id
         response.amount == 42.43
         response.expenseDate == threeDaysEarlier.toString()
         response.description == "test expense description"
         response.expenseStatus == "IN_PROGRESS_REQUESTING"
         response.expensePayer.id.toLong() == baseUser.id
         response.expenseParty.id.toLong() == aParty.id
-//        response.expensePayments.size() == 2
-//        response.expensePayments.any { it.id.toLong() == expensePayment1.id }
-//        response.expensePayments.any { it.id.toLong() == expensePayment2.id }
+        response.expensePayments.size() == 2
+        response.expensePayments.any { it.id.toLong() == expensePayment1.id }
+        response.expensePayments.any { it.id.toLong() == expensePayment2.id }
+        response.expenseMessages.size() == 1
+        response.expenseMessages[0].id.toLong() == expenseMessage.id
     }
 
     def "Should return all expenses for an user"() {
@@ -84,7 +93,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         def thirdExpense = anExpense([user: baseUser, party: aParty([owner: baseUser], partyRepository)], expenseRepository)
 
         and:
-        def getExpensesForUserQuery = ("""getExpensesForUser(userId: "${baseUser.id}") { id }""")
+        def getExpensesForUserQuery = ("""getExpensesForUser(userId: "${baseUser.id}") { id, expensePayer { id }, expensePayments { id } }""")
 
         when:
         def response = postQuery(getExpensesForUserQuery, "getExpensesForUser")

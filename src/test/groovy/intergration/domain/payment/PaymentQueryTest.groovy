@@ -1,6 +1,8 @@
 package intergration.domain.payment
 
 import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
+import com.example.graphql.adapters.pgsql.message.PersistentBulkPaymentMessageRepository
+import com.example.graphql.adapters.pgsql.message.PersistentPaymentMessageRepository
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPaymentRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
@@ -10,7 +12,9 @@ import com.example.graphql.domain.payment.PaymentStatus
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 
-import static intergration.utils.builders.PersistentBulkPaymentBuilder.aBulkPayment
+import static intergration.utils.builders.MessageTestBuilder.aBulkPaymentMessage
+import static intergration.utils.builders.MessageTestBuilder.aPaymentMessage
+import static intergration.utils.builders.PersistentBulkPaymentTestBuilder.aBulkPayment
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
@@ -32,6 +36,12 @@ class PaymentQueryTest extends BaseIntegrationSpec {
     @Autowired
     PersistentBulkPaymentRepository bulkPaymentRepository
 
+    @Autowired
+    PersistentPaymentMessageRepository paymentMessageRepository
+
+    @Autowired
+    PersistentBulkPaymentMessageRepository bulkPaymentMessageRepository
+
     def "Should return single payment"() {
         given:
         authenticate()
@@ -46,6 +56,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 status         : PaymentStatus.PAID,
                 confirmImageUrl: 'www.google.com'
         ], paymentRepository)
+        def message = aPaymentMessage([payment: payment], paymentMessageRepository)
 
         and:
         def getSinglePaymentQuery = ("""
@@ -56,6 +67,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 status
                 paymentPayer { id }
                 paymentExpense { id }
+                paymentMessages { id }
             }
         """)
 
@@ -69,6 +81,8 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         response.status == 'PAID'
         response.paymentPayer.id.toLong() == baseUser.id
         response.paymentExpense.id.toLong() == aExpense.id
+        response.paymentMessages.size() == 1
+        response.paymentMessages[0].id.toLong() == message.id
     }
 
     def "Should return user's payments"() {
@@ -117,6 +131,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 user         : client,
                 bulkedPayment: bulkPayment
         ], paymentRepository)
+        def message = aBulkPaymentMessage([bulkPayment: bulkPayment], bulkPaymentMessageRepository)
 
         and:
         def getClientBulkPaymentsQuery = ({ String id ->
@@ -129,6 +144,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 bulkPaymentPayer { id }
                 bulkPaymentReceiver { id }
                 bulkPaymentPayments { id }
+                bulkPaymentMessages { id }
             }
         """
         })
@@ -145,6 +161,8 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         baseUserResponse[0].bulkPaymentReceiver.id.toLong() == baseUser.id
         baseUserResponse[0].bulkPaymentPayments.size() == 1
         baseUserResponse[0].bulkPaymentPayments[0].id.toLong() == payment.id
+        baseUserResponse[0].bulkPaymentMessages.size() == 1
+        baseUserResponse[0].bulkPaymentMessages[0].id.toLong() == message.id
 
         secondUserResponse.size() == 1
         secondUserResponse[0].amount.toFloat() == 44.0f
@@ -153,5 +171,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         secondUserResponse[0].bulkPaymentReceiver.id.toLong() == baseUser.id
         secondUserResponse[0].bulkPaymentPayments.size() == 1
         secondUserResponse[0].bulkPaymentPayments[0].id.toLong() == payment.id
+        baseUserResponse[0].bulkPaymentMessages.size() == 1
+        baseUserResponse[0].bulkPaymentMessages[0].id.toLong() == message.id
     }
 }

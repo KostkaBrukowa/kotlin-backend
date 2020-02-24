@@ -108,6 +108,10 @@ class BaseIntegrationSpec extends Specification {
     private def cleanupTables() {
         jdbcTemplate.execute("""
             TRUNCATE TABLE 
+                bulk_payment_messages,
+                payment_messages,
+                expense_messages,
+                party_messages,
                 party_user,
                 friends,
                 bulk_payments,
