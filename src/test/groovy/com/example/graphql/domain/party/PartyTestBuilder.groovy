@@ -1,7 +1,6 @@
 package com.example.graphql.domain.party
 
 import com.example.graphql.domain.expense.Expense
-import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.user.User
 
@@ -15,7 +14,6 @@ class PartyTestBuilder {
             id           : 0,
             name         : 'testname',
             owner        : null,
-            messageGroup : null,
             participants : [],
             partyRequests: [],
             expenses     : [],
@@ -37,7 +35,6 @@ class PartyTestBuilder {
                 ZonedDateTime.parse(allArgs.startDate),
                 ZonedDateTime.parse(allArgs.endDate),
                 allArgs.owner as User,
-                allArgs.messageGroup as MessageGroup,
                 allArgs.participants as List<User>,
                 allArgs.partyRequests as List<PartyRequest>,
                 allArgs.expenses as List<Expense>,

@@ -1,7 +1,6 @@
 package com.example.graphql.domain.party
 
 import com.example.graphql.domain.expense.Expense
-import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.user.User
 import java.time.ZonedDateTime
@@ -19,8 +18,6 @@ data class Party(
 
 
         val owner: User? = null,
-
-        val messageGroup: MessageGroup? = null,
 
         val participants: List<User> = emptyList(),
 

@@ -72,7 +72,6 @@ data class PersistentUser(
             email = this.email,
             joinedParties = lazyProxy(this.joinedParties)?.map { it.toDomain() } ?: emptyList(),
             expenses = emptyList(),
-            messageGroups = emptyList(),
             partyRequests = lazyProxy(this.partyRequests)?.map { it.toDomain() } ?: emptyList(),
             isEmailConfirmed = this.isEmailConfirmed
     )

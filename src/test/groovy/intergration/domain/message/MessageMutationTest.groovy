@@ -15,6 +15,7 @@ import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
+import static intergration.utils.AssertionUtils.assertUnauthorizedError
 import static intergration.utils.builders.MessageTestBuilder.*
 import static intergration.utils.builders.PersistentBulkPaymentTestBuilder.aBulkPayment
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
@@ -44,10 +45,13 @@ class MessageMutationTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPartyMessageRepository partyMessageRepository
+
     @Autowired
     PersistentPaymentMessageRepository paymentMessageRepository
+
     @Autowired
     PersistentBulkPaymentMessageRepository bulkPaymentMessageRepository
+
     @Autowired
     PersistentExpenseMessageRepository expenseMessageRepository
 
@@ -59,7 +63,7 @@ class MessageMutationTest extends BaseIntegrationSpec {
                         entityId: ${entityId}
                         messageType: ${type}
                 }
-            )
+            ) { id }
         """
     }
 
@@ -67,29 +71,33 @@ class MessageMutationTest extends BaseIntegrationSpec {
         return """removeMessage(messageId: ${messageId}, messageType: ${type})"""
     }
 
-    private def createEntity(MessageType messageType) {
+    private def createEntity(MessageType messageType, Boolean baseUserAsParticipant = true) {
+        def user = baseUserAsParticipant ? baseUser : aClient(userRepository)
+
         switch (messageType) {
             case MessageType.PARTY:
-                return aParty([owner: baseUser], partyRepository)
+                return aParty([owner: user], partyRepository)
             case MessageType.PAYMENT:
-                return aPayment([expense: anExpense([user: baseUser], expenseRepository), user: baseUser], paymentRepository)
+                return aPayment([expense: anExpense([user: user], expenseRepository), user: user], paymentRepository)
             case MessageType.BULK_PAYMENT:
-                return aBulkPayment([payer: baseUser, receiver: aClient(userRepository)], bulkPaymentRepository)
+                return aBulkPayment([payer: user, receiver: aClient(userRepository)], bulkPaymentRepository)
             case MessageType.EXPENSE:
-                return anExpense([user: baseUser], expenseRepository)
+                return anExpense([user: user], expenseRepository)
         }
     }
 
-    private def createMessage(MessageType messageType, Object entity) {
+    private def createMessage(MessageType messageType, Boolean baseUserAsParticipant = true) {
+        def user = baseUserAsParticipant ? baseUser : aClient(userRepository)
+
         switch (messageType) {
             case MessageType.PARTY:
-                return aPartyMessage([user: baseUser, party: createEntity(messageType)], partyMessageRepository)
+                return aPartyMessage([user: user, party: createEntity(messageType)], partyMessageRepository)
             case MessageType.PAYMENT:
-                return aPaymentMessage([user: baseUser, payment: createEntity(messageType)], paymentMessageRepository)
+                return aPaymentMessage([user: user, payment: createEntity(messageType)], paymentMessageRepository)
             case MessageType.BULK_PAYMENT:
-                return aBulkPaymentMessage([user: baseUser, bulkPayment: createEntity(messageType)], bulkPaymentMessageRepository)
+                return aBulkPaymentMessage([user: user, bulkPayment: createEntity(messageType)], bulkPaymentMessageRepository)
             case MessageType.EXPENSE:
-                return aExpenseMessage([user: baseUser, expense: createEntity(messageType)], expenseMessageRepository)
+                return aExpenseMessage([user: user, expense: createEntity(messageType)], expenseMessageRepository)
         }
     }
 
@@ -102,10 +110,10 @@ class MessageMutationTest extends BaseIntegrationSpec {
         def entity = createEntity(messageType)
 
         when:
-        postMutation(createMessageMutation(entity.id, messageType, 'test message'))
+        def messageId = postMutation(createMessageMutation(entity.id, messageType, 'test message')).id
 
         and:
-        def actualMessage = jdbcTemplate.queryForMap("SELECT * from ${table} WHERE id = ${entity.id} ")
+        def actualMessage = jdbcTemplate.queryForMap("SELECT * from ${table} WHERE id = ${messageId} ")
 
         then:
         actualMessage.text == 'test message'
@@ -121,13 +129,38 @@ class MessageMutationTest extends BaseIntegrationSpec {
     }
 
     @Unroll
+    def "Should not add a new message when user is not a participant"() {
+        given:
+        authenticate()
+
+        and:
+        def entity = createEntity(messageType, false)
+
+        when:
+        def response = postMutation(createMessageMutation(entity.id, messageType, 'test message'))
+
+        and:
+        def actualMessage = jdbcTemplate.queryForMap("SELECT * from ${table} WHERE id = ${entity.id} ")
+
+        then:
+        actualMessage.size() == 0
+        assertUnauthorizedError(response)
+
+        where:
+        messageType              | table                   | entityIdField
+        MessageType.PARTY        | "party_messages"        | "party_id"
+        MessageType.PAYMENT      | "payment_messages"      | "payment_id"
+        MessageType.BULK_PAYMENT | "bulk_payment_messages" | "bulk_payment_id"
+        MessageType.EXPENSE      | "expense_messages"      | "expense_id"
+    }
+
+    @Unroll
     def "Should remove a message"() {
         given:
         authenticate()
 
         and:
-        def entity = createEntity(messageType)
-        def message = createMessage(messageType, entity)
+        def message = createMessage(messageType)
 
         when:
         postMutation(removeMessageMutation(message.id, messageType))
@@ -137,6 +170,31 @@ class MessageMutationTest extends BaseIntegrationSpec {
 
         then:
         actualMessage.size() == 0
+
+        where:
+        messageType              | table
+        MessageType.PARTY        | "party_messages"
+        MessageType.PAYMENT      | "payment_messages"
+        MessageType.BULK_PAYMENT | "bulk_payment_messages"
+        MessageType.EXPENSE      | "expense_messages"
+    }
+
+    def "Should not remove a message when user is not a messageOwner"() {
+        given:
+        authenticate()
+
+        and:
+        def message = createMessage(messageType, false)
+
+        when:
+        def response = postMutation(removeMessageMutation(message.id, messageType), null, true)
+
+        and:
+        def actualMessage = jdbcTemplate.queryForMap("SELECT * from ${table} WHERE id = ${message.id} ")
+
+        then:
+        actualMessage.size() == 1
+        assertUnauthorizedError(response)
 
         where:
         messageType              | table

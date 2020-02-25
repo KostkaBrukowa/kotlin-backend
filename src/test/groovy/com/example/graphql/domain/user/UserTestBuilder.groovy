@@ -1,7 +1,6 @@
 package com.example.graphql.domain.user
 
 import com.example.graphql.domain.expense.Expense
-import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.payment.Payment
@@ -16,7 +15,6 @@ class UserTestBuilder {
             partyRequests   : [],
             joinedParties   : [],
             expenses        : [],
-            messageGroups   : [],
             payments        : [],
             friends         : [],
             friendOf        : [],
@@ -44,9 +42,8 @@ class UserTestBuilder {
                 allArgs.joinedParties as List<Party>,
                 allArgs.expenses as List<Expense>,
                 allArgs.payments as List<Payment>,
-                allArgs.messageGroups as List<MessageGroup>,
-                allArgs.friends as List<MessageGroup>,
-                allArgs.friendOf as List<MessageGroup>,
+                allArgs.friends as List<User>,
+                allArgs.friendOf as List<User>,
         )
     }
 }
