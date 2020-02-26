@@ -1,6 +1,7 @@
 package com.example.graphql.adapters.pgsql.payment
 
 import com.example.graphql.adapters.pgsql.utils.toNullable
+import com.example.graphql.domain.message.Message
 import com.example.graphql.domain.payment.*
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
@@ -31,6 +32,12 @@ class PgSqlPaymentRepository(
 
     override fun findPaymentsWithUsers(ids: Set<Long>): List<Payment> =
             paymentRepository.findAllById(ids.toList()).map { it.toDomainWithRelations() }
+
+    override fun findBulkPaymentsWithMessages(ids: Set<Long>): Map<Payment, List<Message>> {
+        return paymentRepository
+                .findPaymentsWithMessages(ids)
+                .associateBy({ it.toDomain() }, { it.messages.map { message -> message.toDomain() } })
+    }
 
     override fun getPaymentById(paymentId: Long): Payment? =
             paymentRepository.findById(paymentId).toNullable()?.toDomainWithRelations()

@@ -33,4 +33,12 @@ interface PersistentExpenseRepository : JpaRepository<PersistentExpense, Long> {
         WHERE expense.id in :expensesIds
     """)
     fun findExpenseWithPayments(@Param("expensesIds") expensesIds: Set<Long>): List<PersistentExpense>
+
+    @Query("""
+        SELECT expense
+        FROM PersistentExpense as expense
+        LEFT JOIN FETCH expense.messages
+        WHERE expense.id in :ids
+    """)
+    fun findExpensesWithMessages(ids: Set<Long>): List<PersistentExpense>
 }

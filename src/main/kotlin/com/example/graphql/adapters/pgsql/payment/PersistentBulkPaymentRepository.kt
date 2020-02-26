@@ -10,6 +10,14 @@ import javax.transaction.Transactional
 interface PersistentBulkPaymentRepository : JpaRepository<PersistentBulkPayment, Long>, PersistentBulkPaymentRepositoryCustom {
     fun findAllByPayerIdOrReceiverId(payerId: Long, receiverId: Long): List<PersistentBulkPayment>
 
+    @Query("""
+        SELECT distinct p
+        FROM PersistentBulkPayment as p
+        LEFT JOIN FETCH p.messages
+        WHERE p.id in (:ids)
+    """)
+    fun findPaymentsWithMessages(ids: Set<Long>): List<PersistentBulkPayment>
+
     @Transactional
     @Modifying
     @Query("""
@@ -42,7 +50,6 @@ interface PersistentBulkPaymentRepository : JpaRepository<PersistentBulkPayment,
         WHERE payment.id IN (:ids)
     """)
     fun findPaymentsWithPayments(ids: Set<Long>): List<PersistentBulkPayment>
-
 }
 
 interface PersistentBulkPaymentRepositoryCustom {

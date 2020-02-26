@@ -12,6 +12,14 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
     fun findAllByExpenseId(expenseId: Long): List<PersistentPayment>
     fun findAllByUserId(userId: Long): List<PersistentPayment>
 
+    @Query("""
+        SELECT distinct p
+        FROM PersistentPayment as p
+        LEFT JOIN FETCH p.messages
+        WHERE p.id in (:ids)
+    """)
+    fun findPaymentsWithMessages(ids: Set<Long>): List<PersistentPayment>
+
     @Transactional
     @Modifying
     @Query("""
@@ -47,4 +55,5 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
         WHERE id in :paymentsIds
     """, nativeQuery = true)
     fun convertPaymentsToBulkPayment(paymentsIds: List<Long>, bulkPaymentId: Long)
+
 }

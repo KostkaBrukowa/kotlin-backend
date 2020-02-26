@@ -1,5 +1,8 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.domain.message.Message
+import com.example.graphql.domain.payment.Payment
+
 interface PartyRepository {
     fun getAllByOwnerId(id: Long): List<Party>
 
@@ -14,10 +17,9 @@ interface PartyRepository {
     fun removeParty(id: Long)
 
     fun findPartiesWithParticipants(partiesIds: Set<Long>): List<Party>
-
     fun findPartiesWithPartyRequests(partiesIds: Set<Long>): List<Party>
-
     fun findPartiesWithExpenses(partiesIds: Set<Long>): List<Party>
+    fun findPartiesWithMessages(ids: Set<Long>): Map<Party, List<Message>>
 
     fun removeParticipant(partyId: Long, participantId: Long)
 
