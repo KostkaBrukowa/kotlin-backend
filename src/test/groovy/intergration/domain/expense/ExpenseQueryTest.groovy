@@ -48,7 +48,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         ], expenseRepository)
         def expensePayment1 = aPayment([user: baseUser, expense: expense], paymentRepository)
         def expensePayment2 = aPayment([user: aClient(userRepository), expense: expense], paymentRepository)
-        def expenseMessage = aExpenseMessage([expense: expense], messageRepository)
+        def expenseMessage = aExpenseMessage([user: baseUser, expense: expense], messageRepository)
 
         and:
         def getSingleExpenseQuery = ("""

@@ -9,5 +9,5 @@ data class Message(
         val sendDate: ZonedDateTime = ZonedDateTime.now(),
 
 
-        val user: User
+        val user: User? = null
 )

@@ -56,7 +56,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 status         : PaymentStatus.PAID,
                 confirmImageUrl: 'www.google.com'
         ], paymentRepository)
-        def message = aPaymentMessage([payment: payment], paymentMessageRepository)
+        def message = aPaymentMessage([user: baseUser, payment: payment], paymentMessageRepository)
 
         and:
         def getSinglePaymentQuery = ("""
@@ -131,7 +131,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 user         : client,
                 bulkedPayment: bulkPayment
         ], paymentRepository)
-        def message = aBulkPaymentMessage([bulkPayment: bulkPayment], bulkPaymentMessageRepository)
+        def message = aBulkPaymentMessage([user: baseUser, bulkPayment: bulkPayment], bulkPaymentMessageRepository)
 
         and:
         def getClientBulkPaymentsQuery = ({ String id ->

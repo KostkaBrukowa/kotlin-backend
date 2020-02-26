@@ -4,7 +4,6 @@ import com.example.graphql.domain.expense.ExpenseRepository
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.payment.BulkPaymentRepository
 import com.example.graphql.domain.payment.PaymentRepository
-import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.message.MessageType
 import com.example.graphql.resolvers.message.NewMessageInput
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
@@ -30,12 +29,24 @@ class MessageService(
             MessageType.EXPENSE -> requireExpenseParticipant(entityId, currentUserId)
         }
 
-        return messageRepository.saveNewMessage(Message(text = text, user = User(currentUserId)))
+        return messageRepository.saveNewMessage(text, currentUserId, messageType, entityId)
     }
 
 
-    fun removeMessage(messageId: Long, messageType: MessageType, currentUserId: Long): Message {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun removeMessage(messageId: Long, messageType: MessageType, currentUserId: Long): Boolean {
+        val message = messageRepository.findMessageById(messageId, messageType) ?: throw EntityNotFoundException()
+
+        requireMessageOwner(message, currentUserId)
+
+        messageRepository.removeMessage(messageId, messageType)
+
+        return true
+    }
+
+    private fun requireMessageOwner(message: Message, currentUserId: Long) {
+        if (message.user == null) throw InternalError("message owner was not entirely fetched")
+
+        if (message.user.id != currentUserId) throw UnauthorisedException()
     }
 
     private fun requirePartyParticipant(entityId: Long, currentUserId: Long) {
@@ -49,8 +60,9 @@ class MessageService(
         val payment = paymentRepository.findPaymentWithOwnerAndExpenseOwner(entityId)
                 ?: throw EntityNotFoundException("party")
 
+        if (payment.user == null || payment.expense?.user == null) throw InternalError("payment was not entirely fetched")
 
-        if (payment.user?.id != currentUserId && payment.expense?.user?.id != currentUserId) {
+        if (payment.user.id != currentUserId && payment.expense.user.id != currentUserId) {
             throw UnauthorisedException()
         }
     }
@@ -59,7 +71,9 @@ class MessageService(
         val bulkPayment = bulkPaymentRepository.findBulkPaymentById(entityId)
                 ?: throw EntityNotFoundException("party")
 
-        if (bulkPayment.payer?.id != currentUserId && bulkPayment.receiver?.id == currentUserId) {
+        if (bulkPayment.payer == null || bulkPayment.receiver == null) throw InternalError("bulk payment was not entirely fetched")
+
+        if (bulkPayment.payer.id != currentUserId && bulkPayment.receiver.id != currentUserId) {
             throw UnauthorisedException()
         }
     }

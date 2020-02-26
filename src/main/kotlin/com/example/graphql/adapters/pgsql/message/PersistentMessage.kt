@@ -22,5 +22,10 @@ abstract class PersistentMessage(
         @JoinColumn(name = "user_id", nullable = false)
         var user: PersistentUser? = null
 ) {
+        fun toDomain() = Message(
+                id = this.id,
+                text = this.text,
+                sendDate = this.createdAt ?: ZonedDateTime.now()
+        )
         //TODO HASH CODE AND EQUALS
 }

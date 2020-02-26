@@ -104,7 +104,7 @@ class PartyTest extends BaseIntegrationSpec {
                 expenses   : []
         ], partyRepository)
         def expense = anExpense([user: baseUser, party: party], expenseRepository)
-        def partyMessage = aPartyMessage([party: party], messageRepository)
+        def partyMessage = aPartyMessage([user: baseUser, party: party], messageRepository)
 
         and:
         def getSinglePartyQuery = """
