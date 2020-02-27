@@ -25,7 +25,24 @@ abstract class PersistentMessage(
         fun toDomain() = Message(
                 id = this.id,
                 text = this.text,
-                sendDate = this.createdAt ?: ZonedDateTime.now()
+                sendDate = this.createdAt ?: ZonedDateTime.now(),
+                user = this.user!!.toDomain()
         )
-        //TODO HASH CODE AND EQUALS
+
+        override fun hashCode(): Int {
+                var result = id.hashCode()
+                result = 31 * result + text.hashCode()
+                result = 31 * result + createdAt.hashCode()
+
+                return result
+        }
+
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other?.javaClass != javaClass) return false
+
+                other as PersistentMessage
+
+                return this.id == other.id && this.text == other.text && this.createdAt == other.createdAt
+        }
 }

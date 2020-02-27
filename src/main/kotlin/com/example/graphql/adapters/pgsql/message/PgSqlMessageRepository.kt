@@ -29,7 +29,7 @@ class PgSqlMessageRepository(
         val repository = getMessageRepository(messageType)
         val message = repository.findById(messageId)
 
-        return message.toNullable()?.toDomainWithRelations()
+        return message.toNullable()?.toDomain()
     }
 
     override fun saveNewMessage(text: String, currentUserId: Long, messageType: MessageType, entityId: Long): Message {
@@ -60,7 +60,7 @@ class PgSqlMessageRepository(
             }
         }
 
-        return savedMessage.toDomainWithRelations()
+        return savedMessage.toDomain()
     }
 
     override fun removeMessage(messageId: Long, messageType: MessageType) {
@@ -78,8 +78,4 @@ class PgSqlMessageRepository(
         }
     }
 }
-
-private fun PersistentMessage.toDomainWithRelations() = this.toDomain().copy(
-        user = this.user?.toDomain()
-)
 

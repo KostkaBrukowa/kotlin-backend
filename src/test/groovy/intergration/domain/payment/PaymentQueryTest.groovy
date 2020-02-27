@@ -67,7 +67,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 status
                 paymentPayer { id }
                 paymentExpense { id }
-                paymentMessages { id }
+                paymentMessages { id, messageSender { id } }
             }
         """)
 
@@ -83,6 +83,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         response.paymentExpense.id.toLong() == aExpense.id
         response.paymentMessages.size() == 1
         response.paymentMessages[0].id.toLong() == message.id
+        response.paymentMessages[0].messageSender.id.toLong() == baseUser.id
     }
 
     def "Should return user's payments"() {
@@ -144,7 +145,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
                 bulkPaymentPayer { id }
                 bulkPaymentReceiver { id }
                 bulkPaymentPayments { id }
-                bulkPaymentMessages { id }
+                bulkPaymentMessages { id, messageSender { id }}
             }
         """
         })
@@ -163,6 +164,7 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         baseUserResponse[0].bulkPaymentPayments[0].id.toLong() == payment.id
         baseUserResponse[0].bulkPaymentMessages.size() == 1
         baseUserResponse[0].bulkPaymentMessages[0].id.toLong() == message.id
+        baseUserResponse[0].bulkPaymentMessages[0].messageSender.id.toLong() == baseUser.id
 
         secondUserResponse.size() == 1
         secondUserResponse[0].amount.toFloat() == 44.0f
@@ -171,7 +173,8 @@ class PaymentQueryTest extends BaseIntegrationSpec {
         secondUserResponse[0].bulkPaymentReceiver.id.toLong() == baseUser.id
         secondUserResponse[0].bulkPaymentPayments.size() == 1
         secondUserResponse[0].bulkPaymentPayments[0].id.toLong() == payment.id
-        baseUserResponse[0].bulkPaymentMessages.size() == 1
-        baseUserResponse[0].bulkPaymentMessages[0].id.toLong() == message.id
+        secondUserResponse[0].bulkPaymentMessages.size() == 1
+        secondUserResponse[0].bulkPaymentMessages[0].id.toLong() == message.id
+        secondUserResponse[0].bulkPaymentMessages[0].messageSender.id.toLong() == baseUser.id
     }
 }

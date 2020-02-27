@@ -61,7 +61,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
                 expensePayer { id }
                 expenseParty { id }
                 expensePayments { id }
-                expenseMessages { id }
+                expenseMessages { id, messageSender { id } }
             }
         """)
 
@@ -81,6 +81,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         response.expensePayments.any { it.id.toLong() == expensePayment2.id }
         response.expenseMessages.size() == 1
         response.expenseMessages[0].id.toLong() == expenseMessage.id
+        response.expenseMessages[0].messageSender.id.toLong() == baseUser.id
     }
 
     def "Should return all expenses for an user"() {

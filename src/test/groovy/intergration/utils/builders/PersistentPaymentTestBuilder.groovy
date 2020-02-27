@@ -20,7 +20,7 @@ class PersistentPaymentTestBuilder {
             expense        : null,
             user           : null,
             bulkedPayment  : null,
-            messages  : [],
+            messages       : [],
     ]
 
     private PersistentPaymentTestBuilder() {}

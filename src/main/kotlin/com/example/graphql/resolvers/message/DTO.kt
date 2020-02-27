@@ -2,6 +2,7 @@ package com.example.graphql.resolvers.message
 
 import com.example.graphql.domain.message.Message
 import com.example.graphql.resolvers.user.UserType
+import com.example.graphql.resolvers.user.toResponse
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
 import org.hibernate.validator.constraints.Length
@@ -13,16 +14,16 @@ data class MessageResponseType(
 
         val text: String,
 
-        val sendDate: ZonedDateTime
-) : GQLResponseType {
+        val sendDate: ZonedDateTime,
 
-    lateinit var messageSender: UserType
-}
+        val messageSender: UserType
+) : GQLResponseType
 
 fun Message.toResponse() = MessageResponseType(
         id = this.id.toString(),
         text = this.text,
-        sendDate = this.sendDate
+        sendDate = this.sendDate,
+        messageSender = this.user.toResponse()
 )
 
 data class NewMessageInput(
