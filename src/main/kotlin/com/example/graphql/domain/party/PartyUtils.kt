@@ -7,3 +7,8 @@ fun requirePartyOwner(party: Party, currentUserId: Long) {
     if (party.owner == null) throw InternalError("Party owner was not fetched from DB")
     if (party.owner.id != currentUserId) throw UnauthorisedException()
 }
+
+fun requirePartyOwnerOrParticipant(party: Party, participantId: Long, currentUserId: Long) {
+    if (party.owner == null) throw InternalError("Party owner was not fetched from DB")
+    if (party.owner.id != currentUserId && participantId != currentUserId) throw UnauthorisedException()
+}

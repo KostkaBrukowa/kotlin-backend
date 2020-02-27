@@ -2,6 +2,7 @@ package com.example.graphql.resolvers.expense
 
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseStatus
+import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.user.UserType
@@ -33,6 +34,7 @@ data class ExpenseType(
 
     lateinit var expensePayments: List<PaymentType>
 
+    lateinit var expenseMessages: List<MessageResponseType>
 }
 
 fun Expense.toResponse() = ExpenseType(

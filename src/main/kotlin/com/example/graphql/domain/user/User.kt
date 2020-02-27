@@ -1,7 +1,6 @@
 package com.example.graphql.domain.user
 
 import com.example.graphql.domain.expense.Expense
-import com.example.graphql.domain.messagegroup.MessageGroup
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.payment.Payment
@@ -30,8 +29,6 @@ data class User(
         val expenses: List<Expense> = emptyList(),
 
         val payments: List<Payment> = emptyList(),
-
-        val messageGroups: List<MessageGroup> = emptyList(),
 
         val friends: List<User> = emptyList(),
 

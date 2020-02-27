@@ -1,29 +1,48 @@
 package com.example.graphql.domain.message
 
-import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.user.PersistentUser
+import org.hibernate.annotations.CreationTimestamp
 import java.time.ZonedDateTime
 import javax.persistence.*
 
-@Table(name = "messages")
 @Entity
-data class PersistentMessage(
-
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+abstract class PersistentMessage(
         @Id
         @GeneratedValue
-        val id: Long,
+        val id: Long = 0,
 
-        val text: String,
+        var text: String = "",
 
-        @Column(name = "send_date")
-        val sendDate: ZonedDateTime,
+        @field:CreationTimestamp
+        var createdAt: ZonedDateTime? = null,
 
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
-        val user: PersistentUser? = null,
+        var user: PersistentUser? = null
+) {
+        fun toDomain() = Message(
+                id = this.id,
+                text = this.text,
+                sendDate = this.createdAt ?: ZonedDateTime.now(),
+                user = this.user!!.toDomain()
+        )
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "message_group_id", nullable = false)
-        val messageGroup: PersistentMessageGroup
-)
+        override fun hashCode(): Int {
+                var result = id.hashCode()
+                result = 31 * result + text.hashCode()
+                result = 31 * result + createdAt.hashCode()
+
+                return result
+        }
+
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other?.javaClass != javaClass) return false
+
+                other as PersistentMessage
+
+                return this.id == other.id && this.text == other.text && this.createdAt == other.createdAt
+        }
+}

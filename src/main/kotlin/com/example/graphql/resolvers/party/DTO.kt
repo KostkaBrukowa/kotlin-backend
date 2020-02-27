@@ -3,6 +3,7 @@ package com.example.graphql.resolvers.party
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.expense.ExpenseType
+import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.GQLResponseType
@@ -32,6 +33,8 @@ data class PartyType(
     lateinit var partyPartyRequests: List<PartyRequestType>
 
     lateinit var partyExpenses: List<ExpenseType>
+
+    lateinit var partyMessages: List<MessageResponseType>
 }
 
 fun Party.toResponse() = PartyType(

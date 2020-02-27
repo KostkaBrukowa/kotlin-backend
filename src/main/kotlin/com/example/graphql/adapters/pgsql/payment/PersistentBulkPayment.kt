@@ -1,5 +1,6 @@
 package com.example.graphql.adapters.pgsql.payment
 
+import com.example.graphql.adapters.pgsql.message.PersistentBulkPaymentMessage
 import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.PersistentPayment
@@ -32,7 +33,10 @@ data class PersistentBulkPayment(
         val receiver: PersistentUser? = null,
 
         @OneToMany(mappedBy = "bulkedPayment", fetch = FetchType.LAZY)
-        val payments: Set<PersistentPayment> = emptySet()
+        val payments: Set<PersistentPayment> = emptySet(),
+
+        @OneToMany(mappedBy = "bulkPayment",fetch = FetchType.LAZY)
+        val messages: Set<PersistentBulkPaymentMessage> = emptySet()
 ) {
 
     fun toDomain() = BulkPayment(

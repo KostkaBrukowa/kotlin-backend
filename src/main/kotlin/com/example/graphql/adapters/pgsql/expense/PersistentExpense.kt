@@ -1,5 +1,7 @@
 package com.example.graphql.domain.expense
 
+import com.example.graphql.adapters.pgsql.message.PersistentExpenseMessage
+import com.example.graphql.adapters.pgsql.message.PersistentPartyMessage
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.party.toPersistentEntity
 import com.example.graphql.domain.payment.PersistentPayment
@@ -36,7 +38,10 @@ data class PersistentExpense(
         val party: PersistentParty?,
 
         @OneToMany(mappedBy = "expense", cascade = [CascadeType.REMOVE])
-        val payments: List<PersistentPayment> = emptyList()
+        val payments: List<PersistentPayment> = emptyList(),
+
+        @OneToMany(mappedBy = "expense",fetch = FetchType.LAZY)
+        val messages: Set<PersistentExpenseMessage> = emptySet()
 ) {
 
     fun toDomain() = Expense(

@@ -5,6 +5,7 @@ import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseRepository
 import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.expense.toPersistentEntity
+import com.example.graphql.domain.message.Message
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
@@ -36,6 +37,12 @@ class PgSqlExpenseRepository(private val expenseRepository: PersistentExpenseRep
         return expenseRepository.findExpenseWithPayments(ids).map { expense ->
             expense.toDomainWithRelations().copy(payments = expense.payments.map { it.toDomain() })
         }.toSet()
+    }
+
+    override fun findExpensesWithMessages(ids: Set<Long>): Map<Expense, List<Message>> {
+        return expenseRepository
+                .findExpensesWithMessages(ids)
+                .associateBy({ it.toDomain() }, { it.messages.map { message -> message.toDomain() } })
     }
 
     override fun updateExpense(updatedExpense: Expense) {

@@ -1,5 +1,8 @@
 package com.example.graphql.domain.expense
 
+import com.example.graphql.resolvers.message.MessageResponseType
+import com.example.graphql.resolvers.message.MessageType
+import com.example.graphql.resolvers.message.toResponse
 import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.party.toResponse
 import com.example.graphql.resolvers.payment.PaymentType
@@ -28,5 +31,11 @@ class ExpenseDataLoaderService(private val expenseRepository: ExpenseRepository)
         val parties = expenseRepository.findExpensesWithPayments(ids)
 
         return parties.associateBy({ it.id }, { it.payments.map { payment -> payment.toResponse() } })
+    }
+
+    fun expenseToMessagesDataLoaderMap(ids: Set<Long>): Map<Long, List<MessageResponseType>> {
+        val messages = expenseRepository.findExpensesWithMessages(ids)
+
+        return messages.map { it.key.id to it.value.map {message -> message.toResponse() } }.toMap()
     }
 }

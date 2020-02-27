@@ -66,8 +66,4 @@ class PartyService(
         return true
     }
 
-    private fun requirePartyOwnerOrParticipant(party: Party, participantId: Long, currentUserId: Long) {
-        if (party.owner == null) throw InternalError("Party owner was not fetched from DB")
-        if (party.owner.id != currentUserId && participantId != currentUserId) throw UnauthorisedException()
-    }
 }

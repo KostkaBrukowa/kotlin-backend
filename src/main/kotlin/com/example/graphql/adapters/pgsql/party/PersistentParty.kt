@@ -1,8 +1,9 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.adapters.pgsql.message.PersistentBulkPaymentMessage
+import com.example.graphql.adapters.pgsql.message.PersistentPartyMessage
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.expense.PersistentExpense
-import com.example.graphql.domain.messagegroup.PersistentMessageGroup
 import com.example.graphql.domain.user.PersistentUser
 import java.time.ZonedDateTime
 import javax.persistence.*
@@ -30,10 +31,6 @@ data class PersistentParty(
         @JoinColumn(name = "owner_id")
         val owner: PersistentUser? = null,
 
-        @OneToOne(fetch = FetchType.LAZY, optional = true) // TODO CHANGE OPTIONAL TO FALSE WHEN MESSAGE GROUP IS READY
-        @JoinColumn(name = "messagegroup_id")
-        val messageGroup: PersistentMessageGroup? = null,
-
         @ManyToMany(fetch = FetchType.LAZY)
         @JoinTable(name = "party_user", inverseJoinColumns = [JoinColumn(name = "user_id")], joinColumns = [JoinColumn(name = "party_id")])
         val participants: Set<PersistentUser> = emptySet(),
@@ -42,7 +39,10 @@ data class PersistentParty(
         val partyRequests: List<PersistentPartyRequest> = emptyList(),
 
         @OneToMany(mappedBy = "party")
-        val expenses: List<PersistentExpense> = emptyList()
+        val expenses: List<PersistentExpense> = emptyList(),
+
+        @OneToMany(mappedBy = "party",fetch = FetchType.LAZY)
+        val messages: Set<PersistentPartyMessage> = emptySet()
 ) {
 
     fun toDomain(): Party = Party(

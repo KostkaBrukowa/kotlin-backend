@@ -29,7 +29,6 @@ data class UserType(
 
     lateinit var userExpenses: List<ExpenseType>
 
-//    lateinit var  messageGroups: List<MessageGroup>
 }
 
 fun User.toResponse() = UserType(

@@ -1,5 +1,6 @@
 package com.example.graphql.adapters.pgsql.party
 
+import com.example.graphql.domain.message.Message
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.party.PersistentParty
@@ -43,6 +44,12 @@ class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepositor
         return partyRepository.findPartiesWithExpenses(partiesIds).map {
             it.toDomain().copy(expenses = it.expenses.map { expense -> expense.toDomain() })
         }
+    }
+
+    override fun findPartiesWithMessages(ids: Set<Long>): Map<Party, List<Message>> {
+        return partyRepository
+                .findPartiesWithMessages(ids)
+                .associateBy({ it.toDomain() }, { it.messages.map { message -> message.toDomain() } })
     }
 
     override fun removeParticipant(partyId: Long, participantId: Long) {

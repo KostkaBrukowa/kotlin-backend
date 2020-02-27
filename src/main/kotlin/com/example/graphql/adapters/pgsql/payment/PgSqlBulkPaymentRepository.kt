@@ -2,6 +2,7 @@ package com.example.graphql.adapters.pgsql.payment
 
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.adapters.pgsql.utils.toNullable
+import com.example.graphql.domain.message.Message
 import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentRepository
 import com.example.graphql.domain.payment.BulkPaymentStatus
@@ -51,6 +52,12 @@ class PgSqlBulkPaymentRepository(
         return bulkPaymentRepository.findPaymentsWithPayments(ids).map {
             it.toDomain().copy(payments = it.payments.map { payment -> payment.toDomain() }.toSet())
         }
+    }
+
+    override fun findBulkPaymentsWithMessages(ids: Set<Long>): Map<BulkPayment, List<Message>> {
+        return bulkPaymentRepository
+                .findPaymentsWithMessages(ids)
+                .associateBy({ it.toDomain() }, { it.messages.map { message -> message.toDomain() } })
     }
 }
 

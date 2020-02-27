@@ -5,6 +5,7 @@ import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
+import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
@@ -22,6 +23,8 @@ data class PaymentType(
     lateinit var paymentExpense: Expense
 
     lateinit var paymentPayer: UserType
+
+    lateinit var paymentMessages: List<MessageResponseType>
 }
 
 fun Payment.toResponse() = PaymentType(
@@ -45,6 +48,8 @@ data class BulkPaymentType(
     lateinit var bulkPaymentPayer: UserType
 
     lateinit var bulkPaymentPayments: List<PaymentType>
+
+    lateinit var bulkPaymentMessages: List<MessageResponseType>
 }
 
 fun BulkPayment.toResponse() = BulkPaymentType(

@@ -78,4 +78,3 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
     """)
     fun findUsersFriends(@Param("userId") userId: Long): PersistentUser
 }
-

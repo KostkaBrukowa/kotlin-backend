@@ -3,7 +3,7 @@ package com.example.graphql.domain.user
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import com.example.graphql.domain.expense.PersistentExpense
-import com.example.graphql.domain.messagegroup.PersistentMessageGroup
+import com.example.graphql.domain.message.PersistentMessage
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.payment.PersistentPayment
 import javax.persistence.*
@@ -42,8 +42,8 @@ data class PersistentUser(
         @OneToMany(mappedBy = "user")
         val payments: Set<PersistentPayment> = emptySet(),
 
-        @ManyToMany(mappedBy = "users")
-        val messageGroups: List<PersistentMessageGroup> = emptyList(),
+        @OneToMany(mappedBy = "user")
+        val messages: Set<PersistentMessage> = emptySet(),
 
         @ManyToMany(mappedBy = "participants")
         @Column(name = "party_id")
@@ -72,7 +72,6 @@ data class PersistentUser(
             email = this.email,
             joinedParties = lazyProxy(this.joinedParties)?.map { it.toDomain() } ?: emptyList(),
             expenses = emptyList(),
-            messageGroups = emptyList(),
             partyRequests = lazyProxy(this.partyRequests)?.map { it.toDomain() } ?: emptyList(),
             isEmailConfirmed = this.isEmailConfirmed
     )

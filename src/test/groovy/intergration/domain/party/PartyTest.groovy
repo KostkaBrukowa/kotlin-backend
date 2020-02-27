@@ -1,6 +1,7 @@
 package intergration.domain.party
 
 import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
+import com.example.graphql.adapters.pgsql.message.PersistentPartyMessageRepository
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
@@ -16,6 +17,8 @@ import spock.lang.Unroll
 
 import java.time.ZonedDateTime
 
+import static intergration.utils.builders.MessageTestBuilder.aExpenseMessage
+import static intergration.utils.builders.MessageTestBuilder.aPartyMessage
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
@@ -34,6 +37,9 @@ class PartyTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPartyRequestRepository partyRequestRepository
+
+    @Autowired
+    PersistentPartyMessageRepository messageRepository
 
     def "Should return an error when user is not signed in"() {
         given:
@@ -98,6 +104,7 @@ class PartyTest extends BaseIntegrationSpec {
                 expenses   : []
         ], partyRepository)
         def expense = anExpense([user: baseUser, party: party], expenseRepository)
+        def partyMessage = aPartyMessage([user: baseUser, party: party], messageRepository)
 
         and:
         def getSinglePartyQuery = """
@@ -107,6 +114,7 @@ class PartyTest extends BaseIntegrationSpec {
                 description,
                 startDate,
                 partyExpenses { id }
+                partyMessages { id, messageSender { id } }
             }
         """
 
@@ -120,6 +128,9 @@ class PartyTest extends BaseIntegrationSpec {
         partyResponse.startDate == tenDaysFromNow.toString()
         partyResponse.partyExpenses.size() == 1
         partyResponse.partyExpenses[0].id.toLong() == expense.id
+        partyResponse.partyMessages.size() == 1
+        partyResponse.partyMessages[0].id.toLong() == partyMessage.id
+        partyResponse.partyMessages[0].messageSender.id.toLong() == baseUser.id
     }
 
     def "Should return party with only party owner as participant when create party mutation is called with no participants"() {
@@ -156,7 +167,6 @@ class PartyTest extends BaseIntegrationSpec {
         partyResponse.description == "test description"
         partyResponse.startDate == tenDaysFromNow
         partyResponse.endDate == elevenDaysFromNow
-//        partyResponse.messageGroup.containsKey("id") TODO when messages are up
         partyRequestResponse.size() == 0
         participantsResponse.size() == 1
     }

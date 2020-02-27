@@ -3,7 +3,7 @@ package intergration.utils.builders
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.domain.expense.PersistentExpense
-import com.example.graphql.domain.messagegroup.PersistentMessageGroup
+import com.example.graphql.domain.message.PersistentMessage
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.user.PersistentUser
 
@@ -17,7 +17,7 @@ class PersistentPartyTestBuilder {
             id           : '0',
             name         : 'testname',
             owner        : null,
-            messageGroup : null,
+            messages     : [],
             participants : [],
             partyRequests: [],
             expenses     : [],
@@ -39,16 +39,16 @@ class PersistentPartyTestBuilder {
                 allArgs.startDate instanceof ZonedDateTime ? allArgs.startDate : ZonedDateTime.parse(allArgs.startDate) as ZonedDateTime,
                 allArgs.endDate instanceof ZonedDateTime ? allArgs.endDate : ZonedDateTime.parse(allArgs.endDate) as ZonedDateTime,
                 allArgs.owner as PersistentUser,
-                allArgs.messageGroup as PersistentMessageGroup,
                 allArgs.participants as Set<PersistentUser>,
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.expenses as List<PersistentExpense>,
+                allArgs.messages as Set<PersistentMessage>,
         )
     }
 
     static PersistentParty aParty(Map props = [:], PersistentPartyRepository repository) {
-        if(props.containsKey("participants")) {
-            if(props.containsKey("owner") && props.participants.every {it.id != props.owner.id}){
+        if (props.containsKey("participants")) {
+            if (props.containsKey("owner") && props.participants.every { it.id != props.owner.id }) {
                 props.participants.add(props.owner)
             }
         } else {

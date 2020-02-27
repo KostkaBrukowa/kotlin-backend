@@ -3,8 +3,7 @@ package intergration.utils.builders
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.PersistentExpense
-import com.example.graphql.domain.messagegroup.MessageGroup
-import com.example.graphql.domain.messagegroup.PersistentMessageGroup
+import com.example.graphql.domain.message.PersistentMessage
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.payment.PersistentPayment
 import com.example.graphql.domain.user.PersistentUser
@@ -21,7 +20,7 @@ class PersistentUserTestBuilder {
             partyRequests   : [],
             expenses        : [],
             payments        : [],
-            messageGroups   : [],
+            messages        : [],
             joinedParties   : [],
             ownedParties    : [],
             friends         : [],
@@ -49,11 +48,11 @@ class PersistentUserTestBuilder {
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.ownedParties as List<PersistentParty>,
                 allArgs.expenses as Set<PersistentExpense>,
+                allArgs.messages as Set<PersistentMessage>,
                 allArgs.payments as Set<PersistentPayment>,
-                allArgs.messageGroups as List<PersistentMessageGroup>,
                 allArgs.joinedParties as Set<PersistentParty>,
-                allArgs.friends as Set<MessageGroup>,
-                allArgs.friendOf as Set<MessageGroup>,
+                allArgs.friends as Set<PersistentUser>,
+                allArgs.friendOf as Set<PersistentUser>,
         )
     }
 

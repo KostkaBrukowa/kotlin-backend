@@ -15,25 +15,33 @@ interface PersistentPartyRepository : JpaRepository<PersistentParty, Long> {
         SELECT distinct p
         FROM PersistentParty as p
         LEFT JOIN FETCH p.partyRequests
-        WHERE p.id IN (:partiesIds)
+        WHERE p.id IN (:ids)
     """)
-    fun findPartiesWithPartyRequests(@Param("partiesIds") partiesIds: Set<Long>): List<PersistentParty>
+    fun findPartiesWithPartyRequests(@Param("ids") ids: Set<Long>): List<PersistentParty>
 
     @Query("""
         SELECT distinct p
         FROM PersistentParty as p
         LEFT JOIN FETCH p.participants
-        WHERE p.id in (:partiesIds)
+        WHERE p.id in (:ids)
     """)
-    fun findPartiesWithParticipants(@Param("partiesIds") partiesIds: Set<Long>): List<PersistentParty>
+    fun findPartiesWithParticipants(@Param("ids") ids: Set<Long>): List<PersistentParty>
+
+    @Query("""
+        SELECT distinct p
+        FROM PersistentParty as p
+        LEFT JOIN FETCH p.messages
+        WHERE p.id in (:ids)
+    """)
+    fun findPartiesWithMessages(ids: Set<Long>): List<PersistentParty>
 
     @Query("""
         SELECT distinct p
         FROM PersistentParty as p
         LEFT JOIN FETCH p.expenses
-        WHERE p.id in (:partiesIds)
+        WHERE p.id in (:ids)
     """)
-    fun findPartiesWithExpenses(@Param("partiesIds") partiesIds: Set<Long>): List<PersistentParty>
+    fun findPartiesWithExpenses(@Param("ids") ids: Set<Long>): List<PersistentParty>
 
     @Transactional
     @Modifying
@@ -50,4 +58,5 @@ interface PersistentPartyRepository : JpaRepository<PersistentParty, Long> {
         WHERE pu.user_id = :userId AND pu.party_id = :partyId
     """, nativeQuery = true)
     fun removeParticipant(@Param("partyId") partyId: Long, @Param("userId") userId: Long)
+
 }
