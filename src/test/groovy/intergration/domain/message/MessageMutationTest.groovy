@@ -148,10 +148,10 @@ class MessageMutationTest extends BaseIntegrationSpec {
 
         where:
         messageType              | table
-//        MessageType.PARTY        | "party_messages"
-//        MessageType.PAYMENT      | "payment_messages"
+        MessageType.PARTY        | "party_messages"
+        MessageType.PAYMENT      | "payment_messages"
         MessageType.BULK_PAYMENT | "bulk_payment_messages"
-//        MessageType.EXPENSE      | "expense_messages"
+        MessageType.EXPENSE      | "expense_messages"
     }
 
     @Unroll

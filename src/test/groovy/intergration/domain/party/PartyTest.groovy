@@ -114,7 +114,7 @@ class PartyTest extends BaseIntegrationSpec {
                 description,
                 startDate,
                 partyExpenses { id }
-                partyMessages { id }
+                partyMessages { id, messageSender { id } }
             }
         """
 
@@ -130,6 +130,7 @@ class PartyTest extends BaseIntegrationSpec {
         partyResponse.partyExpenses[0].id.toLong() == expense.id
         partyResponse.partyMessages.size() == 1
         partyResponse.partyMessages[0].id.toLong() == partyMessage.id
+        partyResponse.partyMessages[0].messageSender.id.toLong() == baseUser.id
     }
 
     def "Should return party with only party owner as participant when create party mutation is called with no participants"() {
