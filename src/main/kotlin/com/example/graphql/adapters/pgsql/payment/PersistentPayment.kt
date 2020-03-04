@@ -1,6 +1,5 @@
 package com.example.graphql.domain.payment
 
-import com.example.graphql.adapters.pgsql.message.PersistentPartyMessage
 import com.example.graphql.adapters.pgsql.message.PersistentPaymentMessage
 import com.example.graphql.adapters.pgsql.payment.PersistentBulkPayment
 import com.example.graphql.domain.expense.PersistentExpense

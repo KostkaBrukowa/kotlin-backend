@@ -3,7 +3,6 @@ package com.example.graphql.domain.party
 import com.example.graphql.resolvers.expense.ExpenseType
 import com.example.graphql.resolvers.expense.toResponse
 import com.example.graphql.resolvers.message.MessageResponseType
-import com.example.graphql.resolvers.message.MessageType
 import com.example.graphql.resolvers.message.toResponse
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.partyrequest.toResponse

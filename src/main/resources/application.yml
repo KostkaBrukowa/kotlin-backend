@@ -1,6 +1,10 @@
 graphql:
   packages:
     - "com.example.graphql"
+  subscriptions:
+    # Send a ka message every 1000 ms (1 second)
+    keepAliveInterval: 1000
+
 spring:
   jackson:
     timeZone: 'Europe/Warsaw'

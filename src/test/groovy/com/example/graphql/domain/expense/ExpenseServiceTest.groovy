@@ -26,7 +26,7 @@ class ExpenseServiceTest extends Specification {
     ExpenseService expenseService = new ExpenseService(expenseRepository, partyService, paymentService, userRepository, partyRepository)
 
     @Unroll
-    def "Should calculate correct amount for payments"() {
+    def "Should calculate correct amount for payments when expense is changed to paying"() {
         given:
         Long currentUserId = 1
         Long expenseId = 2
@@ -53,5 +53,21 @@ class ExpenseServiceTest extends Specification {
         44            | [PaymentStatus.DECLINED, PaymentStatus.DECLINED]                                                 | 44
         44            | [PaymentStatus.ACCEPTED, PaymentStatus.DECLINED]                                                 | 22
         44            | [PaymentStatus.ACCEPTED, PaymentStatus.ACCEPTED, PaymentStatus.DECLINED, PaymentStatus.ACCEPTED] | 11
+    }
+
+    def "Should return expense by id"() {
+        given:
+        Long currentUserId = 1
+        Long expenseId = 2
+        def expense = defaultExpense([id: expenseId])
+
+        and:
+        expenseRepository.findExpenseById(expenseId) >> expense
+
+        when:
+        def actualExpense = expenseService.findExpenseById(expenseId, currentUserId)
+
+        then:
+        actualExpense == expense
     }
 }

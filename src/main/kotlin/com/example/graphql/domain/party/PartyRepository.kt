@@ -1,7 +1,6 @@
 package com.example.graphql.domain.party
 
 import com.example.graphql.domain.message.Message
-import com.example.graphql.domain.payment.Payment
 
 interface PartyRepository {
     fun getAllByOwnerId(id: Long): List<Party>

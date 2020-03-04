@@ -1,7 +1,6 @@
 package com.example.graphql.domain.expense
 
 import com.example.graphql.domain.message.Message
-import com.example.graphql.domain.party.Party
 
 interface ExpenseRepository {
     fun saveNewExpense(newExpense: Expense): Expense

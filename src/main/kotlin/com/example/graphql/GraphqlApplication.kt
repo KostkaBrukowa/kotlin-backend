@@ -32,6 +32,7 @@ class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecur
         http.csrf().disable().authorizeExchange()
                 .pathMatchers(HttpMethod.POST, "/graphql").permitAll()
                 .pathMatchers(HttpMethod.GET, "/playground").permitAll()
+                .pathMatchers(HttpMethod.GET, "/subscriptions").permitAll()
         return http.build()
     }
 }

@@ -1,7 +1,6 @@
 package com.example.graphql.domain.expense
 
 import com.example.graphql.resolvers.message.MessageResponseType
-import com.example.graphql.resolvers.message.MessageType
 import com.example.graphql.resolvers.message.toResponse
 import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.party.toResponse

@@ -2,7 +2,6 @@ package com.example.graphql.resolvers.expense
 
 import com.example.graphql.domain.expense.ExpenseDataLoaderService
 import com.example.graphql.resolvers.message.MessageResponseType
-import com.example.graphql.resolvers.message.MessageType
 import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.user.UserType

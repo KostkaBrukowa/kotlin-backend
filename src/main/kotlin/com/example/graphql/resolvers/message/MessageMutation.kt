@@ -2,8 +2,6 @@ package com.example.graphql.resolvers.message
 
 import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.domain.message.MessageService
-import com.example.graphql.resolvers.expense.NewExpenseInput
-import com.example.graphql.resolvers.expense.toResponse
 import com.example.graphql.schema.directives.Authenticated
 import com.example.graphql.schema.directives.Roles
 import com.expediagroup.graphql.annotations.GraphQLContext

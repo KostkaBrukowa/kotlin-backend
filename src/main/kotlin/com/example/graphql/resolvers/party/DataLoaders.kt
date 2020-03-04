@@ -3,7 +3,6 @@ package com.example.graphql.resolvers.party
 import com.example.graphql.domain.party.PartyDataLoaderService
 import com.example.graphql.resolvers.expense.ExpenseType
 import com.example.graphql.resolvers.message.MessageResponseType
-import com.example.graphql.resolvers.message.MessageType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.DataFetcher
