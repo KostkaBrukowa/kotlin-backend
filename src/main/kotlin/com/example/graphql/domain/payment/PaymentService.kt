@@ -55,9 +55,13 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
 
         val updatedPayment = payment.copy(status = updatePaymentStatusInput.status)
 
-        paymentRepository.updatePaymentsStatuses(listOf(payment.id), updatePaymentStatusInput.status)
+        updatePaymentsStatuses(listOf(payment.id), updatePaymentStatusInput.status)
 
         return updatedPayment
+    }
+
+    fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus) {
+        paymentRepository.updatePaymentsStatuses(paymentsIds, status)
     }
 
     fun updatePaymentsAmount(payments: List<Payment>, amount: Float) {

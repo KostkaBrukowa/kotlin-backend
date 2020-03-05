@@ -207,8 +207,8 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         then:
         actualExpenses.empty
-        response[0].errorType == 'ValidationError'
-        response[0].message.contains('Party with such id was not found')
+        response[0].errorType == 'DataFetchingException'
+        response[0].message.contains('Entity party was not found')
     }
 
     def "Should not allow to add a user as a request participant if the user is not a party participant"() {
@@ -547,5 +547,43 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         then:
         actualExpense.expenseStatus == ExpenseStatus.IN_PROGRESS_PAYING
         actualPayments.every { it.amount == 25.0 }
+    }
+
+    def "Should reset expense payments when expense is declined"() {
+        given:
+        authenticate()
+
+        and:
+        def anExpense = anExpense([
+                user         : baseUser,
+                party        : aParty([owner: aClient(userRepository)], partyRepository),
+                amount       : 100.0,
+                expenseStatus: ExpenseStatus.IN_PROGRESS_REQUESTING
+        ], expenseRepository)
+
+        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED, user: aClient(userRepository), amount: null], paymentRepository)
+        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED, user: aClient(userRepository), amount: null], paymentRepository)
+        aPayment([expense: anExpense, status: PaymentStatus.ACCEPTED, user: aClient(userRepository), amount: null], paymentRepository)
+
+        and:
+        def changeExpenseStatusMutation = """
+            changeExpenseStatus(
+                updateExpenseStatusInput: {
+                    id: ${anExpense.id},
+                    expenseStatus: DECLINED
+                }
+            ) { id }
+        """
+
+        when:
+        postMutation(changeExpenseStatusMutation)
+
+        and:
+        def actualExpense = expenseRepository.findById(anExpense.id).get()
+        def actualPayments = paymentRepository.findAllByExpenseId(anExpense.id)
+
+        then:
+        actualExpense.expenseStatus == ExpenseStatus.DECLINED
+        actualPayments.every { it.paymentStatus == PaymentStatus.DECLINED }
     }
 }

@@ -2,7 +2,6 @@ package com.example.graphql.domain.expense
 
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyRepository
-import com.example.graphql.domain.party.PartyService
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentService
 import com.example.graphql.domain.payment.PaymentStatus
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component
 @Component
 class ExpenseService(
         private val expenseRepository: ExpenseRepository,
-        private val partyService: PartyService,
         private val paymentService: PaymentService,
         private val userRepository: UserRepository,
         private val partyRepository: PartyRepository
@@ -44,8 +42,8 @@ class ExpenseService(
 
     // CREATE
     fun createExpense(expenseInput: NewExpenseInput, currentUserId: Long): Expense {
-        val expenseParty = partyService.findPartiesWithParticipants(setOf(expenseInput.partyId)).firstOrNull()
-                ?: throw PartyNotFoundException()
+        val expenseParty = partyRepository.findPartiesWithParticipants(setOf(expenseInput.partyId)).firstOrNull()
+                ?: throw EntityNotFoundException("party")
 
         val expenseParticipants = expenseInput.participants.filter { it != currentUserId }.toSet()
 
@@ -105,6 +103,9 @@ class ExpenseService(
         if (updateExpenseStatusInput.expenseStatus == ExpenseStatus.IN_PROGRESS_PAYING) {
             updateExpensePaymentsAmounts(updatedExpense)
         }
+        if (updateExpenseStatusInput.expenseStatus == ExpenseStatus.DECLINED) {
+            declineExpensePayments(updatedExpense)
+        }
 
         return updatedExpense
     }
@@ -127,6 +128,10 @@ class ExpenseService(
         val updatedAmount = updatedExpense.amount / (acceptedPayments.size + 1)
 
         paymentService.updatePaymentsAmount(acceptedPayments, updatedAmount)
+    }
+
+    private fun declineExpensePayments(expense: Expense) {
+        paymentService.updatePaymentsStatuses(expense.payments.map { it.id }, PaymentStatus.DECLINED)
     }
 
     private fun requireExpenseStatusForUpdate(expense: Expense, statusToBeChangedTo: ExpenseStatus) {
@@ -166,8 +171,8 @@ class ExpenseService(
     ) {
         val partyParticipants = expenseParty.participants.map { it.id }.toSet()
 
-        if ((expenseParticipants - partyParticipants).isNotEmpty()) throw ExpenseParticipantNotInPartyException()
         if (!partyParticipants.contains(currentUserId)) throw UnauthorisedException()
+        if ((expenseParticipants - partyParticipants).isNotEmpty()) throw ExpenseParticipantNotInPartyException()
     }
 
     private fun requireExpenseStatuses(expenseToUpdate: Expense, statuses: List<ExpenseStatus>) {
@@ -185,7 +190,6 @@ fun NewExpenseInput.toDomain(userId: Long) = Expense(
         party = Party(this.partyId)
 )
 
-class PartyNotFoundException : SimpleValidationException("Party with such id was not found")
 class ExpenseParticipantNotInPartyException : SimpleValidationException("Not all users were party participants")
 class ExpenseStatusNotValid(status: ExpenseStatus) : SimpleValidationException("Expense status was not valid, status is $status")
 class PaymentStatusNotValid(status: PaymentStatus) : SimpleValidationException("Payment status was not valid, status is $status")

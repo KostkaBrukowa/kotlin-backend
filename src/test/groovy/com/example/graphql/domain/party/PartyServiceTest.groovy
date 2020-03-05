@@ -28,8 +28,8 @@ class PartyServiceTest extends Specification {
             (
                     party.owner.id == 42
                             && party.participants.size() == 2
-                            && party.participants.any { it.id == 1 }
-                            && party.participants.any { it.id == 42 }
+                            && party.participants.any({ it.id == 1 })
+                            && party.participants.any({ it.id == 42 })
             )
         })
     }

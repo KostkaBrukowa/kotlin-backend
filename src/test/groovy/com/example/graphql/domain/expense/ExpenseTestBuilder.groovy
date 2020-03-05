@@ -25,7 +25,7 @@ class ExpenseTestBuilder {
 
     private ExpenseTestBuilder() {}
 
-    static Expense defaultExpense(Map args) {
+    static Expense defaultExpense(Map args = [:]) {
         verifyPropertyNames(defaults, args)
 
         def allArgs = defaults + args

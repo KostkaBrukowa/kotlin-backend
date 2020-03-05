@@ -10,21 +10,21 @@ import javax.persistence.*
 class PersistentNotification(
         @Id
         @GeneratedValue
-        val id: Long = 0,
+        val id: Long = 0
 
-        val text: String = "",
-
-        @field:CreationTimestamp
-        val createdAt: ZonedDateTime? = null,
-
-        val objectId: Long,
-
-        val objectType: NotificationObjectType,
-
-
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "user_id", nullable = false)
-        val actor: PersistentUser? = null
+//        val text: String = "",
+//
+//        @field:CreationTimestamp
+//        val createdAt: ZonedDateTime? = null,
+//
+//        val objectId: Long,
+//
+//        val objectType: NotificationObjectType,
+//
+//
+//        @ManyToOne(fetch = FetchType.LAZY)
+//        @JoinColumn(name = "user_id", nullable = false)
+//        val actor: PersistentUser? = null
 )
 
 enum class NotificationObjectType {
