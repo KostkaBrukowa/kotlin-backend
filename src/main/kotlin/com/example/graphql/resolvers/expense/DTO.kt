@@ -10,6 +10,7 @@ import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
 import org.hibernate.validator.constraints.Length
 import java.time.ZonedDateTime
+import javax.validation.constraints.Min
 import javax.validation.constraints.PastOrPresent
 import javax.validation.constraints.Positive
 
@@ -48,6 +49,7 @@ fun Expense.toResponse() = ExpenseType(
 data class NewExpenseInput(
 
         @field:Positive
+        @field:Min(value = 1)
         val amount: Float,
 
         @field:PastOrPresent
@@ -77,6 +79,7 @@ data class UpdateExpenseAmountInput(
         val id: Long,
 
         @field:Positive
+        @field:Min(value = 1)
         val amount: Float
 )
 

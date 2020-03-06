@@ -25,6 +25,6 @@ class PaymentQuery(
 
     @Authenticated(role = Roles.USER)
     fun getClientBulkPayments(userId: Long): List<BulkPaymentType> {
-        return bulkPaymentService.getUserBulkPayments(userId).map { it.toResponse() }
+        return bulkPaymentService.findUserBulkPayments(userId).map { it.toResponse() }
     }
 }

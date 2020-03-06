@@ -13,7 +13,7 @@ class BulkPaymentService(
         private val paymentRepository: PaymentRepository
 ) {
 
-    fun getUserBulkPayments(userId: Long): List<BulkPayment> {
+    fun findUserBulkPayments(userId: Long): List<BulkPayment> {
         return bulkPaymentRepository.findBulkPaymentsByPayerIdOrReceiver(userId)
     }
 
@@ -24,12 +24,9 @@ class BulkPaymentService(
         if (payments.size != paymentsIds.size) throw EntityNotFoundException("payment")
 
         payments.forEach {
-            requirePaymentStatuses(it.status, listOf(
-                    PaymentStatus.ACCEPTED,
-                    PaymentStatus.IN_PROGRESS,
-                    PaymentStatus.DECLINED
-            ))
+            requirePaymentStatuses(it.status, listOf(PaymentStatus.ACCEPTED, PaymentStatus.IN_PROGRESS))
         }
+
         val (payerId, receiverId, bulkPaymentAmount) = calculateBulkPaymentAmount(payments)
         val newBulkPayment = bulkPaymentRepository.createBulkPayment(
                 bulkPaymentAmount.toFloat(),
@@ -76,7 +73,7 @@ class BulkPaymentService(
                 requireBulkPaymentStatuses(statusTo, listOf(BulkPaymentStatus.PAID))
             }
             BulkPaymentStatus.PAID -> {
-                requireBulkPaymentStatuses(statusTo, listOf(BulkPaymentStatus.PAID, BulkPaymentStatus.IN_PROGRESS))
+                requireBulkPaymentStatuses(statusTo, listOf(BulkPaymentStatus.IN_PROGRESS, BulkPaymentStatus.CONFIRMED))
             }
             BulkPaymentStatus.CONFIRMED -> throw BulkPaymentStatusNotValid(BulkPaymentStatus.CONFIRMED)
         }
@@ -88,5 +85,5 @@ class BulkPaymentService(
 }
 
 class BulkPaymentStatusNotValid(status: BulkPaymentStatus) : SimpleValidationException("Bulk Payment status was not valid, status is $status")
-class TooPaymentParticipantsError() : SimpleValidationException("There was to many participants in the payments")
-class InvalidPaymentState() : SimpleValidationException("Payment has not been initialized yet")
+class TooPaymentParticipantsError : SimpleValidationException("There was to many participants in the payments")
+class InvalidPaymentState : SimpleValidationException("Payment has not been initialized yet")

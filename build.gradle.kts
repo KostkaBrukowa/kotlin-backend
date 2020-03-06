@@ -38,6 +38,7 @@ dependencies {
     testImplementation("org.spockframework:spock-core:1.2-groovy-2.4")
     testImplementation("org.spockframework:spock-spring:1.2-groovy-2.4")
     testImplementation("org.codehaus.groovy:groovy-all:2.5.2")
+    testImplementation("org.hamcrest:hamcrest-core:1.2")
     testImplementation("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1")
 }
 
