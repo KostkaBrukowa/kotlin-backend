@@ -3,6 +3,7 @@ package com.example.graphql.domain.payment
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.PaymentStatusNotValid
 import com.example.graphql.domain.expense.requireExpenseOwner
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.payment.UpdatePaymentStatusInput
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
@@ -11,7 +12,10 @@ import javax.persistence.EntityNotFoundException
 import kotlin.contracts.contract
 
 @Component
-class PaymentService(private val paymentRepository: PaymentRepository) {
+class PaymentService(
+        private val paymentRepository: PaymentRepository,
+        private val notificationService: NotificationService
+) {
 
     // GET
     fun getUserPayments(userId: Long): List<Payment> {
@@ -36,6 +40,7 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
         }
 
         paymentRepository.createPayments(newPayments)
+        notificationService.newExpensePaymentsNotification(newExpense, newPayments)
     }
 
 
@@ -56,12 +61,14 @@ class PaymentService(private val paymentRepository: PaymentRepository) {
         val updatedPayment = payment.copy(status = updatePaymentStatusInput.status)
 
         updatePaymentsStatuses(listOf(payment.id), updatePaymentStatusInput.status)
+        notificationService.updatePaymentsStatusesNotifications(listOf(updatedPayment), updatePaymentStatusInput.status)
 
         return updatedPayment
     }
 
     fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus) {
-        paymentRepository.updatePaymentsStatuses(paymentsIds, status)
+        val updatedPayments = paymentRepository.updatePaymentsStatuses(paymentsIds, status)
+        notificationService.updatePaymentsStatusesNotifications(updatedPayments, status)
     }
 
     fun updatePaymentsAmount(payments: List<Payment>, amount: Float) {

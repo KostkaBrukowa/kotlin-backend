@@ -1,5 +1,6 @@
 package com.example.graphql.domain.partyrequest
 
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.party.PartyService
@@ -13,19 +14,20 @@ import org.springframework.stereotype.Component
 class PartyRequestService(
         private val partyRequestRepository: PartyRequestRepository,
         private val partyRepository: PartyRepository,
-        private val partyService: PartyService
+        private val partyService: PartyService,
+        private val notificationService: NotificationService
 ) {
     // GET
     fun getAllPartyRequestsByPartyId(partyId: Long) = partyRequestRepository.findAllByParty(partyId)
 
     fun getAllPartyRequestsByUserId(userId: Long, currentUserId: Long): List<PartyRequest> {
-        if(userId != currentUserId) throw UnauthorisedException()
+        if (userId != currentUserId) throw UnauthorisedException()
 
         return partyRequestRepository.findAllByUserId(userId)
     }
 
     // UPDATE
-    fun sendRequestsForPartyParticipants(participants: List<User>, party: Party): List<PartyRequest> {
+    fun sendRequestsForPartyParticipants(participants: List<User>, party: Party, currentUserId: Long): List<PartyRequest> {
         return partyRequestRepository.createPartyRequestsForParticipants(participants, party)
     }
 
@@ -39,8 +41,14 @@ class PartyRequestService(
             return null
         }
 
-        return sendRequestsForPartyParticipants(listOf(User(requestReceiverId)), Party(id = partyId))
-                .first()
+        val partyRequests = partyRequestRepository.createPartyRequestsForParticipants(
+                listOf(User(requestReceiverId)),
+                Party(id = partyId)
+        )
+
+        notificationService.newPartyRequestsNotifications(partyRequests, party.id, party.name)
+
+        return partyRequests.first()
     }
 
     fun acceptRequest(partyRequestId: Long, currentUserId: Long): Boolean {

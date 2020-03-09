@@ -1,6 +1,5 @@
 package com.example.graphql
 
-import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.resolvers.configuration.CustomDataFetcherFactoryProvider
 import com.example.graphql.resolvers.configuration.SpringDataFetcherFactory
 import com.example.graphql.schema.directives.CustomDirectiveWiringFactory
@@ -37,8 +36,8 @@ class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecur
     }
 }
 
-@SpringBootApplication()
-class GraphqlApplication(userRepository: PersistentUserRepository) {
+@SpringBootApplication
+class GraphqlApplication {
 
     @Bean
     fun dataFetcherFactoryProvider(springDataFetcherFactory: SpringDataFetcherFactory, objectMapper: ObjectMapper) =

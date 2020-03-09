@@ -13,6 +13,7 @@ class ExpenseTestBuilder {
 
     private static def defaults = [
             id           : 0,
+            name         : 'test name',
             amount       : 44.44,
             expenseDate  : ZonedDateTime.now().minusDays(1),
             description  : "test description",
@@ -31,6 +32,7 @@ class ExpenseTestBuilder {
         def allArgs = defaults + args
         return new Expense(
                 allArgs.id as Long,
+                allArgs.name as String,
                 allArgs.amount as Float,
                 allArgs.expenseDate as ZonedDateTime,
                 allArgs.description as String,

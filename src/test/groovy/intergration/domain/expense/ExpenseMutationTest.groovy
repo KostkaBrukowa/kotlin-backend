@@ -36,6 +36,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
     PersistentPaymentRepository paymentRepository
 
     def createExpenseMutation(Map props = [:]) {
+        String name = props.containsKey("name") ? props.name : 'Test name'
         String amount = props.containsKey("amount") ? props.amount : "42.42"
         ZonedDateTime expenseDate = props.containsKey("expenseDate") ? props.expenseDate : ZonedDateTime.now().minusDays(1)
         String description = props.containsKey("description") ? props.description : "I bought a booze"
@@ -45,6 +46,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         return """
             createExpense(
                 newExpenseInput: {
+                    name: "${name}"
                     amount: ${amount}
                     expenseDate: "${expenseDate}"
                     description: "${description}"
@@ -65,6 +67,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         and:
         def createExpenseMutation = createExpenseMutation(
+                name: 'test name',
                 amount: "42.42",
                 expenseDate: yesterday,
                 description: "I bought a booze for everyone",
@@ -79,6 +82,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         then:
         actualExpense.id == newExpenseId.toLong()
+        actualExpense.name == 'test name'
         actualExpense.description == "I bought a booze for everyone"
         actualExpense.expenseDate == yesterday
         actualExpense.amount == 42.42f
@@ -281,7 +285,8 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
                 user       : baseUser,
                 party      : aParty,
                 expenseDate: ZonedDateTime.now().minusDays(1),
-                description: "description before update"
+                description: "description before update",
+                name: "name before update"
         ], expenseRepository)
 
         and:
@@ -291,6 +296,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
                     id: ${anExpense.id}
                     expenseDate: "${twoDaysBefore}"
                     description: "description after update"
+                    name: "name after update"
                 }
             ) { id }
         """
@@ -303,6 +309,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
 
         then:
         actualExpense.id == newExpenseId.toLong()
+        actualExpense.name == "name after update"
         actualExpense.description == "description after update"
         actualExpense.expenseDate == twoDaysBefore
     }

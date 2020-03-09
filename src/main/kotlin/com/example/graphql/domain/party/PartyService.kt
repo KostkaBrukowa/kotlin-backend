@@ -1,5 +1,6 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.partyrequest.PartyRequestRepository
 import com.example.graphql.domain.user.User
 import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
@@ -9,14 +10,13 @@ import org.springframework.stereotype.Component
 @Component
 class PartyService(
         private val partyRepository: PartyRepository,
-        private val partyRequestRepository: PartyRequestRepository
+        private val partyRequestRepository: PartyRequestRepository,
+        private val notificationService: NotificationService
 ) {
     // GET
     fun getAllParties(userId: Long) = partyRepository.getAllByOwnerId(userId)
 
     fun getSingleParty(partyId: Long) = partyRepository.getTopById(partyId)
-
-    fun findPartiesWithParticipants(partiesIds: Set<Long>) = partyRepository.findPartiesWithParticipants(partiesIds)
 
 
     // CREATE
@@ -26,7 +26,10 @@ class PartyService(
 
         val newParty = partyRepository.saveNewParty(party.copy(owner = currentUser, participants = participants))
 
-        partyRequestRepository.createPartyRequestsForParticipants(participants - currentUser, newParty)
+        val partyRequests = partyRequestRepository.createPartyRequestsForParticipants(participants - currentUser, newParty)
+
+        if(newParty.owner == null) throw InternalError("Party was not entirely fetched")
+        notificationService.newPartyRequestsNotifications(partyRequests, newParty.owner!!.id, party.name) // TODO
 
         return newParty
     }

@@ -17,6 +17,8 @@ data class PersistentExpense(
         @GeneratedValue
         val id: Long = 0,
 
+        val name: String,
+
         val amount: Float,
 
         @Column(name = "expense_date")
@@ -39,16 +41,17 @@ data class PersistentExpense(
         @OneToMany(mappedBy = "expense", cascade = [CascadeType.REMOVE])
         val payments: List<PersistentPayment> = emptyList(),
 
-        @OneToMany(mappedBy = "expense",fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "expense", fetch = FetchType.LAZY)
         val messages: Set<PersistentExpenseMessage> = emptySet()
 ) {
 
     fun toDomain() = Expense(
-            id = this.id,
-            amount = this.amount,
-            expenseDate = this.expenseDate,
-            description = this.description,
-            expenseStatus = this.expenseStatus
+            id = id,
+            name = name,
+            amount = amount,
+            expenseDate = expenseDate,
+            description = description,
+            expenseStatus = expenseStatus
     )
 
     override fun hashCode(): Int {
@@ -61,14 +64,31 @@ data class PersistentExpense(
 
         return result
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PersistentExpense
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (amount != other.amount) return false
+        if (expenseDate != other.expenseDate) return false
+        if (description != other.description) return false
+        if (expenseStatus != other.expenseStatus) return false
+
+        return true
+    }
 }
 
 fun Expense.toPersistentEntity() = PersistentExpense(
-        id = this.id,
-        amount = this.amount,
-        expenseDate = this.expenseDate,
-        description = this.description,
-        expenseStatus = this.expenseStatus,
-        user = this.user?.toPersistentEntity(),
-        party = this.party?.toPersistentEntity()
+        id = id,
+        name = name,
+        amount = amount,
+        expenseDate = expenseDate,
+        description = description,
+        expenseStatus = expenseStatus,
+        user = user?.toPersistentEntity(),
+        party = party?.toPersistentEntity()
 )

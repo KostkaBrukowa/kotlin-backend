@@ -61,6 +61,21 @@ data class PersistentParty(
 
         return result
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PersistentParty
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (description != other.description) return false
+        if (startDate != other.startDate) return false
+        if (endDate != other.endDate) return false
+
+        return true
+    }
 }
 
 fun Party.toPersistentEntity() = PersistentParty(

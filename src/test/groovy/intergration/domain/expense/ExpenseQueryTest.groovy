@@ -41,6 +41,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         def threeDaysEarlier = ZonedDateTime.now().minusDays(3)
         def expense = anExpense([
                 user       : baseUser,
+                name       : 'test name',
                 party      : aParty,
                 amount     : 42.43,
                 expenseDate: threeDaysEarlier,
@@ -54,6 +55,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
         def getSingleExpenseQuery = ("""
             getSingleExpense(expenseId: "${expense.id}") { 
                 id
+                name
                 amount
                 expenseDate
                 description
@@ -70,6 +72,7 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
 
         then:
         response.id.toLong() == expense.id
+        response.name == 'test name'
         response.amount == 42.43
         response.expenseDate == threeDaysEarlier.toString()
         response.description == "test expense description"

@@ -29,8 +29,8 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
     """)
     fun changeExpensePaymentsStatuses(@Param("expenseId") expenseId: Long, @Param("status") status: PaymentStatus)
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
-    @Modifying
     @Query("""
         UPDATE PersistentPayment 
         SET paymentStatus = :status

@@ -1,5 +1,6 @@
 package com.example.graphql.domain.expense
 
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.payment.Payment
@@ -21,7 +22,8 @@ class ExpenseService(
         private val expenseRepository: ExpenseRepository,
         private val paymentService: PaymentService,
         private val userRepository: UserRepository,
-        private val partyRepository: PartyRepository
+        private val partyRepository: PartyRepository,
+        private val notificationService: NotificationService
 ) {
     // GET
     fun findExpenseById(expenseId: Long, currentUserId: Long): Expense? {
@@ -64,6 +66,7 @@ class ExpenseService(
         requireExpenseOwner(expenseToUpdate, currentUserId)
 
         val updatedExpense = expenseToUpdate.copy(
+                name = updateExpenseInput.name,
                 description = updateExpenseInput.description,
                 expenseDate = updateExpenseInput.expenseDate
         )
@@ -183,6 +186,7 @@ class ExpenseService(
 }
 
 fun NewExpenseInput.toDomain(userId: Long) = Expense(
+        name = name,
         description = description,
         amount = amount,
         expenseDate = expenseDate,

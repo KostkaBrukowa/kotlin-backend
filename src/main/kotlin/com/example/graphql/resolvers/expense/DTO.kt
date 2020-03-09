@@ -19,6 +19,8 @@ data class ExpenseType(
         @GraphQLID
         override val id: String = "0",
 
+        val name: String,
+
         val amount: Float,
 
         val expenseDate: ZonedDateTime,
@@ -39,14 +41,18 @@ data class ExpenseType(
 }
 
 fun Expense.toResponse() = ExpenseType(
-        id = this.id.toString(),
-        amount = this.amount,
-        expenseDate = this.expenseDate,
-        description = this.description,
-        expenseStatus = this.expenseStatus
+        id = id.toString(),
+        name = name,
+        amount = amount,
+        expenseDate = expenseDate,
+        description = description,
+        expenseStatus = expenseStatus
 )
 
 data class NewExpenseInput(
+
+        @field:Length(min = 3, max = 256)
+        val name: String,
 
         @field:Positive
         @field:Min(value = 1)
@@ -66,6 +72,9 @@ data class NewExpenseInput(
 data class UpdateExpenseInput(
 
         val id: Long,
+
+        @field:Length(min = 3, max = 256)
+        val name: String,
 
         @field:PastOrPresent
         val expenseDate: ZonedDateTime,

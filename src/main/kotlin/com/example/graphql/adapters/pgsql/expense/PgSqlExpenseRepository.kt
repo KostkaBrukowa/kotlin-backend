@@ -46,19 +46,13 @@ class PgSqlExpenseRepository(private val expenseRepository: PersistentExpenseRep
     }
 
     override fun updateExpense(updatedExpense: Expense) {
-        return expenseRepository.updateExpense(
-                updatedExpense.id,
-                updatedExpense.amount,
-                updatedExpense.description,
-                updatedExpense.expenseDate,
-                updatedExpense.expenseStatus
-        )
+        expenseRepository.save(updatedExpense.toPersistentEntity())
     }
 
     override fun removeExpense(expenseToDelete: Expense) = expenseRepository.deleteById(expenseToDelete.id)
 }
 
-private fun PersistentExpense.toDomainWithRelations() = this.toDomain().copy(
+fun PersistentExpense.toDomainWithRelations() = this.toDomain().copy(
         user = this.user?.toDomain(),
         party = this.party?.toDomain()
 )

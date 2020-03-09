@@ -1,6 +1,7 @@
 package com.example.graphql.domain.payment
 
 import com.example.graphql.domain.expense.PaymentStatusNotValid
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.resolvers.payment.UpdatePaymentStatusInput
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import spock.lang.Specification
@@ -12,7 +13,8 @@ import static com.example.graphql.domain.user.UserTestBuilder.defaultUser
 
 class PaymentServiceTest extends Specification {
     PaymentRepository paymentRepository = Mock()
-    PaymentService paymentService = new PaymentService(paymentRepository)
+    NotificationService notificationService = Mock()
+    PaymentService paymentService = new PaymentService(paymentRepository, notificationService)
 
     @Unroll
     def "Should change payment status when status is changed from #statusFrom to #statusTo"() {
