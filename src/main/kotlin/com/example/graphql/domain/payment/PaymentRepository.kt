@@ -16,7 +16,7 @@ interface PaymentRepository {
     fun createPayments(payments: List<Payment>)
 
     fun changeExpensePaymentsStatuses(expenseId: Long, status: PaymentStatus)
-    fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus)
+    fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus): List<Payment>
     fun updatePaymentsAmounts(updatedPayments: List<Payment>, amount: Float)
     fun convertPaymentsToBulkPayment(paymentsIds: List<Long>, bulkPaymentId: Long)
 }

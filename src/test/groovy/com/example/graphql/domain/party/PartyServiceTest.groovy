@@ -1,5 +1,6 @@
 package com.example.graphql.domain.party
 
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.partyrequest.PartyRequestRepository
 import com.example.graphql.domain.user.UserTestBuilder
 import spock.lang.Specification
@@ -7,21 +8,26 @@ import spock.lang.Specification
 class PartyServiceTest extends Specification {
 
     PartyRepository partyRepository = Mock()
+    NotificationService notificationService = Mock()
     PartyRequestRepository partyRequestRepository = Stub()
-    PartyService partyService = new PartyService(partyRepository, partyRequestRepository)
+    PartyService partyService = new PartyService(partyRepository, partyRequestRepository, notificationService)
 
     def "service should save new party with distinct participants and owner"() {
         given:
         Long userId = 42
 
-        when:
-        partyService.createParty(PartyTestBuilder.defaultParty([
+        and:
+        def newParty = PartyTestBuilder.defaultParty([
                 participants: [
                         UserTestBuilder.defaultUser([id: 1]),
                         UserTestBuilder.defaultUser([id: 1]),
                         UserTestBuilder.defaultUser([id: 1])
-                ]
-        ]), userId)
+                ],
+
+        ])
+
+        when:
+        partyService.createParty(newParty, userId)
 
         then:
         1 * partyRepository.saveNewParty({ Party party ->
@@ -31,7 +37,7 @@ class PartyServiceTest extends Specification {
                             && party.participants.any({ it.id == 1 })
                             && party.participants.any({ it.id == 42 })
             )
-        })
+        }) >> PartyTestBuilder.defaultParty([owner: UserTestBuilder.defaultUser([id: userId])])
     }
 
     def "Should update a party with correct id"() {

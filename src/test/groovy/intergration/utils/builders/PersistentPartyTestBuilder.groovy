@@ -15,7 +15,7 @@ class PersistentPartyTestBuilder {
 
     private static def defaults = [
             id           : '0',
-            name         : 'testname',
+            name         : 'persistent party test name',
             owner        : null,
             messages     : [],
             participants : [],

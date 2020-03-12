@@ -1,5 +1,6 @@
 package com.example.graphql.domain.expense
 
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentService
@@ -28,7 +29,8 @@ class ExpenseServiceTest extends Specification {
     def userRepository = Mock(UserRepository);
     def partyRepository = Mock(PartyRepository);
     def paymentService = Mock(PaymentService);
-    ExpenseService expenseService = new ExpenseService(expenseRepository, paymentService, userRepository, partyRepository)
+    def notificationService = Mock(NotificationService);
+    ExpenseService expenseService = new ExpenseService(expenseRepository, paymentService, userRepository, partyRepository, notificationService)
 
     @Unroll
     def "Should calculate correct amount for payments when expense is changed to paying"() {
@@ -365,6 +367,7 @@ class ExpenseServiceTest extends Specification {
     private static def buildNewExpenseInput(Map props = [:]) {
         def defaults = [
                 amount      : 40.0f,
+                name        : 'test expense input name',
                 expenseDate : ZonedDateTime.now(),
                 description : 'test description',
                 partyId     : 1,
@@ -374,6 +377,7 @@ class ExpenseServiceTest extends Specification {
         def allProps = defaults + props
 
         return new NewExpenseInput(
+                allProps.name as String,
                 allProps.amount as Float,
                 allProps.expenseDate as ZonedDateTime,
                 allProps.description as String,

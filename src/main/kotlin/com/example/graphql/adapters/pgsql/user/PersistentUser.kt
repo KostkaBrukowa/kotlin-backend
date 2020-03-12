@@ -1,5 +1,6 @@
 package com.example.graphql.domain.user
 
+import com.example.graphql.adapters.pgsql.notification.PersistentNotification
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.utils.lazyProxy
 import com.example.graphql.domain.expense.PersistentExpense
@@ -16,15 +17,15 @@ data class PersistentUser(
         @GeneratedValue
         val id: Long = 0,
 
-        val name: String?,
+        val name: String? = null,
 
-        @Column(unique = true)
-        val email: String,
+        @Column(unique = true, nullable = false)
+        val email: String = "",
 
         @Column(name = "bank_account")
-        val bankAccount: String?,
+        val bankAccount: String? = null,
 
-        val password: String,
+        val password: String = "",
 
         @Column(name = "is_email_confirmed")
         val isEmailConfirmed: Boolean = false,
@@ -44,6 +45,12 @@ data class PersistentUser(
 
         @OneToMany(mappedBy = "user")
         val messages: Set<PersistentMessage> = emptySet(),
+
+        @OneToMany(mappedBy = "actor", cascade = [CascadeType.REMOVE])
+        val createdNotifications: Set<PersistentNotification> = emptySet(),
+
+        @OneToMany(mappedBy = "receiver")
+        val notifications: Set<PersistentNotification> = emptySet(),
 
         @ManyToMany(mappedBy = "participants")
         @Column(name = "party_id")

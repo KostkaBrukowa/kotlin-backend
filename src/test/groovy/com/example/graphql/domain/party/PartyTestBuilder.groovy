@@ -12,7 +12,7 @@ class PartyTestBuilder {
 
     private static def defaults = [
             id           : 0,
-            name         : 'testname',
+            name         : 'party test name',
             owner        : null,
             participants : [],
             partyRequests: [],

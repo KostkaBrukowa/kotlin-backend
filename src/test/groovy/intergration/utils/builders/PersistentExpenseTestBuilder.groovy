@@ -16,6 +16,7 @@ class PersistentExpenseTestBuilder {
 
     private static def defaults = [
             id           : 0,
+            name         : 'some name',
             amount       : 42.42,
             expenseDate  : ZonedDateTime.now().minusDays(1),
             description  : "test expense description",
@@ -34,6 +35,7 @@ class PersistentExpenseTestBuilder {
         def allArgs = defaults + args
         return new PersistentExpense(
                 allArgs.id as Long,
+                allArgs.name as String,
                 allArgs.amount as Float,
                 allArgs.expenseDate as ZonedDateTime,
                 allArgs.description as String,

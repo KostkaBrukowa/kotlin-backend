@@ -18,7 +18,7 @@ class UserTestBuilder {
             payments        : [],
             friends         : [],
             friendOf        : [],
-            name            : 'testname',
+            name            : 'user test name',
             bankAccount     : '3921321938',
             password        : '@fdaksl228@*##8',
             isEmailConfirmed: true,

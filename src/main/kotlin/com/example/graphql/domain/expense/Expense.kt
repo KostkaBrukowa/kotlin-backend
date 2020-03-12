@@ -7,6 +7,7 @@ import java.time.ZonedDateTime
 
 data class Expense(
         val id: Long = 0,
+        val name: String,
         val amount: Float,
         val expenseDate: ZonedDateTime,
         val description: String,

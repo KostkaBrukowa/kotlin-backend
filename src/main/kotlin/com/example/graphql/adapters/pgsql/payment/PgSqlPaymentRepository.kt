@@ -1,5 +1,6 @@
 package com.example.graphql.adapters.pgsql.payment
 
+import com.example.graphql.adapters.pgsql.expense.toDomainWithRelations
 import com.example.graphql.adapters.pgsql.utils.toNullable
 import com.example.graphql.domain.message.Message
 import com.example.graphql.domain.payment.*
@@ -8,8 +9,7 @@ import javax.transaction.Transactional
 
 @Component
 class PgSqlPaymentRepository(
-        private val paymentRepository: PersistentPaymentRepository,
-        private val bulkPaymentRepository: PersistentBulkPaymentRepository
+        private val paymentRepository: PersistentPaymentRepository
 ) : PaymentRepository {
     override fun findPaymentWithOwnerAndExpenseOwner(paymentId: Long): Payment? {
         val payment = paymentRepository.findById(paymentId).toNullable()
@@ -54,8 +54,13 @@ class PgSqlPaymentRepository(
         paymentRepository.changeExpensePaymentsStatuses(expenseId, status)
     }
 
-    override fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus) {
+    override fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus): List<Payment> {
         paymentRepository.updatePaymentStatus(paymentsIds, status)
+
+        return paymentRepository.findAllById(paymentsIds)
+                .map {
+                    it.toDomainWithRelations().copy(expense = it.expense?.toDomainWithRelations())
+                }
     }
 
     @Transactional
@@ -70,5 +75,5 @@ class PgSqlPaymentRepository(
     }
 }
 
-private fun PersistentPayment.toDomainWithRelations(): Payment =
+fun PersistentPayment.toDomainWithRelations(): Payment =
         this.toDomain().copy(expense = this.expense!!.toDomain(), user = this.user!!.toDomain())

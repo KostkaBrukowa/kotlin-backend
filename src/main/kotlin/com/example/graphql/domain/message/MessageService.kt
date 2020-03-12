@@ -1,6 +1,7 @@
 package com.example.graphql.domain.message
 
 import com.example.graphql.domain.expense.ExpenseRepository
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.payment.BulkPaymentRepository
 import com.example.graphql.domain.payment.PaymentRepository
@@ -16,7 +17,8 @@ class MessageService(
         private val partyRepository: PartyRepository,
         private val paymentRepository: PaymentRepository,
         private val bulkPaymentRepository: BulkPaymentRepository,
-        private val expenseRepository: ExpenseRepository
+        private val expenseRepository: ExpenseRepository,
+        private val notificationService: NotificationService
 ) {
 
     fun addMessage(newMessageInput: NewMessageInput, currentUserId: Long): Message {
@@ -29,7 +31,9 @@ class MessageService(
             MessageType.EXPENSE -> requireExpenseParticipant(entityId, currentUserId)
         }
 
-        return messageRepository.saveNewMessage(text, currentUserId, messageType, entityId)
+        val newMessage = messageRepository.saveNewMessage(text, currentUserId, messageType, entityId)
+
+        return newMessage
     }
 
 
@@ -44,8 +48,6 @@ class MessageService(
     }
 
     private fun requireMessageOwner(message: Message, currentUserId: Long) {
-        if (message.user == null) throw InternalError("message owner was not entirely fetched")
-
         if (message.user.id != currentUserId) throw UnauthorisedException()
     }
 

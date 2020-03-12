@@ -1,5 +1,6 @@
 package intergration.utils.builders
 
+import com.example.graphql.adapters.pgsql.notification.PersistentNotification
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.PersistentExpense
@@ -15,20 +16,22 @@ import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
 class PersistentUserTestBuilder {
     private static def defaults = [
-            id              : '0',
-            email           : 'test@email.com',
-            partyRequests   : [],
-            expenses        : [],
-            payments        : [],
-            messages        : [],
-            joinedParties   : [],
-            ownedParties    : [],
-            friends         : [],
-            friendOf        : [],
-            name            : 'testname',
-            bankAccount     : '3921321938',
-            password        : '@fdaksl228@*##8',
-            isEmailConfirmed: true,
+            id                  : '0',
+            email               : 'test@email.com',
+            partyRequests       : [],
+            expenses            : [],
+            payments            : [],
+            messages            : [],
+            createdNotifications: [],
+            notifications       : [],
+            ownedParties        : [],
+            joinedParties       : [],
+            friends             : [],
+            friendOf            : [],
+            name                : 'persistent user test name',
+            bankAccount         : '3921321938',
+            password            : '@fdaksl228@*##8',
+            isEmailConfirmed    : true,
     ]
 
 
@@ -48,8 +51,10 @@ class PersistentUserTestBuilder {
                 allArgs.partyRequests as List<PersistentPartyRequest>,
                 allArgs.ownedParties as List<PersistentParty>,
                 allArgs.expenses as Set<PersistentExpense>,
-                allArgs.messages as Set<PersistentMessage>,
                 allArgs.payments as Set<PersistentPayment>,
+                allArgs.messages as Set<PersistentMessage>,
+                allArgs.createdNotifications as Set<PersistentNotification>,
+                allArgs.notifications as Set<PersistentNotification>,
                 allArgs.joinedParties as Set<PersistentParty>,
                 allArgs.friends as Set<PersistentUser>,
                 allArgs.friendOf as Set<PersistentUser>,

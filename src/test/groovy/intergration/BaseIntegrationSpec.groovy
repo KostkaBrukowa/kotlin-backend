@@ -116,6 +116,7 @@ class BaseIntegrationSpec extends Specification {
                 friends,
                 bulk_payments,
                 expenses,
+                notifications,
               parties ,
               party_requests ,
               payments,
