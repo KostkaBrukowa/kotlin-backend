@@ -286,7 +286,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
                 party      : aParty,
                 expenseDate: ZonedDateTime.now().minusDays(1),
                 description: "description before update",
-                name: "name before update"
+                name       : "name before update"
         ], expenseRepository)
 
         and:

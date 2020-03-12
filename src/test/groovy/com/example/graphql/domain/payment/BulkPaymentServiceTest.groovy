@@ -1,6 +1,7 @@
 package com.example.graphql.domain.payment
 
 import com.example.graphql.domain.expense.PaymentStatusNotValid
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.resolvers.payment.UpdateBulkPaymentStatusInput
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import spock.lang.Specification
@@ -16,7 +17,8 @@ import static com.example.graphql.domain.user.UserTestBuilder.defaultUser
 class BulkPaymentServiceTest extends Specification {
     PaymentRepository paymentRepository = Mock()
     BulkPaymentRepository bulkPaymentRepository = Mock()
-    BulkPaymentService bulkPaymentService = new BulkPaymentService(bulkPaymentRepository, paymentRepository)
+    NotificationService notificationService = Mock()
+    BulkPaymentService bulkPaymentService = new BulkPaymentService(bulkPaymentRepository, paymentRepository, notificationService)
 
     def "should return bulk payments"() {
         given:

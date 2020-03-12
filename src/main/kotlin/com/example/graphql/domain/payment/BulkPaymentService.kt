@@ -1,5 +1,6 @@
 package com.example.graphql.domain.payment
 
+import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.payment.UpdateBulkPaymentStatusInput
 import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
@@ -10,7 +11,8 @@ import org.springframework.stereotype.Component
 @Component
 class BulkPaymentService(
         private val bulkPaymentRepository: BulkPaymentRepository,
-        private val paymentRepository: PaymentRepository
+        private val paymentRepository: PaymentRepository,
+        private val notificationService: NotificationService
 ) {
 
     fun findUserBulkPayments(userId: Long): List<BulkPayment> {
@@ -35,6 +37,7 @@ class BulkPaymentService(
         )
 
         paymentRepository.convertPaymentsToBulkPayment(paymentsIds, newBulkPayment.id)
+        notificationService.updatePaymentsStatusesNotifications(payments, PaymentStatus.BULKED)
 
         return newBulkPayment
     }

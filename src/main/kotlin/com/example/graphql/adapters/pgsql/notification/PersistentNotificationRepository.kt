@@ -14,6 +14,7 @@ interface PersistentNotificationRepository : JpaRepository<PersistentNotificatio
         FROM PersistentNotification as n
         LEFT JOIN FETCH n.receiver
         WHERE n.id IN (:ids)
+        ORDER BY n.createdAt DESC 
     """)
     fun findNotificationsWithUsers(ids: Iterable<Long>): List<PersistentNotification>
 

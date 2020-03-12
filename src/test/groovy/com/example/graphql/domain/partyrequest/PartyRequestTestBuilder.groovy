@@ -13,14 +13,14 @@ class PartyRequestTestBuilder {
 
     private static def defaults = [
             id    : 0,
-            user  : UserTestBuilder.defaultUser(),
-            party : PartyTestBuilder.defaultParty(),
+            user  : null,
+            party : null,
             status: PartyRequestStatus.IN_PROGRESS,
     ]
 
     private PartyRequestTestBuilder() {}
 
-    static PartyRequest defaultPartyRequest(Map args) {
+    static PartyRequest defaultPartyRequest(Map args = [:]) {
         verifyPropertyNames(defaults, args)
 
         def allArgs = defaults + args

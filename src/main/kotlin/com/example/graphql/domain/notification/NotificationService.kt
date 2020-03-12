@@ -76,7 +76,8 @@ class NotificationService(private val notificationRepository: NotificationReposi
                     actorId = it.user!!.id,
                     receiverId = it.expense!!.user!!.id,
                     paymentId = it.id,
-                    notificationEvent = paymentStatus.toNotificationEvent()
+                    notificationEvent = paymentStatus.toNotificationEvent(),
+                    objectName = it.expense.name
             )
         }
 
@@ -129,6 +130,7 @@ private fun PaymentStatus.toNotificationEvent(): NotificationEvent = when (this)
     PaymentStatus.DECLINED -> NotificationEvent.DECLINED
     PaymentStatus.PAID -> NotificationEvent.PAID
     PaymentStatus.CONFIRMED -> NotificationEvent.CONFIRMED
+    PaymentStatus.BULKED -> NotificationEvent.BULKED
 
     else -> throw UnsupportedNotificationEventException()
 }
