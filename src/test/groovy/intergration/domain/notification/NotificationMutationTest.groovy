@@ -14,9 +14,10 @@ import java.time.ZonedDateTime
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
+import static intergration.utils.builders.PersistentPersistentNotificationTestBuilder.aNotification
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
 
-class NotificationTest extends BaseIntegrationSpec {
+class NotificationMutationTest extends BaseIntegrationSpec {
     @Autowired
     PersistentUserRepository userRepository
 
@@ -106,7 +107,7 @@ class NotificationTest extends BaseIntegrationSpec {
         actualNotifications.any { it.receiver.id == secondUserId.toLong() && it.actor.id == baseUser.id }
     }
 
-    def "Should bulk payments with correct amount"() {
+    def "should create new payment notification for status update"() { //TODO CORRECT THIS TEST
         given:
         authenticate()
 
@@ -121,7 +122,7 @@ class NotificationTest extends BaseIntegrationSpec {
         def payment4 = aPayment([amount: 40.0, expense: expense, user: baseUser], paymentRepository)
 
         and:
-        def bulkPaymentsMutation = ({ String id ->
+        def markAllAsReadMutation = ({ String id ->
             """
             bulkPayments(
                 paymentsIds: [
@@ -135,17 +136,49 @@ class NotificationTest extends BaseIntegrationSpec {
         })
 
         when:
-        postMutation(bulkPaymentsMutation(baseUser.id.toString()))
+        postMutation(markAllAsReadMutation(baseUser.id.toString()))
 
         and:
         def actualNotifications = notificationRepository.findAll()
 
         then:
         actualNotifications.size() == 4
-//        actualNotifications.any { it.receiver.id == .toLong() && it.actor.id == baseUser.id }
-//        actualNotifications.any { it.receiver.id == secondUserId.toLong() && it.actor.id == baseUser.id }
-//        actualNotifications.any { it.receiver.id == secondUserId.toLong() && it.actor.id == baseUser.id }
-//        actualNotifications.any { it.receiver.id == secondUserId.toLong() && it.actor.id == baseUser.id }
+        actualNotifications.any { it.receiver.id == baseUser.id && it.actor.id == client.id }
+    }
+
+    def "Should mark all notifications as read"() { //TODO CORRECT THIS TEST
+        given:
+        authenticate()
+
+        and:
+        def notifications = [
+                aNotification([receiver: baseUser, actor: aClient(userRepository), isRead: true], notificationRepository),
+                aNotification([receiver: baseUser, actor: aClient(userRepository), isRead: false], notificationRepository),
+                aNotification([receiver: baseUser, actor: aClient(userRepository), isRead: false], notificationRepository),
+        ]
+
+        and:
+        def bulkPaymentsMutation = ({ String id ->
+            """
+            markNotificationsAsRead(
+                notificationsIds: [
+                    ${notifications[0].id}
+                    ${notifications[1].id}
+                    ${notifications[2].id}
+                ]
+            )
+        """
+        })
+
+        when:
+        postMutation(bulkPaymentsMutation(baseUser.id.toString()))
+
+        and:
+        def actualNotifications = notificationRepository.findAll()
+
+        then:
+        actualNotifications.size() == 3
+        actualNotifications.every { it.isRead }
     }
 
     def createExpenseMutation(Map props = [:]) {
