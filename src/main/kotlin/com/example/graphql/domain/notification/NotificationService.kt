@@ -46,16 +46,8 @@ class NotificationService(private val notificationRepository: NotificationReposi
         notificationRepository.sendExpenseNotifications(notifications)
     }
 
-    fun newMessageNotification(message: Message, receiverId: Long, messageType: MessageType, objectId: Long, objectName: String) {
-        val notification = NewMessageNotification(
-                actorId = message.user.id,
-                receiverId = receiverId,
-                objectId = objectId,
-                messageType = messageType,
-                objectName = objectName
-        )
-
-        notificationRepository.sendMessagesNotifications(listOf(notification))
+    fun newMessageNotification(message: Message, messageType: MessageType, objectId: Long) {
+        notificationRepository.sendMessagesNotifications(message, messageType, objectId)
     }
 
     fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyName: String) {
@@ -102,9 +94,9 @@ class NewExpenseNotification(
 
 class NewMessageNotification(
         actorId: Long,
-        receiverId: Long,
         objectName: String? = null,
         notificationEvent: NotificationEvent? = null,
+        receiverId: Long,
         val objectId: Long,
         val messageType: MessageType
 ) : SendNotificationType(actorId, receiverId, objectName, notificationEvent)

@@ -26,4 +26,30 @@ interface PersistentNotificationRepository : JpaRepository<PersistentNotificatio
         WHERE n.id in (:ids)
     """)
     fun markNotificationsAsRead(ids: Iterable<Long>)
+
+//    fun sendPartyMessageNotifications(partyId: Long)
+//    @Query("""
+//        SELECT distinct n
+//        FROM PersistentNotification as n
+//        LEFT JOIN FETCH n.receiver
+//        WHERE n.id IN (:ids)
+//        ORDER BY n.createdAt DESC
+//    """)
+//    fun sendPaymentMessageNotifications(paymentId: Long)
+//    @Query("""
+//        SELECT distinct n
+//        FROM PersistentNotification as n
+//        LEFT JOIN FETCH n.receiver
+//        WHERE n.id IN (:ids)
+//        ORDER BY n.createdAt DESC
+//    """)
+//    fun sendBulkPaymentMessageNotifications(paymentId: Long)
+//    @Query("""
+//        SELECT distinct n
+//        FROM PersistentNotification as n
+//        LEFT JOIN FETCH n.receiver
+//        WHERE n.id IN (:ids)
+//        ORDER BY n.createdAt DESC
+//    """)
+//    fun sendExpenseMessageNotifications(expenseId: Long)
 }

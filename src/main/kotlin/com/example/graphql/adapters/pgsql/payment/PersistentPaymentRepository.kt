@@ -20,6 +20,15 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
     """)
     fun findPaymentsWithMessages(ids: Set<Long>): List<PersistentPayment>
 
+    @Query("""
+        SELECT distinct p
+        FROM PersistentPayment as p
+        LEFT JOIN FETCH p.expense as e
+        LEFT JOIN FETCH e.user
+        WHERE p.id in (:ids)
+    """)
+    fun findPaymentsWithExpenseOwner(ids: Set<Long>): List<PersistentPayment>
+
     @Transactional
     @Modifying
     @Query("""

@@ -55,7 +55,7 @@ class MessageMutationTest extends BaseIntegrationSpec {
     @Autowired
     PersistentExpenseMessageRepository expenseMessageRepository
 
-    private static def createMessageMutation(Long entityId, MessageType type, String text) {
+    static def createMessageMutation(Long entityId, MessageType type, String text) {
         return """
             createMessage(
                 newMessageInput: {

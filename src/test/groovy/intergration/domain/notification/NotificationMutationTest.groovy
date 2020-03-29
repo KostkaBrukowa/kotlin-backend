@@ -4,13 +4,17 @@ import com.example.graphql.adapters.pgsql.expense.PersistentExpenseRepository
 import com.example.graphql.adapters.pgsql.notification.PersistentNotificationRepository
 import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
+import com.example.graphql.adapters.pgsql.payment.PersistentBulkPaymentRepository
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.resolvers.message.MessageType
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.time.ZonedDateTime
 
+import static intergration.domain.message.MessageMutationTest.createMessageMutation
+import static intergration.utils.builders.PersistentBulkPaymentTestBuilder.aBulkPayment
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
@@ -32,6 +36,9 @@ class NotificationMutationTest extends BaseIntegrationSpec {
 
     @Autowired
     PersistentPaymentRepository paymentRepository
+
+    @Autowired
+    PersistentBulkPaymentRepository bulkPaymentRepository
 
     @Autowired
     PersistentNotificationRepository notificationRepository
@@ -122,7 +129,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         def payment4 = aPayment([amount: 40.0, expense: expense, user: baseUser], paymentRepository)
 
         and:
-        def markAllAsReadMutation = ({ String id ->
+        def bulkPaymentsMutation = ({ String id ->
             """
             bulkPayments(
                 paymentsIds: [
@@ -136,7 +143,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         })
 
         when:
-        postMutation(markAllAsReadMutation(baseUser.id.toString()))
+        postMutation(bulkPaymentsMutation(baseUser.id.toString()))
 
         and:
         def actualNotifications = notificationRepository.findAll()
@@ -144,6 +151,112 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         then:
         actualNotifications.size() == 4
         actualNotifications.any { it.receiver.id == baseUser.id && it.actor.id == client.id }
+    }
+
+    def "should create new message notification for each party member"() { //TODO CORRECT THIS TEST
+        given:
+        authenticate()
+
+        and:
+        def client1 = aClient(userRepository)
+        def client2 = aClient(userRepository)
+        def client3 = aClient(userRepository)
+        def party = aParty([owner: client1, participants: [baseUser, client2, client3]], partyRepository)
+
+        when:
+        postMutation(createMessageMutation(party.id, MessageType.PARTY, 'test message'))
+
+        and:
+        def actualNotifications = notificationRepository.findAll()
+
+        then:
+        actualNotifications.size() == 3
+        actualNotifications.any { it.receiver.id == client1.id }
+        actualNotifications.any { it.receiver.id == client2.id }
+        actualNotifications.any { it.receiver.id == client3.id }
+        actualNotifications.every { it.actor.id == baseUser.id && it.objectId == party.id }
+    }
+
+    def "should create new message notification for each expense participant"() { //TODO CORRECT THIS TEST
+        given:
+        authenticate()
+
+        and: 'users'
+        def client1 = aClient(userRepository)
+        def client2 = aClient(userRepository)
+        def client3 = aClient(userRepository)
+
+        and: 'expense'
+        def expense = anExpense([user: client1], expenseRepository)
+
+        and: 'payments'
+        aPayment([expense: expense, user: baseUser], paymentRepository)
+        aPayment([expense: expense, user: client2], paymentRepository)
+        aPayment([expense: expense, user: client3], paymentRepository)
+
+        when:
+        postMutation(createMessageMutation(expense.id, MessageType.EXPENSE, 'test message'))
+
+        and:
+        def actualNotifications = notificationRepository.findAll()
+
+        then:
+        actualNotifications.size() == 3
+        actualNotifications.any { it.receiver.id == client1.id }
+        actualNotifications.any { it.receiver.id == client2.id }
+        actualNotifications.any { it.receiver.id == client3.id }
+        actualNotifications.every { it.actor.id == baseUser.id && it.objectId == expense.id }
+    }
+
+    def "should create new message notification for each payment participant"() { //TODO CORRECT THIS TEST
+        given:
+        authenticate()
+
+        and: 'users'
+        def client1 = aClient(userRepository)
+        def client2 = aClient(userRepository)
+        def client3 = aClient(userRepository)
+
+        and: 'expense'
+        def expense = anExpense([user: client1], expenseRepository)
+
+        and: 'payments'
+        def payment = aPayment([expense: expense, user: baseUser], paymentRepository)
+        aPayment([expense: expense, user: client2], paymentRepository)
+        aPayment([expense: expense, user: client3], paymentRepository)
+
+        when:
+        postMutation(createMessageMutation(payment.id, MessageType.PAYMENT, 'test message'))
+
+        and:
+        def actualNotifications = notificationRepository.findAll()
+
+        then:
+        actualNotifications.size() == 1
+        actualNotifications.any { it.receiver.id == client1.id }
+        actualNotifications.every { it.actor.id == baseUser.id && it.objectId == payment.id }
+    }
+
+    def "should create new message notification for each bulk payment participant"() { //TODO CORRECT THIS TEST
+        given:
+        authenticate()
+
+        and: 'users'
+        def client1 = aClient(userRepository)
+
+        and: 'payments'
+        def payment = aBulkPayment([payer: baseUser, receiver: client1], bulkPaymentRepository)
+
+        when:
+        postMutation(createMessageMutation(payment.id, MessageType.BULK_PAYMENT, 'test message'))
+
+        and:
+        def actualNotifications = notificationRepository.findAll()
+
+        then:
+        actualNotifications.size() == 1
+        actualNotifications.any { it.receiver.id == client1.id }
+        actualNotifications.every { it.actor.id == baseUser.id && it.objectId == payment.id }
     }
 
     def "Should mark all notifications as read"() { //TODO CORRECT THIS TEST
