@@ -3,6 +3,8 @@ package com.example.graphql.domain.payment
 import com.example.graphql.domain.message.Message
 
 interface PaymentRepository {
+    fun findAllByExpenseId(paymentId: Long): List<Payment>
+
     fun findPaymentWithOwnerAndExpenseOwner(paymentId: Long): Payment?
     fun findPaymentsWithOwnerAndExpenseOwner(paymentsIds: List<Long>): List<Payment>
 

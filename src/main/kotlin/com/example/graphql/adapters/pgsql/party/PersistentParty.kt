@@ -15,15 +15,15 @@ data class PersistentParty(
         @GeneratedValue
         val id: Long = 0,
 
-        var name: String,
+        val name: String,
 
-        var description: String,
+        val description: String,
 
         @Column(name = "start_date")
-        var startDate: ZonedDateTime,
+        val startDate: ZonedDateTime,
 
         @Column(name = "end_date")
-        var endDate: ZonedDateTime?,
+        val endDate: ZonedDateTime?,
 
 
         @ManyToOne(fetch = FetchType.LAZY, optional = false)

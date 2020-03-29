@@ -33,6 +33,8 @@ class MessageService(
 
         val newMessage = messageRepository.saveNewMessage(text, currentUserId, messageType, entityId)
 
+        notificationService.newMessageNotification(newMessage, messageType, entityId)
+
         return newMessage
     }
 
@@ -82,9 +84,10 @@ class MessageService(
 
     private fun requireExpenseParticipant(entityId: Long, currentUserId: Long) {
         val expense = expenseRepository.findExpensesWithPayments(setOf(entityId)).firstOrNull()
-                ?: throw EntityNotFoundException("party")
+                ?: throw EntityNotFoundException("Expense")
+        val expensePayments = paymentRepository.findAllByExpenseId(expense.id)
 
-        if (expense.user?.id != currentUserId && expense.payments.all { it.user?.id != currentUserId }) {
+        if (expense.user?.id != currentUserId && expensePayments.all { it.user!!.id != currentUserId }) {
             throw UnauthorisedException()
         }
     }

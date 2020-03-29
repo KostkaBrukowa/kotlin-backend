@@ -75,12 +75,12 @@ class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepositor
     }
 
     override fun updateParty(updatedParty: Party): Party {
-        val partyToUpdate = partyRepository.getTopById(updatedParty.id)?.apply {
-            name = updatedParty.name
-            description = updatedParty.description ?: ""
-            startDate = updatedParty.startDate
-            endDate = updatedParty.endDate
-        } ?: throw Exception("Party not found")
+        val partyToUpdate = partyRepository.getTopById(updatedParty.id)?.copy(
+                name = updatedParty.name,
+                description = updatedParty.description ?: "",
+                startDate = updatedParty.startDate,
+                endDate = updatedParty.endDate
+        ) ?: throw Exception("Party not found")
 
         return partyRepository.save(partyToUpdate).toDomainWithRelations()
     }

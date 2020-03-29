@@ -18,6 +18,15 @@ interface PersistentBulkPaymentRepository : JpaRepository<PersistentBulkPayment,
     """)
     fun findPaymentsWithMessages(ids: Set<Long>): List<PersistentBulkPayment>
 
+    @Query("""
+        SELECT distinct p
+        FROM PersistentBulkPayment as p
+        LEFT JOIN FETCH p.payer
+        JOIN FETCH p.receiver
+        WHERE p.id in (:ids)
+    """)
+    fun findPaymentsWithPayerAndReceiver(ids: Set<Long>): List<PersistentBulkPayment>
+
     @Transactional
     @Modifying
     @Query("""

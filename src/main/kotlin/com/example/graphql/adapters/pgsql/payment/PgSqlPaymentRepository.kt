@@ -11,6 +11,10 @@ import javax.transaction.Transactional
 class PgSqlPaymentRepository(
         private val paymentRepository: PersistentPaymentRepository
 ) : PaymentRepository {
+    override fun findAllByExpenseId(paymentId: Long): List<Payment> {
+        return paymentRepository.findAllByExpenseId(paymentId).map { it.toDomainWithRelations() }
+    }
+
     override fun findPaymentWithOwnerAndExpenseOwner(paymentId: Long): Payment? {
         val payment = paymentRepository.findById(paymentId).toNullable()
 
