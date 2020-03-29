@@ -114,7 +114,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         actualNotifications.any { it.receiver.id == secondUserId.toLong() && it.actor.id == baseUser.id }
     }
 
-    def "should create new payment notification for status update"() { //TODO CORRECT THIS TEST
+    def "should create new payment notification for status update"() {
         given:
         authenticate()
 
@@ -153,7 +153,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         actualNotifications.any { it.receiver.id == baseUser.id && it.actor.id == client.id }
     }
 
-    def "should create new message notification for each party member"() { //TODO CORRECT THIS TEST
+    def "should create new message notification for each party member"() {
         given:
         authenticate()
 
@@ -177,7 +177,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         actualNotifications.every { it.actor.id == baseUser.id && it.objectId == party.id }
     }
 
-    def "should create new message notification for each expense participant"() { //TODO CORRECT THIS TEST
+    def "should create new message notification for each expense participant"() {
         given:
         authenticate()
 
@@ -208,7 +208,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         actualNotifications.every { it.actor.id == baseUser.id && it.objectId == expense.id }
     }
 
-    def "should create new message notification for each payment participant"() { //TODO CORRECT THIS TEST
+    def "should create new message notification for each payment participant"() {
         given:
         authenticate()
 
@@ -237,7 +237,7 @@ class NotificationMutationTest extends BaseIntegrationSpec {
         actualNotifications.every { it.actor.id == baseUser.id && it.objectId == payment.id }
     }
 
-    def "should create new message notification for each bulk payment participant"() { //TODO CORRECT THIS TEST
+    def "should create new message notification for each bulk payment participant"() { //
         given:
         authenticate()
 

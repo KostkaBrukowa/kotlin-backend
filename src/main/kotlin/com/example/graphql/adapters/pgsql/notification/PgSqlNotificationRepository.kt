@@ -34,7 +34,6 @@ class PgSqlNotificationRepository(
             MessageType.PAYMENT -> sendPaymentMessageNotifications(message.user.id, objectId)
             MessageType.BULK_PAYMENT -> sendBulkPaymentMessageNotifications(message.user.id, objectId)
             MessageType.EXPENSE -> sendExpenseMessageNotifications(message.user.id, objectId)
-            else -> throw Exception()
         }
     }
 
@@ -121,14 +120,6 @@ class PgSqlNotificationRepository(
         return notificationRepository.saveAll(newNotifications).map { it.toDomainWithRelations() }
     }
 
-//    override fun sendMessagesNotifications(notifications: Iterable<NewMessageNotification>): List<Notification> {
-//        val newNotifications = notifications.map {
-//            it.toPersistentEntity(it.objectId, it.messageType.toNotificationObjectType(), NotificationEvent.NEW_MESSAGE)
-//        }
-//
-//        return notificationRepository.saveAll(newNotifications).map { it.toDomainWithRelations() }
-//    }
-
     override fun sendExpenseNotifications(notifications: Iterable<NewExpenseNotification>): List<Notification> {
         val newNotifications = notifications.map {
             it.toPersistentEntity(it.expenseId, NotificationObjectType.PAYMENT, NotificationEvent.CREATION)
@@ -175,11 +166,3 @@ private fun PersistentNotification.toDomainWithRelations() = this.toDomain().cop
         actor = actor?.toDomain(),
         receiver = receiver?.toDomain()
 )
-
-private fun MessageType.toNotificationObjectType() = when (this) {
-    MessageType.PARTY -> NotificationObjectType.PARTY
-    MessageType.PAYMENT -> NotificationObjectType.PAYMENT
-    MessageType.BULK_PAYMENT -> NotificationObjectType.BULK_PAYMENT
-    MessageType.EXPENSE -> NotificationObjectType.EXPENSE
-}
-
