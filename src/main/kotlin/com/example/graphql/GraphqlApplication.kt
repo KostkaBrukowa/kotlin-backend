@@ -1,5 +1,8 @@
 package com.example.graphql
 
+import com.example.graphql.domain.user.PersistentUser
+import com.example.graphql.domain.user.User
+import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.resolvers.configuration.CustomDataFetcherFactoryProvider
 import com.example.graphql.resolvers.configuration.SpringDataFetcherFactory
 import com.example.graphql.schema.directives.CustomDirectiveWiringFactory
@@ -51,9 +54,10 @@ class WebSecurity() : WebSecurityConfigurerAdapter() {
 @Component
 class CorsFilter : WebFilter {
     override fun filter(ctx: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        ctx.response.headers.add("Access-Control-Allow-Origin", "*")
+        ctx.response.headers.add("Access-Control-Allow-Origin", "http://localhost:3000")
+        ctx.response.headers.add("Access-Control-Allow-Credentials", "true")
         ctx.response.headers.add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS")
-        ctx.response.headers.add("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
+        ctx.response.headers.add("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Authorization")
         return when {
             ctx.request.method == HttpMethod.OPTIONS -> {
                 ctx.response.headers.add("Access-Control-Max-Age", "1728000")
@@ -61,7 +65,7 @@ class CorsFilter : WebFilter {
                 Mono.empty()
             }
             else -> {
-                ctx.response.headers.add("Access-Control-Expose-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
+                ctx.response.headers.add("Access-Control-Expose-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Authorization")
                 chain.filter(ctx) ?: Mono.empty()
             }
         }
@@ -69,7 +73,8 @@ class CorsFilter : WebFilter {
 }
 
 @SpringBootApplication
-class GraphqlApplication {
+class GraphqlApplication() {
+
     @Bean
     fun dataFetcherFactoryProvider(springDataFetcherFactory: SpringDataFetcherFactory, objectMapper: ObjectMapper) =
             CustomDataFetcherFactoryProvider(springDataFetcherFactory, objectMapper)
@@ -95,6 +100,7 @@ class GraphqlApplication {
 }
 
 fun main(args: Array<String>) {
+
     runApplication<GraphqlApplication>(*args)
 
 }

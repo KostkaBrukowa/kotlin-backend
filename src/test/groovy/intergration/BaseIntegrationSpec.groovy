@@ -119,8 +119,7 @@ class BaseIntegrationSpec extends Specification {
                 notifications,
               parties ,
               party_requests ,
-              payments,
-              users 
+              payments
             """)
     }
 }

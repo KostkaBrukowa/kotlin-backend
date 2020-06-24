@@ -63,6 +63,17 @@ class UserMutationTest extends BaseIntegrationSpec {
         getUserResponse[0].errorType == "ExecutionAborted"
     }
 
+    def "create admin user"() {
+        given:
+        def signUpMutation = 'signUp(input: {email: "admin@gmail.com", password: "admin"}) '
+
+        when:
+        def x = postMutation(signUpMutation)
+
+        then:
+        true
+    }
+
     def "Should add other client as a friend"() {
         given:
         authenticate()
