@@ -12,6 +12,9 @@ class PaymentQuery(
         private val paymentService: PaymentService,
         private val bulkPaymentService: BulkPaymentService
 ) : Query {
+    fun getTest(paymentId: Long): String {
+        return "tnsraei"
+    }
 
     @Authenticated(role = Roles.USER)
     fun getSinglePayment(paymentId: Long): PaymentType? {

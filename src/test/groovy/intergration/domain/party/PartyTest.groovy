@@ -17,7 +17,6 @@ import spock.lang.Unroll
 
 import java.time.ZonedDateTime
 
-import static intergration.utils.builders.MessageTestBuilder.aExpenseMessage
 import static intergration.utils.builders.MessageTestBuilder.aPartyMessage
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty

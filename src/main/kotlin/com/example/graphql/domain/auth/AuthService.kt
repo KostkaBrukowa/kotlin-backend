@@ -2,6 +2,7 @@ package com.example.graphql.domain.auth
 
 import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.configuration.security.JWTAuthentication
+import com.example.graphql.configuration.security.JWTClient
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -15,16 +16,18 @@ class AuthService(
 
 ) {
 
-    fun signUpUser(email: String, password: String, context: AppGraphQLContext): User? {
+    fun signUpUser(email: String, password: String, context: AppGraphQLContext): String {
         val user = User(email = email, password = passwordEncoder.encode(password))
         val savedUser = userRepository.saveUser(user)
 
-        jwtAuthentication.authenticateUser(savedUser.id.toString(), context.request, context.response)
-
-        return savedUser
+        return jwtAuthentication.authenticateUser(savedUser.id.toString(), context.request, context.response)
     }
 
-    fun logInUser(email: String, password: String, context: AppGraphQLContext): User? {
+    fun refreshToken(context: AppGraphQLContext): String {
+        return jwtAuthentication.handleRefreshToken(context.request, context.response).token
+    }
+
+    fun logInUser(email: String, password: String, context: AppGraphQLContext): String?{
         val user = userRepository.findUserByEmail(email) ?: return null
         val passwordMatches = passwordEncoder.matches(password, user.password)
 
@@ -32,8 +35,6 @@ class AuthService(
             return null
         }
 
-        jwtAuthentication.authenticateUser(user.id.toString(), context.request, context.response)
-
-        return user
+        return jwtAuthentication.authenticateUser(user.id.toString(), context.request, context.response)
     }
 }

@@ -14,31 +14,62 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.stereotype.Component
+import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.server.WebFilter
+import org.springframework.web.server.WebFilterChain
+import reactor.core.publisher.Mono
 
-
-@Configuration
 @EnableWebSecurity
-class WebSecurity(private val bCryptPasswordEncoder: PasswordEncoder) : WebSecurityConfigurerAdapter() {
+@Configuration
+class WebSecurity() : WebSecurityConfigurerAdapter() {
 
     @Bean
     fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
-        http.csrf().disable().authorizeExchange()
+
+        http
+                .cors().disable()
+                .csrf().disable()
+                .authorizeExchange()
                 .pathMatchers(HttpMethod.POST, "/graphql").permitAll()
+                .pathMatchers(HttpMethod.OPTIONS, "/graphql").permitAll()
                 .pathMatchers(HttpMethod.GET, "/playground").permitAll()
                 .pathMatchers(HttpMethod.GET, "/subscriptions").permitAll()
+
+
         return http.build()
+    }
+}
+
+@Component
+class CorsFilter : WebFilter {
+    override fun filter(ctx: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        ctx.response.headers.add("Access-Control-Allow-Origin", "*")
+        ctx.response.headers.add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS")
+        ctx.response.headers.add("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
+        return when {
+            ctx.request.method == HttpMethod.OPTIONS -> {
+                ctx.response.headers.add("Access-Control-Max-Age", "1728000")
+                ctx.response.statusCode = HttpStatus.NO_CONTENT
+                Mono.empty()
+            }
+            else -> {
+                ctx.response.headers.add("Access-Control-Expose-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
+                chain.filter(ctx) ?: Mono.empty()
+            }
+        }
     }
 }
 
 @SpringBootApplication
 class GraphqlApplication {
-
     @Bean
     fun dataFetcherFactoryProvider(springDataFetcherFactory: SpringDataFetcherFactory, objectMapper: ObjectMapper) =
             CustomDataFetcherFactoryProvider(springDataFetcherFactory, objectMapper)
