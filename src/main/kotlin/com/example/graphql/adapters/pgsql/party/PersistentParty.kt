@@ -15,9 +15,9 @@ data class PersistentParty(
         @GeneratedValue
         val id: Long = 0,
 
-        val name: String,
+        val name: String?,
 
-        val description: String,
+        val description: String?,
 
         @Column(name = "start_date")
         val startDate: ZonedDateTime,
@@ -25,6 +25,17 @@ data class PersistentParty(
         @Column(name = "end_date")
         val endDate: ZonedDateTime?,
 
+        @Column(name = "location_name")
+        val locationName: String?,
+
+        @Column(name = "location_latitude")
+        val locationLatitude: Float?,
+
+        @Column(name = "location_longitude")
+        val locationLongitude: Float?,
+
+        @Column(name = "type")
+        val type: PartyKind,
 
         @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "owner_id")
@@ -49,7 +60,11 @@ data class PersistentParty(
             name = this.name,
             description = this.description,
             startDate = this.startDate,
-            endDate = this.endDate
+            endDate = this.endDate,
+            locationName = this.locationName,
+            locationLatitude = this.locationLatitude,
+            locationLongitude = this.locationLongitude,
+            type = this.type
     )
 
     override fun hashCode(): Int {
@@ -58,6 +73,9 @@ data class PersistentParty(
         result = 31 * result + description.hashCode()
         result = 31 * result + startDate.hashCode()
         result = 31 * result + endDate.hashCode()
+        result = 31 * result + locationName.hashCode()
+        result = 31 * result + locationLatitude.hashCode()
+        result = 31 * result + locationLongitude.hashCode()
 
         return result
     }
@@ -73,6 +91,10 @@ data class PersistentParty(
         if (description != other.description) return false
         if (startDate != other.startDate) return false
         if (endDate != other.endDate) return false
+        if (locationName != other.locationName) return false
+        if (locationLatitude != other.locationLatitude) return false
+        if (locationLongitude != other.locationLongitude) return false
+        if (type != other.type) return false
 
         return true
     }
@@ -83,5 +105,9 @@ fun Party.toPersistentEntity() = PersistentParty(
         name = this.name,
         description = this.description ?: "",
         startDate = this.startDate,
-        endDate = this.endDate
+        endDate = this.endDate,
+        locationName = this.locationName,
+        locationLatitude = this.locationLatitude,
+        locationLongitude = this.locationLongitude,
+        type = this.type
 )

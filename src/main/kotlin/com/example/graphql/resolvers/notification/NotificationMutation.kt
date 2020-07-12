@@ -13,7 +13,7 @@ class NotificationMutation(private val notificationService: NotificationService)
 
     @Authenticated(role = Roles.USER)
     fun markNotificationsAsRead(
-            notificationsIds: List<Long>,
+            notificationsIds: List<String>,
             @GraphQLContext context: AppGraphQLContext
     ): Boolean = notificationService.markNotificationsAsRead(notificationsIds, context.subject)
 }

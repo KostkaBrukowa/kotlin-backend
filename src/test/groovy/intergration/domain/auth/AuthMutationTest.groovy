@@ -10,10 +10,10 @@ class AuthMutationTest extends BaseIntegrationSpec {
 
     def "Should return correct jwt and store refresh token in cookie token after correct sign up"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) '
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { token }'
 
         when:
-        String accessToken = postMutation(signUpMutation, "signUp")
+        String accessToken = postMutation(signUpMutation, "signUp").token
 
         then:
         def accessTokenSubject = JWTUtils.getJWTTokenSubject(accessToken)
@@ -26,7 +26,7 @@ class AuthMutationTest extends BaseIntegrationSpec {
     @Unroll
     def "Should return store correct jwt and store refresh token in cookie token after correct [#loginCorrect] login"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "correct password"}) '
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "correct password"}) { token }'
 
         when:
         postMutation(signUpMutation, "signUp")
@@ -35,10 +35,10 @@ class AuthMutationTest extends BaseIntegrationSpec {
         CookiesUtils.removeCookie(SecurityConstants.REFRESH_TOKEN, restClient)
 
         and:
-        String accessTokenResponse = postMutation(loginMutation, "logIn")
+        def accessTokenResponse = postMutation(loginMutation, "logIn")
 
         then:
-        def accessToken = JWTUtils.getJWTToken(accessTokenResponse)
+        def accessToken = JWTUtils.getJWTToken(accessTokenResponse?.token)
         def refreshToken = JWTUtils.getJWTToken(CookiesUtils.getCookieValue(SecurityConstants.REFRESH_TOKEN, restClient))
 
         if (loginCorrect) {
@@ -50,21 +50,21 @@ class AuthMutationTest extends BaseIntegrationSpec {
         }
 
         where:
-        loginMutation                                                         | loginCorrect
-        'logIn(input: {email: "a@gmail.com", password: "correct password"}) ' | true
-        'logIn(input: {email: "a@gmail.com", password: "wrong password"}) '   | false
+        loginMutation                                                                  | loginCorrect
+        'logIn(input: {email: "a@gmail.com", password: "correct password"}) { token }' | true
+        'logIn(input: {email: "a@gmail.com", password: "wrong password"}) { token }'   | false
     }
 
     def "Refresh token enpoint should work"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "correct password"}) '
-        def refreshTokenMutation = 'refreshToken'
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "correct password"}) { token }'
+        def refreshTokenMutation = 'refreshToken { token }'
 
         when:
         postMutation(signUpMutation)
 
         and:
-        def refreshToken = postMutation(refreshTokenMutation)
+        def refreshToken = postMutation(refreshTokenMutation, 'refreshToken').token
 
         then:
         refreshToken != null
@@ -72,11 +72,11 @@ class AuthMutationTest extends BaseIntegrationSpec {
 
     def "Should reject request with expired token"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "correct password"}) '
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "correct password"}) { token }'
         def authenticationNeededQuery = { String id -> (' getUser(id: "' + id + '"){ id }') }
 
         when:
-        String accessTokenResponse = postMutation(signUpMutation)
+        String accessTokenResponse = postMutation(signUpMutation).token
 
         and:
         String expiredToken = JWTUtils.expireToken(accessTokenResponse)

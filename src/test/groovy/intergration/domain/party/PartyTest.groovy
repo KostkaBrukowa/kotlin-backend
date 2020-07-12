@@ -6,6 +6,7 @@ import com.example.graphql.adapters.pgsql.party.PersistentPartyRepository
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequest
 import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
+import com.example.graphql.domain.party.PartyKind
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.partyrequest.PartyRequestStatus
 import com.example.graphql.domain.user.PersistentUser
@@ -53,7 +54,8 @@ class PartyTest extends BaseIntegrationSpec {
 
     def "Should return all created parties created by user"() {
         given:
-        authenticate("firstUser@gmail.com")
+        authenticate()
+//        authenticate("firstUser@gmail.com")
 
         and:
         def loggedInClient = defaultPersistentUser([id: baseUserId])
@@ -61,15 +63,39 @@ class PartyTest extends BaseIntegrationSpec {
         def thirdClient = aClient(userRepository)
 
         and:
-        aParty([owner: secondClient], partyRepository)
-        aParty([owner: thirdClient], partyRepository)
-        aParty([owner: loggedInClient, name: 'logged party 1', participants: [secondClient, thirdClient]], partyRepository)
-        aParty([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient]], partyRepository)
+        aParty([owner: secondClient, type: PartyKind.EVENT], partyRepository)
+        aParty([owner: thirdClient, type: PartyKind.GROUP], partyRepository)
+        aParty([owner: loggedInClient, name: 'logged party 1', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
+        aParty([owner: loggedInClient, name: 'logged party 2', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
+        aParty([owner: loggedInClient, name: null, participants: [secondClient, thirdClient], type: PartyKind.FRIENDS], partyRepository)
+        aParty([owner: loggedInClient, name: null, participants: [secondClient, thirdClient], type: PartyKind.FRIENDS], partyRepository)
+         aParty([
+                owner: loggedInClient,
+                name : 'logged party 2',
+                participants: [secondClient, thirdClient],
+                type: PartyKind.EVENT,
+                locationName: 'Niebo',
+                locationLatitude: 52.13,
+                locationLongitude: 21.0,
+        ], partyRepository)
+
+        aParty([
+                owner: loggedInClient,
+                description: 'Najleprza impresa koronawosiura',
+                name : 'some party',
+                participants: [secondClient, thirdClient],
+                type: PartyKind.EVENT,
+                locationName: 'Niebo',
+                locationLatitude: 52.13,
+                locationLongitude: 21.0,
+        ], partyRepository)
 
         and:
         def getAllPartiesQuery = """
             getAllParties(userId: "${baseUserId}") {
                 name,
+                locationName
+                type
                 owner { id }
                 partyParticipants { id } 
                 partyPartyRequests { id } 

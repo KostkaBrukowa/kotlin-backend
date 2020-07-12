@@ -13,19 +13,19 @@ class ExpenseQuery(private val expenseService: ExpenseService) : Query {
 
     @Authenticated(role = Roles.USER)
     fun getSingleExpense(
-            expenseId: Long,
+            expenseId: String,
             @GraphQLContext context: AppGraphQLContext
     ): ExpenseType? = expenseService.findExpenseById(expenseId, context.subject)?.toResponse()
 
     @Authenticated(role = Roles.USER)
     fun getExpensesForUser(
-            userId: Long,
+            userId: String,
             @GraphQLContext context: AppGraphQLContext
     ): List<ExpenseType> = expenseService.getExpensesForUser(userId, context.subject).map { it.toResponse() }
 
     @Authenticated(role = Roles.USER)
     fun getExpensesForParty(
-            partyId: Long,
+            partyId: String,
             @GraphQLContext context: AppGraphQLContext
     ): List<ExpenseType> = expenseService.getExpensesForParty(partyId, context.subject).map { it.toResponse() }
 }

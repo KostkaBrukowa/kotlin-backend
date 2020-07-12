@@ -50,7 +50,7 @@ class NotificationService(private val notificationRepository: NotificationReposi
         notificationRepository.sendMessagesNotifications(message, messageType, objectId)
     }
 
-    fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyName: String) {
+    fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyName: String?) {
         if (partyRequests.any { it.user == null }) throw InternalError("Party request was not entirely fetched")
 
         val notifications = partyRequests.map {

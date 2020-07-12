@@ -12,9 +12,9 @@ class PartyQuery(
 ) : Query {
 
     @Authenticated(role = Roles.USER)
-    fun getAllParties(userId: Long): List<PartyType> =
+    fun getAllParties(userId: String): List<PartyType> =
             partyService.getAllParties(userId).map { it.toResponse() }
 
     @Authenticated(role = Roles.USER)
-    fun getSingleParty(partyId: Long): PartyType? = partyService.getSingleParty(partyId)?.toResponse()
+    fun getSingleParty(partyId: String): PartyType? = partyService.getSingleParty(partyId)?.toResponse()
 }

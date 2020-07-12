@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Ignore
 import spock.lang.Specification
 
@@ -40,6 +41,9 @@ class BaseIntegrationSpec extends Specification {
     @Autowired
     PersistentUserRepository userRepository
 
+    @Autowired
+    PasswordEncoder passwordEncoder
+
     RESTClient restClient
 
     def setup() {
@@ -52,8 +56,8 @@ class BaseIntegrationSpec extends Specification {
         restClient.handler.failure = restClient.handler.success
     }
 
-    protected def authenticate(String email = "a@gmail.com") {
-        baseUser = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([email: email]))
+    protected def authenticate(String email = "admin@gmail.com") {
+        baseUser = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([email: email, password: passwordEncoder.encode('admin123')]))
 
         baseUserId = baseUser.id
 
@@ -106,20 +110,22 @@ class BaseIntegrationSpec extends Specification {
     }
 
     private def cleanupTables() {
-        jdbcTemplate.execute("""
-            TRUNCATE TABLE 
-                bulk_payment_messages,
-                payment_messages,
-                expense_messages,
-                party_messages,
-                party_user,
-                friends,
-                bulk_payments,
-                expenses,
-                notifications,
-              parties ,
-              party_requests ,
-              payments
-            """)
+//        jdbcTemplate.execute("""
+
+//            TRUNCATE TABLE
+//                bulk_payment_messages,
+//                payment_messages,
+//                expense_messages,
+//                party_messages,
+//                party_user,
+//                friends,
+//                bulk_payments,
+//                expenses,
+//                notifications,
+//              parties ,
+//              party_requests ,
+//              payments,
+//                users
+//            """)
     }
 }

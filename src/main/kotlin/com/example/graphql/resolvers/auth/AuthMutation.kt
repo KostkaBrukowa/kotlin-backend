@@ -13,16 +13,17 @@ import org.springframework.stereotype.Component
 class AuthMutation(private val authService: AuthService) : Mutation {
 
     @GraphQLDescription("Registers user and return JWT token as return value")
-    fun refreshToken(@GraphQLContext context: AppGraphQLContext): String
+    fun refreshToken(@GraphQLContext context: AppGraphQLContext): UserAuthResponse
             = authService.refreshToken(context)
 
     @GraphQLDescription("Registers user and return JWT token as return value")
-    fun signUp(input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): String
+    fun signUp(input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse
             = authService.signUpUser(input.email, input.password, context)
 
     @GraphQLDescription("Logs in user and return JWT token as return value")
-    fun logIn(input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): String?
+    fun logIn(input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse?
             = authService.logInUser(input.email, input.password, context)
 }
 
 data class UserAuthInput(val email: String, val password: String)
+data class UserAuthResponse(val token: String, val userId: String)

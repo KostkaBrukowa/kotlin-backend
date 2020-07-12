@@ -25,7 +25,7 @@ data class ExpenseType(
 
         val expenseDate: ZonedDateTime,
 
-        val description: String? = null,
+        val description: String,
 
         val expenseStatus: ExpenseStatus
 
@@ -64,14 +64,14 @@ data class NewExpenseInput(
         @field:Length(min = 3, max = 256)
         val description: String,
 
-        val partyId: Long,
+        val partyId: String,
 
         val participants: List<Long>
 )
 
 data class UpdateExpenseInput(
 
-        val id: Long,
+        val id: String,
 
         @field:Length(min = 3, max = 256)
         val name: String,
@@ -85,7 +85,7 @@ data class UpdateExpenseInput(
 
 data class UpdateExpenseAmountInput(
 
-        val id: Long,
+        val id: String,
 
         @field:Positive
         @field:Min(value = 1)
@@ -94,7 +94,7 @@ data class UpdateExpenseAmountInput(
 
 data class UpdateExpenseStatusInput(
 
-        val id: Long,
+        val id: String,
 
         val expenseStatus: ExpenseStatus
 )

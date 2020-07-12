@@ -6,6 +6,7 @@ import com.example.graphql.domain.user.User
 import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
+import java.lang.Exception
 
 @Component
 class PartyService(
@@ -24,12 +25,14 @@ class PartyService(
         val currentUser = User(id = userId)
         val participants = (party.participants + currentUser).distinctBy { it.id }
 
-        val newParty = partyRepository.saveNewParty(party.copy(owner = currentUser, participants = participants))
+        val partyToBePersisted = party.copy(owner = currentUser, participants = participants)
+        validatePartyType(partyToBePersisted)
+        val newParty = partyRepository.saveNewParty(partyToBePersisted)
 
         val partyRequests = partyRequestRepository.createPartyRequestsForParticipants(participants - currentUser, newParty)
 
         if(newParty.owner == null) throw InternalError("Party was not entirely fetched")
-        notificationService.newPartyRequestsNotifications(partyRequests, newParty.owner!!.id, party.name) // TODO
+        notificationService.newPartyRequestsNotifications(partyRequests, newParty.owner.id, party.name) // TODO
 
         return newParty
     }
@@ -67,6 +70,30 @@ class PartyService(
         partyRepository.removeParty(id)
 
         return true
+    }
+
+    private fun validatePartyType(partyToBePersisted: Party) {
+        when(partyToBePersisted.type) {
+            PartyKind.EVENT -> {
+                checkNotNull(partyToBePersisted.startDate)
+                checkNotNull(partyToBePersisted.endDate)
+                checkNotNull(partyToBePersisted.name)
+                checkNotNull(partyToBePersisted.locationName)
+                checkNotNull(partyToBePersisted.locationLatitude)
+                checkNotNull(partyToBePersisted.locationLongitude)
+            }
+            PartyKind.GROUP -> {
+                checkNotNull(partyToBePersisted.name)
+                if(partyToBePersisted.endDate != null)
+                    throw Exception("End date cannot be defined in group party")
+            }
+            PartyKind.FRIENDS -> {
+                if(partyToBePersisted.name != null)
+                    throw Exception("Name cannot be defined in friends party")
+                if(partyToBePersisted.endDate != null)
+                    throw Exception("End date cannot be defined in friends party")
+            }
+        }
     }
 
 }

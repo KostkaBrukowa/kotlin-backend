@@ -13,7 +13,7 @@ class UserMutationTest extends BaseIntegrationSpec {
     @Unroll
     def "Should return a user when user is authenticated"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) '
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { token }'
 
         and:
         def getUserQuery = { String id ->
@@ -26,7 +26,7 @@ class UserMutationTest extends BaseIntegrationSpec {
         }
 
         when:
-        String newUserJWTToken = postMutation(signUpMutation, "signUp")
+        def newUserJWTToken = postMutation(signUpMutation, "signUp").token
 
         and:
         setHeaders(["Authorization": "Bearer " + newUserJWTToken])
@@ -41,7 +41,7 @@ class UserMutationTest extends BaseIntegrationSpec {
 
     def "Should sent error response when user is not authenticated"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) '
+        def signUpMutation = 'signUp(input: {email: "a@gmail.com", password: "fdak"}) { token }'
 
         and:
         def signUpQuery = { String id ->
@@ -65,7 +65,7 @@ class UserMutationTest extends BaseIntegrationSpec {
 
     def "create admin user"() {
         given:
-        def signUpMutation = 'signUp(input: {email: "admin@gmail.com", password: "admin"}) '
+        def signUpMutation = 'signUp(input: {email: "admin@gmail.com", password: "admin"}) { token }'
 
         when:
         def x = postMutation(signUpMutation)

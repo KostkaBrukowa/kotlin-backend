@@ -20,7 +20,7 @@ class MessageMutation(private val messageService: MessageService): Mutation {
 
     @Authenticated(role = Roles.USER)
     fun removeMessage(
-            messageId: Long,
+            messageId: String,
             messageType: MessageType,
             @GraphQLContext context: AppGraphQLContext
     ) = messageService.removeMessage(messageId, messageType, context.subject)

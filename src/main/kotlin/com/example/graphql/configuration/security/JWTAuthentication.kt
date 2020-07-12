@@ -65,7 +65,7 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
         return tokenResponse.jwtToken
     }
 
-    private fun decodeTokenSafely(token: String): DecodedJWT {
+    public fun decodeTokenSafely(token: String): DecodedJWT {
         try {
             return JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
                     .build()
