@@ -1,8 +1,5 @@
 package com.example.graphql
 
-import com.example.graphql.domain.user.PersistentUser
-import com.example.graphql.domain.user.User
-import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.resolvers.configuration.CustomDataFetcherFactoryProvider
 import com.example.graphql.resolvers.configuration.SpringDataFetcherFactory
 import com.example.graphql.schema.directives.CustomDirectiveWiringFactory
@@ -42,6 +39,7 @@ class WebSecurity() : WebSecurityConfigurerAdapter() {
                 .csrf().disable()
                 .authorizeExchange()
                 .pathMatchers(HttpMethod.POST, "/graphql").permitAll()
+                .pathMatchers(HttpMethod.GET, "/graphql").permitAll()
                 .pathMatchers(HttpMethod.OPTIONS, "/graphql").permitAll()
                 .pathMatchers(HttpMethod.GET, "/playground").permitAll()
                 .pathMatchers(HttpMethod.GET, "/subscriptions").permitAll()

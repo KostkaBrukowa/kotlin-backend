@@ -15,24 +15,23 @@ class PartyRequestMutation(private val partyRequestService: PartyRequestService)
     fun acceptPartyRequest(
             partyRequestId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.acceptRequest(partyRequestId, context.subject)
+    ) = partyRequestService.acceptRequest(partyRequestId.toLong(), context.subject)
 
     @Authenticated(role = Roles.USER)
     fun declinePartyRequest(
             partyRequestId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.declineRequest(partyRequestId, context.subject)
+    ) = partyRequestService.declineRequest(partyRequestId.toLong(), context.subject)
 
     @Authenticated(role = Roles.USER)
     fun removePartyRequest(
             partyRequestId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.removePartyRequest(partyRequestId, context.subject)
+    ) = partyRequestService.removePartyRequest(partyRequestId.toLong(), context.subject)
 
     @Authenticated(role = Roles.USER)
     fun sendPartyRequest(
             partyId: String,
             requestReceiverId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.sendPartyRequest(requestReceiverId, partyId, context.subject)?.toResponse()
-}
+    ) = partyRequestService.sendPartyRequest(requestReceiverId.toLong(), partyId.toLong(), context.subject)?.toResponse() }

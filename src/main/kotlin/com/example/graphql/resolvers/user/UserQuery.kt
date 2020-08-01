@@ -12,12 +12,12 @@ class UserQuery(
 ) : Query {
 
     @Authenticated(role = Roles.USER)
-    fun getUser(id: Long): UserType? {
-        return userService.getUserById(id)?.toResponse()
+    fun getUser(id: String): UserType? {
+        return userService.getUserById(id.toLong())?.toResponse()
     }
 
     @Authenticated(role = Roles.USER)
-    fun findUsersFriends(userId: Long): List<UserType> {
-        return userService.findUsersFriends(userId).map { it.toResponse() }
+    fun findUsersFriends(userId: String): List<UserType> {
+        return userService.findUsersFriends(userId.toLong()).map { it.toResponse() }
     }
 }

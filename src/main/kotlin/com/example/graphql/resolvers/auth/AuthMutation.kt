@@ -23,6 +23,10 @@ class AuthMutation(private val authService: AuthService) : Mutation {
     @GraphQLDescription("Logs in user and return JWT token as return value")
     fun logIn(input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse?
             = authService.logInUser(input.email, input.password, context)
+
+    @GraphQLDescription("Removes the cookie from request")
+    fun logOut(@GraphQLContext context: AppGraphQLContext)
+            = authService.logOut(context)
 }
 
 data class UserAuthInput(val email: String, val password: String)

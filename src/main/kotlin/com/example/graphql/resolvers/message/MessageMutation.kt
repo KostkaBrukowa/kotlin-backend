@@ -23,7 +23,7 @@ class MessageMutation(private val messageService: MessageService): Mutation {
             messageId: String,
             messageType: MessageType,
             @GraphQLContext context: AppGraphQLContext
-    ) = messageService.removeMessage(messageId, messageType, context.subject)
+    ) = messageService.removeMessage(messageId.toLong(), messageType, context.subject)
 }
 
 enum class MessageType {

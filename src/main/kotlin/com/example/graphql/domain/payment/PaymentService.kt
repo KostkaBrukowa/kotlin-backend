@@ -46,7 +46,7 @@ class PaymentService(
 
     // UPDATE
     fun updatePaymentStatus(updatePaymentStatusInput: UpdatePaymentStatusInput, currentUserId: Long): Payment {
-        val payment = paymentRepository.findPaymentWithOwnerAndExpenseOwner(updatePaymentStatusInput.paymentId)
+        val payment = paymentRepository.findPaymentWithOwnerAndExpenseOwner(updatePaymentStatusInput.paymentId.toLong())
                 ?: throw EntityNotFoundException("payment")
 
         requireCorrectPaymentStatus(payment.status, updatePaymentStatusInput.status)

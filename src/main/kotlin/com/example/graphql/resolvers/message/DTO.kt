@@ -31,7 +31,7 @@ data class NewMessageInput(
         @field:Length(min = 1)
         val text: String,
 
-        val entityId: String,
+        val entityId: Long,
 
         val messageType: MessageType
 )

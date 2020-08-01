@@ -33,7 +33,7 @@ class PaymentMutation(
 
     @Authenticated(role = Roles.USER)
     fun bulkPayments(
-            paymentsIds: List<Long>,
+            paymentsIds: List<String>,
             @GraphQLContext context: AppGraphQLContext
-    ): BulkPaymentType? = bulkPaymentService.convertPaymentsToBulkPayment(paymentsIds, context.subject)?.toResponse()
+    ): BulkPaymentType? = bulkPaymentService.convertPaymentsToBulkPayment(paymentsIds.map {it.toLong()}, context.subject)?.toResponse()
 }

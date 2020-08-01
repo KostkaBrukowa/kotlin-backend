@@ -9,10 +9,10 @@ import com.expediagroup.graphql.annotations.GraphQLID
 import java.time.ZonedDateTime
 
 fun Notification.toResponse(): NotificationType = when (objectType) {
-    NotificationObjectType.EXPENSE -> ExpenseNotification(id.toString(), createdAt, event, isRead, actor?.toResponse(), receiver?.toResponse(), objectId)
-    NotificationObjectType.PARTY_REQUEST -> PartyRequestNotification(id.toString(), createdAt, event, isRead, actor?.toResponse(), receiver?.toResponse(), objectId)
-    NotificationObjectType.PAYMENT -> PaymentNotification(id.toString(), createdAt, event, isRead, actor?.toResponse(), receiver?.toResponse(), objectId)
-    NotificationObjectType.BULK_PAYMENT -> PaymentNotification(id.toString(), createdAt, event, isRead, actor?.toResponse(), receiver?.toResponse(), objectId)
+    NotificationObjectType.EXPENSE -> ExpenseNotification(id.toString(), createdAt, event, isRead, objectName, actor?.toResponse(), receiver?.toResponse(), objectId.toString())
+    NotificationObjectType.PARTY_REQUEST -> PartyRequestNotification(id.toString(), createdAt, event, isRead, objectName, actor?.toResponse(), receiver?.toResponse(), objectId.toString())
+    NotificationObjectType.PAYMENT -> PaymentNotification(id.toString(), createdAt, event, isRead,objectName,  actor?.toResponse(), receiver?.toResponse(), objectId.toString())
+    NotificationObjectType.BULK_PAYMENT -> PaymentNotification(id.toString(), createdAt, event, isRead,objectName,  actor?.toResponse(), receiver?.toResponse(), objectId.toString())
     else -> throw UnsupportedResponseNotificationType()
 }
 
@@ -23,6 +23,7 @@ interface NotificationType {
     val event: NotificationEvent
     val isRead: Boolean
     val type: NotificationTypeEnum
+    val objectName: String?
     val actor: UserType?
     val receiver: UserType?
 }
@@ -33,6 +34,7 @@ class PaymentNotification(
         override val createdAt: ZonedDateTime,
         override val event: NotificationEvent,
         override val isRead: Boolean,
+        override val objectName: String?,
         override val actor: UserType?,
         override val receiver: UserType?,
         val paymentId: String
@@ -48,6 +50,7 @@ class ExpenseNotification(
         override val createdAt: ZonedDateTime,
         override val event: NotificationEvent,
         override val isRead: Boolean,
+        override val objectName: String?,
         override val actor: UserType?,
         override val receiver: UserType?,
         val expenseId: String
@@ -63,6 +66,7 @@ class PartyRequestNotification(
         override val createdAt: ZonedDateTime,
         override val event: NotificationEvent,
         override val isRead: Boolean,
+        override val objectName: String?,
         override val actor: UserType?,
         override val receiver: UserType?,
         val partyId: String
@@ -78,5 +82,5 @@ enum class NotificationTypeEnum {
     PARTY_REQUEST
 }
 
-class UnsupportedResponseNotificationType : InternalError("Unsupported notification type for resopnse")
+class UnsupportedResponseNotificationType : InternalError("Unsupported notification type for response")
 

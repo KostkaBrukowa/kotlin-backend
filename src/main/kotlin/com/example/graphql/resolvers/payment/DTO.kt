@@ -61,12 +61,12 @@ fun BulkPayment.toResponse() = BulkPaymentType(
 
 data class UpdatePaymentStatusInput(
 
-        val paymentId: Long,
+        val paymentId: String,
         val status: PaymentStatus
 )
 
 data class UpdateBulkPaymentStatusInput(
 
-        val id: Long,
+        val id: String,
         val status: BulkPaymentStatus
 )

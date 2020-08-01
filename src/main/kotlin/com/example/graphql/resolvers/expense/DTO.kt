@@ -66,8 +66,10 @@ data class NewExpenseInput(
 
         val partyId: String,
 
-        val participants: List<Long>
-)
+        val participants: List<String>
+) {
+
+}
 
 data class UpdateExpenseInput(
 

@@ -44,12 +44,12 @@ class ExpenseService(
 
     // CREATE
     fun createExpense(expenseInput: NewExpenseInput, currentUserId: Long): Expense {
-        val expenseParty = partyRepository.findPartiesWithParticipants(setOf(expenseInput.partyId)).firstOrNull()
+        val expenseParty = partyRepository.findPartiesWithParticipants(setOf(expenseInput.partyId.toLong())).firstOrNull()
                 ?: throw EntityNotFoundException("party")
 
-        val expenseParticipants = expenseInput.participants.filter { it != currentUserId }.toSet()
+        val expenseParticipants = expenseInput.participants.filter { it.toLong() != currentUserId }.map { it.toLong() }.toSet()
 
-        requirePartyParticipantsIncludeExpenseParticipants(expenseParticipants, expenseParty, currentUserId)
+        requirePartyParticipantsIncludeExpenseParticipants(expenseParticipants.map { it }.toSet(), expenseParty, currentUserId)
 
         val newExpense = expenseRepository.saveNewExpense(expenseInput.toDomain(currentUserId))
 
@@ -60,7 +60,7 @@ class ExpenseService(
 
     // UPDATE
     fun updateExpense(updateExpenseInput: UpdateExpenseInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseInput.id)
+        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseInput.id.toLong())
                 ?: throw EntityNotFoundException("expense")
 
         requireExpenseOwner(expenseToUpdate, currentUserId)
@@ -77,7 +77,7 @@ class ExpenseService(
     }
 
     fun updateExpenseAmount(updateExpenseAmountInput: UpdateExpenseAmountInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseAmountInput.id)
+        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseAmountInput.id.toLong())
                 ?: throw EntityNotFoundException("expense")
 
         requireExpenseOwner(expenseToUpdate, currentUserId)
@@ -93,7 +93,7 @@ class ExpenseService(
     }
 
     fun updateExpenseStatus(updateExpenseStatusInput: UpdateExpenseStatusInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseWithPayments(updateExpenseStatusInput.id)
+        val expenseToUpdate = expenseRepository.findExpenseWithPayments(updateExpenseStatusInput.id.toLong())
                 ?: throw EntityNotFoundException("expense")
 
         requireExpenseOwner(expenseToUpdate, currentUserId)
@@ -191,7 +191,7 @@ fun NewExpenseInput.toDomain(userId: Long) = Expense(
         amount = amount,
         expenseDate = expenseDate,
         user = User(userId),
-        party = Party(this.partyId)
+        party = Party(this.partyId.toLong())
 )
 
 class ExpenseParticipantNotInPartyException : SimpleValidationException("Not all users were party participants")

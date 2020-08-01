@@ -13,9 +13,9 @@ class PartyRequestQuery(private val partyRequestService: PartyRequestService) : 
 
     @Authenticated(role = Roles.USER)
     fun getPartyRequestsForParty(partyId: String) =
-            partyRequestService.getAllPartyRequestsByPartyId(partyId).map { it.toResponse() }
+            partyRequestService.getAllPartyRequestsByPartyId(partyId.toLong()).map { it.toResponse() }
 
     @Authenticated(role = Roles.USER)
     fun getPartyRequestsForUser(userId: String, @GraphQLContext context: AppGraphQLContext) =
-            partyRequestService.getAllPartyRequestsByUserId(userId, context.subject).map { it.toResponse() }
+            partyRequestService.getAllPartyRequestsByUserId(userId.toLong(), context.subject).map { it.toResponse() }
 }
