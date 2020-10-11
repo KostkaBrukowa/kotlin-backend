@@ -22,10 +22,10 @@ class NotificationQuery(private val notificationService: NotificationService) : 
     ): List<NotificationType> {
 //        return notificationService.findUserNotifications(userId, context.subject).map { it.toResponse() }
         return listOf(
-                PaymentNotification("12", ZonedDateTime.now(), NotificationEvent.ACCEPTED, false, UserType(name = "actor"), UserType(name ="receiver"),  33),
-                ExpenseNotification("13", ZonedDateTime.now(), NotificationEvent.CREATION, false, UserType(name = "actor"), UserType(name = "receiver"),33),
-                PartyRequestNotification("15", ZonedDateTime.now(), NotificationEvent.DELETION, false, UserType(name = "actor"), UserType(name = "receiver"),33),
-                PartyRequestNotification("16", ZonedDateTime.now(), NotificationEvent.ACCEPTED, true, UserType(name = "actor"), UserType(name = "receiver"),33)
+                PaymentNotification("12", ZonedDateTime.now(), NotificationEvent.ACCEPTED, false, "name", UserType(name = "actor"), UserType(name ="receiver"),  "33"),
+                ExpenseNotification("13", ZonedDateTime.now(), NotificationEvent.CREATION, false,  "name",UserType(name = "actor"), UserType(name = "receiver"),"33"),
+                PartyRequestNotification("15", ZonedDateTime.now(), NotificationEvent.DELETION, false,  "name",UserType(name = "actor"), UserType(name = "receiver"),"33"),
+                PartyRequestNotification("16", ZonedDateTime.now(), NotificationEvent.ACCEPTED, true,  "name",UserType(name = "actor"), UserType(name = "receiver"),"33")
         )
     }
 

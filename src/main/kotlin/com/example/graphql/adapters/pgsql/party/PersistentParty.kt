@@ -20,7 +20,7 @@ data class PersistentParty(
         val description: String?,
 
         @Column(name = "start_date")
-        val startDate: ZonedDateTime,
+        val startDate: ZonedDateTime?,
 
         @Column(name = "end_date")
         val endDate: ZonedDateTime?,

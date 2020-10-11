@@ -24,9 +24,8 @@ class PartyMutation(
 
     @Authenticated(role = Roles.USER)
     fun updateParty(
-            id: String,
             @Valid editPartyInput: EditPartyInput
-    ) = partyService.updateParty(id.toLong(), editPartyInput.toDomain())
+    ) = partyService.updateParty(editPartyInput.toDomain()).toResponse()
 
     @Authenticated(role = Roles.USER)
     fun deleteParty(

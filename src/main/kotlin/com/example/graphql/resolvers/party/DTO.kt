@@ -22,7 +22,7 @@ data class PartyType(
         val name: String? = null,
         val owner: User? = null,
         val description: String? = null,
-        val startDate: ZonedDateTime,
+        val startDate: ZonedDateTime?,
         val endDate: ZonedDateTime? = null,
         val locationName: String? = null,
         val locationLatitude: Float? = null,
@@ -95,14 +95,16 @@ data class NewPartyInput(
 }
 
 data class EditPartyInput(
+        val id: String,
+
         @field:Length(min = 3, max = 256)
         val name: String,
 
         @field:FutureOrPresent
-        val startDate: ZonedDateTime,
+        val startDate: ZonedDateTime?,
 
         @field:FutureOrPresent
-        val endDate: ZonedDateTime,
+        val endDate: ZonedDateTime?,
 
         val description: String?,
 
@@ -120,6 +122,7 @@ data class EditPartyInput(
 ) {
 
     fun toDomain(): Party = Party(
+            id = this.id.toLong(),
             name = this.name,
             description = this.description,
             startDate = this.startDate,

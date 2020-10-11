@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param
 import javax.transaction.Transactional
 
 interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
-    fun findTopByEmail(email: String): PersistentUser?
+    fun findByEmail(email: String): PersistentUser?
 
     @Query("""
         SELECT u.id, u.name, u.email, u.bank_account, u.password, u.is_email_confirmed
@@ -26,6 +26,15 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
         WHERE user.id in :usersIds
     """)
     fun findUsersWithPartyRequests(@Param("usersIds") usersIds: Set<Long>): List<PersistentUser>
+
+    @Query("""
+        SELECT user
+        FROM PersistentUser as user
+        LEFT JOIN FETCH user.friends
+        LEFT JOIN FETCH user.friendOf
+        WHERE user.email = :userEmail
+    """)
+    fun findUserByEmailWithFriends(@Param("userEmail") userEmail: String): PersistentUser?
 
     @Query("""
         SELECT distinct user

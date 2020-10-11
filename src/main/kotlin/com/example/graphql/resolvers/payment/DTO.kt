@@ -5,6 +5,7 @@ import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
+import com.example.graphql.resolvers.expense.ExpenseType
 import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.GQLResponseType
@@ -20,7 +21,7 @@ data class PaymentType(
         val status: PaymentStatus = PaymentStatus.IN_PROGRESS
 ) : GQLResponseType {
 
-    lateinit var paymentExpense: Expense
+    lateinit var paymentExpense: ExpenseType
 
     lateinit var paymentPayer: UserType
 

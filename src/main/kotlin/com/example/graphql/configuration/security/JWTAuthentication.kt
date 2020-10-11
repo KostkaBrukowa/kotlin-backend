@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.example.graphql.configuration.security.SecurityConstants.JWT_EXPIRATION_TIME
+import com.example.graphql.domain.user.UserRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
@@ -17,9 +18,10 @@ const val ACCESS_TOKEN = "xppctkn"
 const val REFRESH_TOKEN = "xppcreftkn"
 
 @Component
-class JWTAuthentication(private val jwtClient: JWTClient) {
+class JWTAuthentication(private val jwtClient: JWTClient, private val userRepository: UserRepository) {
 
     fun handleJWTAuthorisation(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT? {
+        return decodeTokenSafely(jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString()).jwtToken)
         return try {
             log.debug("Processing '{}' request to resource: {}", request.method, request.uri)
 
@@ -49,7 +51,8 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
     fun handleRefreshToken(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT {
         log.debug("Handling request with no/expired token. Refresh token cookie is present.")
 
-        val tokenResponse = jwtClient.validateAndCreateValidationTokens(request.getCookieValue(REFRESH_TOKEN))
+//        val tokenResponse = jwtClient.validateAndCreateValidationTokens(request.getCookieValue(REFRESH_TOKEN)) //todo revert
+        val tokenResponse = jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString())
         log.debug("Received new OAuth2 token from authorization server using refresh token.")
 
         response.addRefreshTokenCookie(tokenResponse.refreshToken)

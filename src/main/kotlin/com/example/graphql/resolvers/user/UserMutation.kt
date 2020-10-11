@@ -13,10 +13,10 @@ class UserMutation(private val userService: UserService) : Mutation {
 
     @Authenticated(role = Roles.USER)
     fun addFriend(
-            userId: String,
+            userEmail: String,
             @GraphQLContext context: AppGraphQLContext
-    ): Boolean {
-        return userService.addFriend(userId.toLong(), context.subject)
+    ): UserType? {
+        return userService.addFriend(context.subject, userEmail).toResponse()
     }
 
     @Authenticated(role = Roles.USER)

@@ -3,6 +3,7 @@ package com.example.graphql.resolvers.expense
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseStatus
 import com.example.graphql.resolvers.message.MessageResponseType
+import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.user.UserType
@@ -33,7 +34,7 @@ data class ExpenseType(
 
     lateinit var expensePayer: UserType
 
-    lateinit var expenseParty: PartyRequestType
+    lateinit var expenseParty: PartyType
 
     lateinit var expensePayments: List<PaymentType>
 
@@ -82,7 +83,11 @@ data class UpdateExpenseInput(
         val expenseDate: ZonedDateTime,
 
         @field:Length(min = 3, max = 256)
-        val description: String
+        val description: String,
+
+        @field:Positive
+        @field:Min(value = 1)
+        val amount: Float
 )
 
 data class UpdateExpenseAmountInput(

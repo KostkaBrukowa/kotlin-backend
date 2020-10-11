@@ -9,7 +9,7 @@ data class Party(
         val id: Long = 0,
         val name: String? = null,
         val description: String? = null,
-        val startDate: ZonedDateTime = ZonedDateTime.now(),
+        val startDate: ZonedDateTime? = ZonedDateTime.now(),
         val endDate: ZonedDateTime? = null,
         val locationName: String? = null,
         val locationLatitude: Float? = null,

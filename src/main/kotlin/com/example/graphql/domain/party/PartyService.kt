@@ -38,7 +38,7 @@ class PartyService(
     }
 
     // UPDATE
-    fun updateParty(id: Long, party: Party) = partyRepository.updateParty(party.copy(id = id))
+    fun updateParty(party: Party) = partyRepository.updateParty(party.copy(id = party.id))
 
     fun removeParticipant(partyId: Long, participantId: Long, currentUserId: Long): Boolean {
         val party = partyRepository.getPartyWithOwnerAndParticipants(partyId)
@@ -75,15 +75,14 @@ class PartyService(
     private fun validatePartyType(partyToBePersisted: Party) {
         when(partyToBePersisted.type) {
             PartyKind.EVENT -> {
-                checkNotNull(partyToBePersisted.startDate)
-                checkNotNull(partyToBePersisted.endDate)
-                checkNotNull(partyToBePersisted.name)
-                checkNotNull(partyToBePersisted.locationName)
-                checkNotNull(partyToBePersisted.locationLatitude)
-                checkNotNull(partyToBePersisted.locationLongitude)
+                checkNotNull(partyToBePersisted.startDate) { "Start date was null for event party" }
+                checkNotNull(partyToBePersisted.name){ "Name was null for event party" }
+                checkNotNull(partyToBePersisted.locationName){ "Location name was null for event party" }
+                checkNotNull(partyToBePersisted.locationLatitude){ "Location latitude was null for event party" }
+                checkNotNull(partyToBePersisted.locationLongitude){ "Location longitude was null for event party" }
             }
             PartyKind.GROUP -> {
-                checkNotNull(partyToBePersisted.name)
+                checkNotNull(partyToBePersisted.name){ "Name was null for group party" }
                 if(partyToBePersisted.endDate != null)
                     throw Exception("End date cannot be defined in group party")
             }

@@ -15,6 +15,6 @@ interface UserRepository {
     fun findUsersWithJoinedParties(usersIds: Set<Long>): List<User>
 
 
-    fun addFriend(userId: Long, friendId: Long): Boolean
+    fun addFriend(userId: Long, friendEmail: String): User
     fun removeFriend(userId: Long, friendId: Long)
 }

@@ -2,6 +2,8 @@ package com.example.graphql.domain.auth
 
 import com.example.graphql.configuration.context.AppGraphQLContext
 import com.example.graphql.configuration.security.JWTAuthentication
+import com.example.graphql.configuration.security.REFRESH_TOKEN
+import com.example.graphql.configuration.security.removeCookie
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.resolvers.auth.UserAuthResponse
@@ -13,7 +15,6 @@ class AuthService(
         private val userRepository: UserRepository,
         private val passwordEncoder: PasswordEncoder,
         private val jwtAuthentication: JWTAuthentication
-
 ) {
 
     fun signUpUser(email: String, password: String, context: AppGraphQLContext): UserAuthResponse {
@@ -24,11 +25,13 @@ class AuthService(
             throw UserAlreadyExistsException()
         }
 
-        return toResponse(jwtAuthentication.authenticateUser(savedUser.id.toString(), context.request, context.response))
+        return jwtAuthentication.authenticateUser(savedUser.id.toString(), context.request, context.response).toResponse()
     }
 
     fun refreshToken(context: AppGraphQLContext): UserAuthResponse {
-        return toResponse(jwtAuthentication.handleRefreshToken(context.request, context.response).token)
+//        return jwtAuthentication.handleRefreshToken(context.request, context.response).toResponse().token
+        val savedUser = userRepository.findUserByEmail("admin@gmail.com")
+        return jwtAuthentication.authenticateUser(savedUser?.id.toString(), context.request, context.response).toResponse()
     }
 
     fun logInUser(email: String, password: String, context: AppGraphQLContext): UserAuthResponse? {
@@ -39,13 +42,25 @@ class AuthService(
             return null
         }
 
-        return toResponse(jwtAuthentication.authenticateUser(user.id.toString(), context.request, context.response))
+        return jwtAuthentication.authenticateUser(user.id.toString(), context.request, context.response).toResponse()
     }
 
-    private fun toResponse(token: String): UserAuthResponse {
-        val decodedJWT = jwtAuthentication.decodeTokenSafely(token)
+//    private fun toResponse(token: String): UserAuthResponse {
+//        val decodedJWT = jwtAuthentication.decodeTokenSafely(token)
+//
+//        return UserAuthResponse(token, decodedJWT.subject)
+//    }
 
-        return UserAuthResponse(token, decodedJWT.subject)
+    private fun String.toResponse(): UserAuthResponse {
+        val decodedJWT = jwtAuthentication.decodeTokenSafely(this)
+
+        return UserAuthResponse(this, decodedJWT.subject)
+    }
+
+    fun logOut(context: AppGraphQLContext): Boolean {
+        context.response.removeCookie(REFRESH_TOKEN)
+
+        return true
     }
 }
 

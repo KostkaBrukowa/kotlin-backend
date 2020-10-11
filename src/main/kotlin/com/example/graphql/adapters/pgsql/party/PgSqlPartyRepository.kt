@@ -6,6 +6,7 @@ import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.party.PersistentParty
 import com.example.graphql.domain.party.toPersistentEntity
 import com.example.graphql.domain.user.toPersistentEntity
+import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
@@ -79,8 +80,12 @@ class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepositor
                 name = updatedParty.name,
                 description = updatedParty.description ?: "",
                 startDate = updatedParty.startDate,
-                endDate = updatedParty.endDate
-        ) ?: throw Exception("Party not found")
+                endDate = updatedParty.endDate,
+                locationLatitude = updatedParty.locationLatitude,
+                locationLongitude = updatedParty.locationLongitude,
+                locationName = updatedParty.locationName
+
+        ) ?: throw EntityNotFoundException("Party not found")
 
         return partyRepository.save(partyToUpdate).toDomainWithRelations()
     }

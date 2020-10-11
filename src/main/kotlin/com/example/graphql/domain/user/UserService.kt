@@ -12,14 +12,8 @@ class UserService(
 
     fun findUsersFriends(userId: Long) = userRepository.findUsersFriends(userId)
 
-    fun addFriend(userId: Long, currentUserId: Long): Boolean {
-        val insertSucceed = userRepository.addFriend(userId, currentUserId)
-
-        if(!insertSucceed) {
-            throw FriendshipAlreadyExistsException()
-        }
-
-        return insertSucceed
+    fun addFriend(currentUserId: Long, friendEmail: String): User {
+        return userRepository.addFriend(currentUserId, friendEmail)
     }
 
     fun removeFriend(userId: Long, currentUserId: Long) {

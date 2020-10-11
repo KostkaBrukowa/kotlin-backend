@@ -57,7 +57,7 @@ class BaseIntegrationSpec extends Specification {
     }
 
     protected def authenticate(String email = "admin@gmail.com") {
-        baseUser = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([email: email, password: passwordEncoder.encode('admin123')]))
+        baseUser = userRepository.save(PersistentUserTestBuilder.defaultPersistentUser([id: "123", email: email, password: passwordEncoder.encode('admin123')]))
 
         baseUserId = baseUser.id
 

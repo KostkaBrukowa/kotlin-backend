@@ -68,28 +68,23 @@ class ExpenseService(
         val updatedExpense = expenseToUpdate.copy(
                 name = updateExpenseInput.name,
                 description = updateExpenseInput.description,
-                expenseDate = updateExpenseInput.expenseDate
+                expenseDate = updateExpenseInput.expenseDate,
+                amount = updateExpenseInput.amount
         )
 
+        updateExpenseAmount(expenseToUpdate, updateExpenseInput.amount)
         expenseRepository.updateExpense(updatedExpense)
 
         return updatedExpense
     }
 
-    fun updateExpenseAmount(updateExpenseAmountInput: UpdateExpenseAmountInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseAmountInput.id.toLong())
-                ?: throw EntityNotFoundException("expense")
+    private fun updateExpenseAmount(expenseToUpdate: Expense, amount: Float) {
+        if(expenseToUpdate.amount == amount)
+            return
 
-        requireExpenseOwner(expenseToUpdate, currentUserId)
         requireExpenseStatuses(expenseToUpdate, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
 
-        val updatedExpense = expenseToUpdate.copy(amount = updateExpenseAmountInput.amount)
-
-        expenseRepository.updateExpense(updatedExpense)
-
-        paymentService.resetPaymentsStatuses(updatedExpense.id)
-
-        return updatedExpense
+        paymentService.resetPaymentsStatuses(expenseToUpdate.id)
     }
 
     fun updateExpenseStatus(updateExpenseStatusInput: UpdateExpenseStatusInput, currentUserId: Long): Expense {

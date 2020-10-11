@@ -33,12 +33,6 @@ class ExpenseMutation(private val expenseService: ExpenseService) : Mutation {
     ) = expenseService.deleteExpense(expenseId, context.subject)
 
     @Authenticated(role = Roles.USER)
-    fun updateExpenseAmount(
-            @Valid updateExpenseAmountInput: UpdateExpenseAmountInput,
-            @GraphQLContext context: AppGraphQLContext
-    ) = expenseService.updateExpenseAmount(updateExpenseAmountInput, context.subject).toResponse()
-
-    @Authenticated(role = Roles.USER)
     fun changeExpenseStatus(
             updateExpenseStatusInput: UpdateExpenseStatusInput,
             @GraphQLContext context: AppGraphQLContext
