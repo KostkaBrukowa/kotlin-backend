@@ -1,6 +1,7 @@
 package com.example.graphql.adapters.pgsql.party
 
 import com.example.graphql.domain.party.PersistentParty
+import com.example.graphql.domain.user.PersistentUser
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -25,7 +26,7 @@ interface PersistentPartyRepository : JpaRepository<PersistentParty, Long> {
         LEFT JOIN FETCH p.participants
         WHERE p.id in (:ids)
     """)
-    fun findPartiesWithParticipants(@Param("ids") ids: Set<Long>): List<PersistentParty>
+    fun findPartiesWithParticipants(@Param("ids") ids: Iterable<Long>): List<PersistentParty>
 
     @Query("""
         SELECT distinct p

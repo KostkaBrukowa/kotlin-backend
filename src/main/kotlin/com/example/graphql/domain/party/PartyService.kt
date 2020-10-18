@@ -15,7 +15,9 @@ class PartyService(
         private val notificationService: NotificationService
 ) {
     // GET
-    fun getAllParties(userId: Long) = partyRepository.getAllByOwnerId(userId)
+    fun getAllUserParties(userId: Long): List<Party> {
+        return partyRepository.getAllUsersPartiesWithParticipants(userId)
+    }
 
     fun getSingleParty(partyId: Long) = partyRepository.getTopById(partyId)
 
@@ -40,19 +42,19 @@ class PartyService(
     // UPDATE
     fun updateParty(party: Party) = partyRepository.updateParty(party.copy(id = party.id))
 
-    fun removeParticipant(partyId: Long, participantId: Long, currentUserId: Long): Boolean {
+    fun removeParticipant(partyId: Long, participantId: Long, currentUserId: Long): Party? {
         val party = partyRepository.getPartyWithOwnerAndParticipants(partyId)
                 ?: throw EntityNotFoundException("Party")
 
         if (party.owner?.id == participantId) {
-            return false
+            return null
         }
 
         requirePartyOwnerOrParticipant(party, participantId, currentUserId)
 
         partyRepository.removeParticipant(partyId, participantId)
 
-        return true
+        return party
     }
 
     fun addParticipant(partyId: Long, participantId: Long, currentUserId: Long): Boolean {
@@ -62,14 +64,16 @@ class PartyService(
     }
 
     // DELETE
-    fun deleteParty(id: Long, currentUserId: Long): Boolean {
-        if (partyRepository.getTopById(id)?.owner?.id != currentUserId) {
+    fun deleteParty(id: Long, currentUserId: Long): Party? {
+        val party = partyRepository.getTopById(id)
+
+        if (party?.owner?.id != currentUserId) {
             throw UnauthorisedException()
         }
 
         partyRepository.removeParty(id)
 
-        return true
+        return party
     }
 
     private fun validatePartyType(partyToBePersisted: Party) {

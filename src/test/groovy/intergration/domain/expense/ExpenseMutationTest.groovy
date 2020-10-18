@@ -16,6 +16,9 @@ import java.time.ZonedDateTime
 import java.util.stream.Collectors
 
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
+import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPartyRequest
+import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPartyRequest
+import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPartyRequest
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
@@ -47,6 +50,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
     PersistentPaymentRepository paymentRepository
 
     def createExpenseMutation(Map props = [:]) {
+        PartyKind partyKind = PartyKind.FRIENDS
         String name = props.containsKey("name") ? props.name : 'Test name'
         String amount = props.containsKey("amount") ? props.amount : "42.42"
         ZonedDateTime expenseDate = props.containsKey("expenseDate") ? props.expenseDate : ZonedDateTime.now().minusDays(1)
@@ -65,6 +69,7 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
                     description: "${description}"
                     partyId: "${partyId.toString()}"
                     participants: [${participantsIds}]
+                    partyType: ${partyKind}
                 }
             ) { id }
         """
@@ -83,9 +88,12 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         then:
         aParty([owner: baseUser, type: PartyKind.GROUP], partyRepository)
         aParty([owner: baseUser, name: 'logged party 1', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
-        aParty([owner: baseUser, name: 'logged party 2', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
+        def p1 = aParty([owner: baseUser, name: 'logged party 2', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
         aParty([owner: baseUser, name: null, participants: [secondClient, thirdClient], type: PartyKind.FRIENDS], partyRepository)
         aParty([owner: baseUser, name: null, participants: [secondClient, thirdClient], type: PartyKind.FRIENDS], partyRepository)
+        aPartyRequest([user: aClient(userRepository), party: p1], partyRequestRepository)
+        aPartyRequest([user: aClient(userRepository), party: p1], partyRequestRepository)
+        aPartyRequest([user: aClient(userRepository), party: p1], partyRequestRepository)
         def p = aParty([
                 owner: baseUser,
                 name : 'logged party 2',
@@ -114,6 +122,17 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
         postMutation(createExpenseMutation, "createExpense").id
 
         def aExpense = anExpense([party: p, user: baseUser], expenseRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
         aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
     }
 

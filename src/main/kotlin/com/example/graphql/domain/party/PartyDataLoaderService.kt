@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component
 class PartyDataLoaderService(private val partyRepository: PartyRepository) {
 
     fun partyToPartyRequestsDataLoaderMap(partiesIds: Set<Long>): Map<Long, List<PartyRequestType>> {
-        val parties = partyRepository.findPartiesWithParticipants(partiesIds)
+        val parties = partyRepository.findPartiesWithPartyRequests(partiesIds)
 
-        return parties.associateBy({ it.id }, { it.partyRequests.map { participant -> participant.toResponse() } })
+        return parties.associateBy({ it.id }, { it.partyRequests.map { partyRequest -> partyRequest.toResponse() } })
     }
 
 

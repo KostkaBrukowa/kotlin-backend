@@ -1,5 +1,6 @@
 package com.example.graphql.adapters.pgsql.party
 
+import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.message.Message
 import com.example.graphql.domain.party.Party
 import com.example.graphql.domain.party.PartyRepository
@@ -11,11 +12,21 @@ import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
 @Component
-class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepository) : PartyRepository {
+class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepository, private val userRepository: PersistentUserRepository) : PartyRepository {
 
     @Transactional
     override fun getAllByOwnerId(id: Long): List<Party> = partyRepository.getAllByOwnerId(id).map {
         it.toDomainWithRelations()
+    }
+
+    override fun getAllUsersPartiesWithParticipants(userId: Long): List<Party> {
+        val userWithParties = userRepository.findUsersWithJoinedParties(setOf(userId)).firstOrNull() ?: throw EntityNotFoundException("user")
+
+        return partyRepository.findPartiesWithParticipants(userWithParties.joinedParties.map { it.id }).map {
+            it.toDomainWithRelations().copy(
+                    participants = it.participants.map { participant -> participant.toDomain() }
+            )
+        }
     }
 
     @Transactional

@@ -29,6 +29,7 @@ class PersistentNotification(
 
         val isRead: Boolean = false,
 
+        val isDeleted: Boolean = false,
 
         @ManyToOne(fetch = FetchType.LAZY,  cascade = [CascadeType.REMOVE])
         @JoinColumn(name = "actor_id", nullable = false)
@@ -46,7 +47,8 @@ class PersistentNotification(
                 objectName = objectName,
                 objectType = objectType,
                 event = event,
-                isRead = isRead
+                isRead = isRead,
+                isDeleted = isDeleted
         )
     }
 }

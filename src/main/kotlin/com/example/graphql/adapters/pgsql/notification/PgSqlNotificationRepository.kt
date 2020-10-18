@@ -20,6 +20,10 @@ class PgSqlNotificationRepository(
         private val expenseRepository: PersistentExpenseRepository
 
 ) : NotificationRepository {
+    override fun findUserNotificationWithUser(notificationId: Long): Notification? {
+        return notificationRepository.getTopById(notificationId)?.toDomainWithRelations()
+    }
+
     override fun findUserNotifications(userId: Long): List<Notification> {
         return notificationRepository.findAllByReceiverId(userId).map { it.toDomainWithRelations() }
     }
@@ -146,6 +150,10 @@ class PgSqlNotificationRepository(
 
     override fun markNotificationsAsRead(notificationsIds: Iterable<Long>) {
         notificationRepository.markNotificationsAsRead(notificationsIds)
+    }
+
+    override fun removeNotification(notificationId: Long) {
+        notificationRepository.markNotificationAsDeleted(listOf(notificationId))
     }
 }
 

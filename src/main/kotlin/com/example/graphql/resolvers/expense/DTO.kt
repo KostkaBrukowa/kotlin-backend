@@ -2,6 +2,7 @@ package com.example.graphql.resolvers.expense
 
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseStatus
+import com.example.graphql.domain.party.PartyKind
 import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
@@ -65,9 +66,11 @@ data class NewExpenseInput(
         @field:Length(min = 3, max = 256)
         val description: String,
 
-        val partyId: String,
+        val partyId: String?,
 
-        val participants: List<String>
+        val participants: List<String>,
+
+        val partyType: PartyKind
 ) {
 
 }

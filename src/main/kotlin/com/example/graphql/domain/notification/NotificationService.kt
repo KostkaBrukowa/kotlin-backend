@@ -7,6 +7,7 @@ import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
 import com.example.graphql.resolvers.message.MessageType
+import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Service
 
@@ -27,6 +28,16 @@ class NotificationService(private val notificationRepository: NotificationReposi
         notificationRepository.markNotificationsAsRead(notificationsIds)
 
         return true
+    }
+
+    fun removeNotification(notificationId: Long, currentUserId: Long): Notification {
+        val notification = notificationRepository.findUserNotificationWithUser(notificationId) ?: throw EntityNotFoundException("notification")
+
+        requireNotificationsOwner(listOf(notification), currentUserId)
+
+        notificationRepository.removeNotification(notificationId)
+
+        return notification
     }
 
     private fun requireNotificationsOwner(notifications: List<Notification>, currentUserId: Long) {

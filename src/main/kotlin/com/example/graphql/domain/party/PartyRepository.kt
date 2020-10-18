@@ -4,6 +4,7 @@ import com.example.graphql.domain.message.Message
 
 interface PartyRepository {
     fun getAllByOwnerId(id: Long): List<Party>
+    fun getAllUsersPartiesWithParticipants(userId: Long): List<Party>
 
     fun getTopById(id: Long): Party?
 
