@@ -3,6 +3,8 @@ package com.example.graphql.domain.payment
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.user.User
 
+import java.time.ZonedDateTime
+
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
 class PaymentTestBuilder {
@@ -13,8 +15,9 @@ class PaymentTestBuilder {
             confirmImageUrl: null,
             status         : PaymentStatus.IN_PROGRESS,
             expense        : null,
-            user           : null
-
+            user           : null,
+            createdAt      : ZonedDateTime.now(),
+            paidAt         : null
     ]
 
 
@@ -29,6 +32,8 @@ class PaymentTestBuilder {
                 allArgs.amount as Float,
                 allArgs.confirmImageUrl as String,
                 allArgs.status as PaymentStatus,
+                allArgs.createdAt as ZonedDateTime,
+                allArgs.paidAt as ZonedDateTime,
                 allArgs.expense as Expense,
                 allArgs.user as User
         )

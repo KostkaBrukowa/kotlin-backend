@@ -6,6 +6,8 @@ import com.example.graphql.domain.expense.PersistentExpense
 import com.example.graphql.domain.expense.toPersistentEntity
 import com.example.graphql.domain.user.PersistentUser
 import com.example.graphql.domain.user.toPersistentEntity
+import org.springframework.data.annotation.CreatedDate
+import java.time.ZonedDateTime
 import javax.persistence.*
 
 @Table(name = "payments")
@@ -14,6 +16,13 @@ data class PersistentPayment(
         @Id
         @GeneratedValue
         val id: Long = 0,
+
+        @CreatedDate
+        @Column(name = "created_at", nullable = false, updatable = false)
+        val createdAt: ZonedDateTime,
+
+        @Column(name = "paid_at", nullable = true)
+        val paidAt: ZonedDateTime?,
 
         val amount: Float?,
 
@@ -44,7 +53,9 @@ data class PersistentPayment(
             id = this.id,
             amount = this.amount,
             confirmImageUrl = this.confirmImageUrl,
-            status = this.paymentStatus
+            status = this.paymentStatus,
+            createdAt = this.createdAt,
+            paidAt = this.paidAt
     )
 
     override fun hashCode(): Int {
@@ -62,5 +73,7 @@ fun Payment.toPersistentEntity() = PersistentPayment(
         confirmImageUrl = this.confirmImageUrl,
         paymentStatus = this.status,
         expense = this.expense?.toPersistentEntity(),
-        user = this.user?.toPersistentEntity()
+        user = this.user?.toPersistentEntity(),
+        createdAt = this.createdAt,
+        paidAt = this.paidAt
 )

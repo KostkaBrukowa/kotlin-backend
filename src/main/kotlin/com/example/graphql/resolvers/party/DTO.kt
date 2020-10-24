@@ -7,6 +7,7 @@ import com.example.graphql.resolvers.expense.ExpenseType
 import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.user.UserType
+import com.example.graphql.resolvers.user.toResponse
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
 import org.hibernate.validator.constraints.Length
@@ -20,7 +21,7 @@ data class PartyType(
         override val id: String = "0",
 
         val name: String? = null,
-        val owner: User? = null,
+        val owner: UserType? = null,
         val description: String? = null,
         val startDate: ZonedDateTime?,
         val endDate: ZonedDateTime? = null,
@@ -43,7 +44,7 @@ data class PartyType(
 fun Party.toResponse() = PartyType(
         id = this.id.toString(),
         name = this.name,
-        owner = this.owner,
+        owner = this.owner?.toResponse(),
         description = this.description,
         startDate = this.startDate,
         endDate = this.endDate,
@@ -98,7 +99,7 @@ data class EditPartyInput(
         val id: String,
 
         @field:Length(min = 3, max = 256)
-        val name: String,
+        val name: String?,
 
         @field:FutureOrPresent
         val startDate: ZonedDateTime?,

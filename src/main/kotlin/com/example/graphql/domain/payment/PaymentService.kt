@@ -8,6 +8,7 @@ import com.example.graphql.domain.user.User
 import com.example.graphql.resolvers.payment.UpdatePaymentStatusInput
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
+import java.time.ZonedDateTime
 import javax.persistence.EntityNotFoundException
 import kotlin.contracts.contract
 
@@ -35,7 +36,8 @@ class PaymentService(
                     confirmImageUrl = null,
                     status = PaymentStatus.IN_PROGRESS,
                     expense = newExpense,
-                    user = User(it)
+                    user = User(it),
+                    createdAt = ZonedDateTime.now()
             )
         }
 

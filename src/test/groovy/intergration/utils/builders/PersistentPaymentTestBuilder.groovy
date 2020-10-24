@@ -8,6 +8,8 @@ import com.example.graphql.domain.payment.PaymentStatus
 import com.example.graphql.domain.payment.PersistentPayment
 import com.example.graphql.domain.user.PersistentUser
 
+import java.time.ZonedDateTime
+
 import static com.example.graphql.utils.VerifyingBuilder.verifyPropertyNames
 
 class PersistentPaymentTestBuilder {
@@ -21,6 +23,8 @@ class PersistentPaymentTestBuilder {
             user           : null,
             bulkedPayment  : null,
             messages       : [],
+            createdAt      : ZonedDateTime.now(),
+            paidAt         : null
     ]
 
     private PersistentPaymentTestBuilder() {}
@@ -31,6 +35,8 @@ class PersistentPaymentTestBuilder {
         def allArgs = defaults + args
         return new PersistentPayment(
                 allArgs.id as Long,
+                allArgs.createdAt as ZonedDateTime,
+                allArgs.paidAt as ZonedDateTime,
                 allArgs.amount as Float,
                 allArgs.confirmImageUrl as String,
                 allArgs.status as PaymentStatus,

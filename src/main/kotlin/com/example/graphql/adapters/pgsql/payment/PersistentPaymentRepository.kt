@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.time.ZonedDateTime
 import javax.transaction.Transactional
 
 interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
@@ -48,6 +49,15 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
     fun updatePaymentStatus(@Param("paymentsIds") paymentsIds: List<Long>, @Param("status") status: PaymentStatus)
 
     @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        UPDATE PersistentPayment 
+        SET paidAt = :date
+        WHERE id in :paymentsIds
+    """, nativeQuery = true)
+    fun updatePaymentPaidDate(paymentsIds: List<Long>, date: ZonedDateTime)
+
+    @Transactional
     @Modifying
     @Query("""
         UPDATE PersistentPayment 
@@ -64,5 +74,6 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
         WHERE id in :paymentsIds
     """, nativeQuery = true)
     fun convertPaymentsToBulkPayment(paymentsIds: List<Long>, bulkPaymentId: Long)
+
 
 }
