@@ -17,8 +17,8 @@ class AuthService(
         private val jwtAuthentication: JWTAuthentication
 ) {
 
-    fun signUpUser(email: String, password: String, context: AppGraphQLContext): UserAuthResponse {
-        val user = User(email = email, password = passwordEncoder.encode(password))
+    fun signUpUser(email: String, password: String, name: String, context: AppGraphQLContext): UserAuthResponse {
+        val user = User(email = email, password = passwordEncoder.encode(password), name = name)
         val savedUser = try {
             userRepository.saveUser(user)
         } catch (ex: Throwable) {
@@ -29,9 +29,7 @@ class AuthService(
     }
 
     fun refreshToken(context: AppGraphQLContext): UserAuthResponse {
-//        return jwtAuthentication.handleRefreshToken(context.request, context.response).toResponse().token
-        val savedUser = userRepository.findUserByEmail("admin@gmail.com")
-        return jwtAuthentication.authenticateUser(savedUser?.id.toString(), context.request, context.response).toResponse()
+        return jwtAuthentication.handleRefreshToken(context.request, context.response).token.toResponse()
     }
 
     fun logInUser(email: String, password: String, context: AppGraphQLContext): UserAuthResponse? {
@@ -45,11 +43,6 @@ class AuthService(
         return jwtAuthentication.authenticateUser(user.id.toString(), context.request, context.response).toResponse()
     }
 
-//    private fun toResponse(token: String): UserAuthResponse {
-//        val decodedJWT = jwtAuthentication.decodeTokenSafely(token)
-//
-//        return UserAuthResponse(token, decodedJWT.subject)
-//    }
 
     private fun String.toResponse(): UserAuthResponse {
         val decodedJWT = jwtAuthentication.decodeTokenSafely(this)

@@ -27,7 +27,7 @@ class ExpenseQuery(private val expenseService: ExpenseService) : Query {
             userId: String,
             @GraphQLContext context: AppGraphQLContext
     ): List<ExpenseType> {
-        return expenseService.getExpensesForUser(userId.toLong(), context.subject).map { it.toResponse() } //todo revert
+        return expenseService.getExpensesForUser(userId.toLong(), context.subject).map { it.toResponse() }
     }
 
     @Authenticated(role = Roles.USER)

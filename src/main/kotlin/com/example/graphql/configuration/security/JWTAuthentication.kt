@@ -21,12 +21,13 @@ const val REFRESH_TOKEN = "xppcreftkn"
 class JWTAuthentication(private val jwtClient: JWTClient, private val userRepository: UserRepository) {
 
     fun handleJWTAuthorisation(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT? {
-        return decodeTokenSafely(jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString()).jwtToken)
+//        return decodeTokenSafely(jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString()).jwtToken)
         return try {
             log.debug("Processing '{}' request to resource: {}", request.method, request.uri)
 
             when {
                 request.isAuthorizationTokenPresent() -> handleJWTValidation(request, response)
+                request.isCookiePresent(REFRESH_TOKEN) -> handleRefreshToken(request, response)
                 else -> null
             }
         } catch (e: ClientAuthenticationException) {
@@ -43,7 +44,6 @@ class JWTAuthentication(private val jwtClient: JWTClient, private val userReposi
 
         return when {
             decodedJWT.isNotExpired() -> decodedJWT
-            request.isCookiePresent(REFRESH_TOKEN) -> handleRefreshToken(request, response)
             else -> decodedJWT
         }
     }
@@ -51,8 +51,8 @@ class JWTAuthentication(private val jwtClient: JWTClient, private val userReposi
     fun handleRefreshToken(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT {
         log.debug("Handling request with no/expired token. Refresh token cookie is present.")
 
-//        val tokenResponse = jwtClient.validateAndCreateValidationTokens(request.getCookieValue(REFRESH_TOKEN)) //todo revert
-        val tokenResponse = jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString())
+        val tokenResponse = jwtClient.validateAndCreateValidationTokens(request.getCookieValue(REFRESH_TOKEN)) //todo revert
+//        val tokenResponse = jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString())
         log.debug("Received new OAuth2 token from authorization server using refresh token.")
 
         response.addRefreshTokenCookie(tokenResponse.refreshToken)
@@ -80,7 +80,7 @@ class JWTAuthentication(private val jwtClient: JWTClient, private val userReposi
 
     class ClientAuthenticationException(cause: String) : Exception(cause) {}
 
-    private fun ServerHttpRequest.isAuthorizationTokenPresent(): Boolean = isHeaderPresent(HttpHeaders.AUTHORIZATION)
+    private fun ServerHttpRequest.isAuthorizationTokenPresent(): Boolean = isHeaderPresent(HttpHeaders.AUTHORIZATION) && getHeaderValue(HttpHeaders.AUTHORIZATION).replace("Bearer ", "") != "null"
 
     private fun ServerHttpRequest.extractAuthorizationToken(): String {
         val token: String

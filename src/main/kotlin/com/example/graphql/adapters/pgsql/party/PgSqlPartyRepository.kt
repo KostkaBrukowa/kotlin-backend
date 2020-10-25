@@ -22,6 +22,10 @@ class PgSqlPartyRepository(private val partyRepository: PersistentPartyRepositor
     override fun getAllUsersPartiesWithParticipants(userId: Long): List<Party> {
         val userWithParties = userRepository.findUsersWithJoinedParties(setOf(userId)).firstOrNull() ?: throw EntityNotFoundException("user")
 
+        if(userWithParties.joinedParties.isEmpty()) {
+            return emptyList()
+        }
+
         return partyRepository.findPartiesWithParticipants(userWithParties.joinedParties.map { it.id }).map {
             it.toDomainWithRelations().copy(
                     participants = it.participants.map { participant -> participant.toDomain() }

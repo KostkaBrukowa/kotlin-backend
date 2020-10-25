@@ -54,7 +54,7 @@ interface PersistentPaymentRepository : JpaRepository<PersistentPayment, Long> {
         UPDATE PersistentPayment 
         SET paidAt = :date
         WHERE id in :paymentsIds
-    """, nativeQuery = true)
+    """)
     fun updatePaymentPaidDate(paymentsIds: List<Long>, date: ZonedDateTime)
 
     @Transactional
