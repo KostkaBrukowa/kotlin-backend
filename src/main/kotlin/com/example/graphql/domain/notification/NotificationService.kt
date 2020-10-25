@@ -20,14 +20,14 @@ class NotificationService(private val notificationRepository: NotificationReposi
         return notificationRepository.findUserNotifications(userId)
     }
 
-    fun markNotificationsAsRead(notificationsIds: List<Long>, currentUserId: Long): Boolean {
+    fun markNotificationsAsRead(notificationsIds: List<Long>, currentUserId: Long): List<Notification> {
         val notifications = notificationRepository.findNotificationsWithUsers(notificationsIds)
 
         requireNotificationsOwner(notifications, currentUserId)
 
         notificationRepository.markNotificationsAsRead(notificationsIds)
 
-        return true
+        return notifications.map {it.copy(isRead = true)}
     }
 
     fun removeNotification(notificationId: Long, currentUserId: Long): Notification {
@@ -61,11 +61,11 @@ class NotificationService(private val notificationRepository: NotificationReposi
         notificationRepository.sendMessagesNotifications(message, messageType, objectId)
     }
 
-    fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyName: String?) {
+    fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyId: Long, partyName: String?) {
         if (partyRequests.any { it.user == null }) throw InternalError("Party request was not entirely fetched")
 
         val notifications = partyRequests.map {
-            NewPartyRequestNotification(actorId = partyOwner, receiverId = it.user!!.id, partyRequestId = it.id, objectName = partyName)
+            NewPartyRequestNotification(actorId = partyOwner, receiverId = it.user!!.id, partyRequestId = partyId, objectName = partyName)
         }
 
         notificationRepository.sendPartyRequestsNotifications(notifications)

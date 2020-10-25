@@ -48,7 +48,7 @@ data class PersistentParty(
         @OneToMany(mappedBy = "party", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
         val partyRequests: List<PersistentPartyRequest> = emptyList(),
 
-        @OneToMany(mappedBy = "party")
+        @OneToMany(mappedBy = "party", cascade = [CascadeType.REMOVE])
         val expenses: List<PersistentExpense> = emptyList(),
 
         @OneToMany(mappedBy = "party",fetch = FetchType.LAZY)

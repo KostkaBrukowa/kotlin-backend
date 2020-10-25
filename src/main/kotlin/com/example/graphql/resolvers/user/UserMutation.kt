@@ -12,6 +12,15 @@ import org.springframework.stereotype.Component
 class UserMutation(private val userService: UserService) : Mutation {
 
     @Authenticated(role = Roles.USER)
+    fun changeUserData(
+            userName: String?,
+            userBankAccount: String?,
+            @GraphQLContext context: AppGraphQLContext
+    ): UserType? {
+        return userService.changeUserData(context.subject, userName, userBankAccount).toResponse()
+    }
+
+    @Authenticated(role = Roles.USER)
     fun addFriend(
             userEmail: String,
             @GraphQLContext context: AppGraphQLContext

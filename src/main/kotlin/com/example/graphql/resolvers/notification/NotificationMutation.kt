@@ -15,7 +15,7 @@ class NotificationMutation(private val notificationService: NotificationService)
     fun markNotificationsAsRead(
             notificationsIds: List<String>,
             @GraphQLContext context: AppGraphQLContext
-    ): Boolean = notificationService.markNotificationsAsRead(notificationsIds.map {it.toLong()}, context.subject)
+    ) = notificationService.markNotificationsAsRead(notificationsIds.map {it.toLong()}, context.subject).map {it.toResponse()}
 
     @Authenticated(role = Roles.USER)
     fun removeNotification(

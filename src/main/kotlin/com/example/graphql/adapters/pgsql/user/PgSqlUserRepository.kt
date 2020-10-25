@@ -1,5 +1,6 @@
 package com.example.graphql.adapters.pgsql.user
 
+import com.example.graphql.domain.user.CannotAddYourselfAsFriendException
 import com.example.graphql.domain.user.FriendshipAlreadyExistsException
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
@@ -13,6 +14,17 @@ import javax.transaction.Transactional
 class PgSqlUserRepository(private val userRepository: PersistentUserRepository) : UserRepository {
 
     override fun saveUser(user: User): User = userRepository.save(user.toPersistentEntity()).toDomain()
+
+    @Throws(EntityNotFoundException::class)
+    override fun updateUser(userId: Long, name: String?, bankAccount: String?): User {
+        val user = findUserById(userId) ?: throw EntityNotFoundException()
+        val newName =name ?: user.name
+        val newBankAccount =bankAccount ?: user.bankAccount
+
+        userRepository.updateUser(userId, newName , newBankAccount)
+
+        return user.copy(name = newName, bankAccount = newBankAccount)
+    }
 
     override fun findUserByEmail(email: String): User? = userRepository.findByEmail(email)?.toDomain()
 
@@ -64,6 +76,10 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
 
         if (friend.friends.any { it.id == userId } || friend.friendOf.any { it.id == userId }) {
             throw FriendshipAlreadyExistsException()
+        }
+
+        if (friend.id == userId) {
+            throw CannotAddYourselfAsFriendException()
         }
 
         userRepository.addFriend(userId, friend.id)

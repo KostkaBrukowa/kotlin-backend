@@ -7,7 +7,6 @@ plugins {
     kotlin("jvm") version "1.3.61"
     kotlin("plugin.spring") version "1.3.61"
     kotlin("plugin.jpa") version "1.3.61"
-    id("org.siouan.frontend-jdk11") version "4.0.0"
 }
 
 group = "com.example"
@@ -41,18 +40,6 @@ dependencies {
     testImplementation("org.codehaus.groovy:groovy-all:2.5.2")
     testImplementation("org.hamcrest:hamcrest-core:1.2")
     testImplementation("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1")
-}
-
-frontend {
-    nodeVersion.set("12.19.0")
-    assembleScript.set("run build")
-
-    packageJsonDirectory.set(project.layout.projectDirectory)
-    proxyHost.set("127.0.0.1")
-    proxyPort.set(8080)
-    proxyUsername.set("username")
-    proxyPassword.set("password")
-    verboseModeEnabled.set(false)
 }
 
 tasks.withType<Test> {

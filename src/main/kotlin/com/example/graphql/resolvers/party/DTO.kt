@@ -59,10 +59,8 @@ data class NewPartyInput(
         @field:Length(min = 3, max = 256)
         val name: String,
 
-        @field:FutureOrPresent
         val startDate: ZonedDateTime,
 
-        @field:FutureOrPresent
         val endDate: ZonedDateTime?,
 
         val description: String?,

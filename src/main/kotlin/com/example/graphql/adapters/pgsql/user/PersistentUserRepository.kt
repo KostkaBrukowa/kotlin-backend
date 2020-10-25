@@ -1,10 +1,12 @@
 package com.example.graphql.adapters.pgsql.user
 
+import com.example.graphql.domain.expense.ExpenseStatus
 import com.example.graphql.domain.user.PersistentUser
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.time.ZonedDateTime
 import javax.transaction.Transactional
 
 interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
@@ -60,6 +62,18 @@ interface PersistentUserRepository : JpaRepository<PersistentUser, Long> {
     """)
     fun findUsersWithJoinedParties(usersIds: Set<Long>):List<PersistentUser>
 
+    @Transactional
+    @Modifying
+    @Query("""
+        UPDATE PersistentUser 
+        SET name = :name, bankAccount = :bankAccount
+        WHERE id = :userId
+    """)
+    fun updateUser(
+            @Param("userId") expenseId: Long,
+            @Param("name") amount: String?,
+            @Param("bankAccount") description: String?
+    )
 
     @Transactional
     @Modifying

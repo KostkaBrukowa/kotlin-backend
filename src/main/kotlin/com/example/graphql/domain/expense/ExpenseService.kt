@@ -175,7 +175,7 @@ class ExpenseService(
             }
             ExpenseStatus.RESOLVED -> {
                 requireExpenseStatuses(expense, listOf(ExpenseStatus.IN_PROGRESS_PAYING))
-                requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.CONFIRMED, PaymentStatus.DECLINED))
+                requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.PAID, PaymentStatus.DECLINED))
             }
         }
     }

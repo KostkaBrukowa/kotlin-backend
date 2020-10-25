@@ -37,7 +37,7 @@ class PartyRequestService(
 
         requirePartyOwner(party, currentUserId)
 
-        if (requestReceiverId == currentUserId || participantAlreadyExists(party, requestReceiverId)) {
+        if (requestReceiverId == currentUserId || participantAlreadyExists(party, requestReceiverId) || party.owner == null) {
             return null
         }
 
@@ -46,7 +46,7 @@ class PartyRequestService(
                 Party(id = partyId)
         )
 
-        notificationService.newPartyRequestsNotifications(partyRequests, party.id, party.name)
+        notificationService.newPartyRequestsNotifications(partyRequests, party.owner.id, party.id, party.name)
 
         return partyRequests.first()
     }

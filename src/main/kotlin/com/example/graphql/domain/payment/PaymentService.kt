@@ -63,7 +63,6 @@ class PaymentService(
         val updatedPayment = payment.copy(status = updatePaymentStatusInput.status)
 
         updatePaymentsStatuses(listOf(payment.id), updatePaymentStatusInput.status)
-        notificationService.updatePaymentsStatusesNotifications(listOf(updatedPayment), updatePaymentStatusInput.status)
 
         return updatedPayment
     }

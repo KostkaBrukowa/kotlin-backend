@@ -27,14 +27,14 @@ class PartyService(
         val currentUser = User(id = userId)
         val participants = (party.participants + currentUser).distinctBy { it.id }
 
-        val partyToBePersisted = party.copy(owner = currentUser, participants = participants)
+        val partyToBePersisted = party.copy(owner = currentUser, participants = listOf(currentUser))
         validatePartyType(partyToBePersisted)
         val newParty = partyRepository.saveNewParty(partyToBePersisted)
 
         val partyRequests = partyRequestRepository.createPartyRequestsForParticipants(participants - currentUser, newParty)
 
         if(newParty.owner == null) throw InternalError("Party was not entirely fetched")
-        notificationService.newPartyRequestsNotifications(partyRequests, newParty.owner.id, party.name) // TODO
+        notificationService.newPartyRequestsNotifications(partyRequests, newParty.owner.id, newParty.id, party.name) // TODO
 
         return newParty
     }
