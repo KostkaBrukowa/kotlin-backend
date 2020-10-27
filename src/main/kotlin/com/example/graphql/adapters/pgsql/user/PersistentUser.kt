@@ -17,7 +17,7 @@ data class PersistentUser(
         @GeneratedValue
         val id: Long = 0,
 
-        val name: String? = null,
+        val name: String = "",
 
         @Column(unique = true, nullable = false)
         val email: String = "",

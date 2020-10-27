@@ -37,7 +37,7 @@ class PartyRequestService(
 
         requirePartyOwner(party, currentUserId)
 
-        if (requestReceiverId == currentUserId || participantAlreadyExists(party, requestReceiverId)) {
+        if (requestReceiverId == currentUserId || participantAlreadyExists(party, requestReceiverId) || party.owner == null) {
             return null
         }
 
@@ -46,36 +46,36 @@ class PartyRequestService(
                 Party(id = partyId)
         )
 
-        notificationService.newPartyRequestsNotifications(partyRequests, party.id, party.name)
+        notificationService.newPartyRequestsNotifications(partyRequests, party.owner.id, party.id, party.name)
 
         return partyRequests.first()
     }
 
-    fun acceptRequest(partyRequestId: Long, currentUserId: Long): Boolean {
+    fun acceptRequest(partyRequestId: Long, currentUserId: Long): PartyRequest {
         val request = changeRequestStatus(partyRequestId, currentUserId, PartyRequestStatus.ACCEPTED)
 
         if (request.party != null) {
             partyService.addParticipant(request.party.id, currentUserId, currentUserId)
         }
 
-        return true
+        return request
     }
 
 
-    fun declineRequest(partyRequestId: Long, currentUserId: Long): Boolean {
-        changeRequestStatus(partyRequestId, currentUserId, PartyRequestStatus.DECLINED)
-
-        return true
+    fun declineRequest(partyRequestId: Long, currentUserId: Long): PartyRequest {
+        return changeRequestStatus(partyRequestId, currentUserId, PartyRequestStatus.DECLINED)
     }
 
     //REMOVE
-    fun removePartyRequest(partyRequestId: Long, currentUserId: Long): Boolean {
+    fun removePartyRequest(partyRequestId: Long, currentUserId: Long): PartyRequest {
         val request = partyRequestRepository.findByIdWithUserAndPartyOwner(partyRequestId)
                 ?: throw EntityNotFoundException("PartyRequest")
 
         requirePartyOwnerOrRequestOwner(request, currentUserId)
 
-        return partyRequestRepository.remove(request)
+        partyRequestRepository.remove(request)
+
+        return request
     }
 
     private fun changeRequestStatus(partyRequestId: Long, currentUserId: Long, status: PartyRequestStatus): PartyRequest {

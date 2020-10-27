@@ -1,6 +1,7 @@
 package com.example.graphql.adapters.pgsql.user
 
-import com.example.graphql.adapters.pgsql.utils.toNullable
+import com.example.graphql.domain.user.CannotAddYourselfAsFriendException
+import com.example.graphql.domain.user.FriendshipAlreadyExistsException
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.domain.user.toPersistentEntity
@@ -14,7 +15,18 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
 
     override fun saveUser(user: User): User = userRepository.save(user.toPersistentEntity()).toDomain()
 
-    override fun findUserByEmail(email: String): User? = userRepository.findTopByEmail(email)?.toDomain()
+    @Throws(EntityNotFoundException::class)
+    override fun updateUser(userId: Long, name: String?, bankAccount: String?): User {
+        val user = findUserById(userId) ?: throw EntityNotFoundException()
+        val newName =name ?: user.name
+        val newBankAccount =bankAccount ?: user.bankAccount
+
+        userRepository.updateUser(userId, newName , newBankAccount)
+
+        return user.copy(name = newName, bankAccount = newBankAccount)
+    }
+
+    override fun findUserByEmail(email: String): User? = userRepository.findByEmail(email)?.toDomain()
 
     override fun findUserById(id: Long): User? = userRepository.findByIdOrNull(id)?.toDomain()
 
@@ -56,17 +68,23 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
         }
     }
 
+    @Throws(EntityNotFoundException::class)
     @Transactional
-    override fun addFriend(userId: Long, friendId: Long): Boolean {
-        val friend = userRepository.findById(friendId).toNullable() ?: throw EntityNotFoundException()
+    override fun addFriend(userId: Long, friendEmail: String): User {
+        val friend = userRepository.findUserByEmailWithFriends(friendEmail)
+                ?: throw EntityNotFoundException("User does not exist")
 
-        if (friend.friends.any { it.id == userId }) {
-            return false
+        if (friend.friends.any { it.id == userId } || friend.friendOf.any { it.id == userId }) {
+            throw FriendshipAlreadyExistsException()
         }
 
-        userRepository.addFriend(userId, friendId)
+        if (friend.id == userId) {
+            throw CannotAddYourselfAsFriendException()
+        }
 
-        return true
+        userRepository.addFriend(userId, friend.id)
+
+        return friend.toDomain()
     }
 
     override fun removeFriend(userId: Long, friendId: Long) {

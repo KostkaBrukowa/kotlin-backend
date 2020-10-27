@@ -10,16 +10,14 @@ class UserService(
 
     fun getUserById(id: Long): User? = userRepository.findUserById(id)
 
+    fun changeUserData(userId: Long, userName: String?,
+                       userBankAccount: String?
+    ): User = userRepository.updateUser(userId, userName, userBankAccount)
+
     fun findUsersFriends(userId: Long) = userRepository.findUsersFriends(userId)
 
-    fun addFriend(userId: Long, currentUserId: Long): Boolean {
-        val insertSucceed = userRepository.addFriend(userId, currentUserId)
-
-        if(!insertSucceed) {
-            throw FriendshipAlreadyExistsException()
-        }
-
-        return insertSucceed
+    fun addFriend(currentUserId: Long, friendEmail: String): User {
+        return userRepository.addFriend(currentUserId, friendEmail)
     }
 
     fun removeFriend(userId: Long, currentUserId: Long) {
@@ -28,4 +26,5 @@ class UserService(
 }
 
 class FriendshipAlreadyExistsException : SimpleValidationException("Friendship already exists")
+class CannotAddYourselfAsFriendException : SimpleValidationException("Nie możesz dodać siebie jako znajomego")
 

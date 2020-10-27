@@ -13,26 +13,25 @@ class PartyRequestMutation(private val partyRequestService: PartyRequestService)
 
     @Authenticated(role = Roles.USER)
     fun acceptPartyRequest(
-            partyRequestId: Long,
+            partyRequestId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.acceptRequest(partyRequestId, context.subject)
+    ) = partyRequestService.acceptRequest(partyRequestId.toLong(), context.subject).toResponse()
 
     @Authenticated(role = Roles.USER)
     fun declinePartyRequest(
-            partyRequestId: Long,
+            partyRequestId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.declineRequest(partyRequestId, context.subject)
+    ) = partyRequestService.declineRequest(partyRequestId.toLong(), context.subject).toResponse()
 
     @Authenticated(role = Roles.USER)
     fun removePartyRequest(
-            partyRequestId: Long,
+            partyRequestId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.removePartyRequest(partyRequestId, context.subject)
+    ) = partyRequestService.removePartyRequest(partyRequestId.toLong(), context.subject).toResponse()
 
     @Authenticated(role = Roles.USER)
     fun sendPartyRequest(
-            partyId: Long,
-            requestReceiverId: Long,
+            partyId: String,
+            requestReceiverId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyRequestService.sendPartyRequest(requestReceiverId, partyId, context.subject)?.toResponse()
-}
+    ) = partyRequestService.sendPartyRequest(requestReceiverId.toLong(), partyId.toLong(), context.subject)?.toResponse() }

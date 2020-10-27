@@ -12,19 +12,28 @@ import org.springframework.stereotype.Component
 class UserMutation(private val userService: UserService) : Mutation {
 
     @Authenticated(role = Roles.USER)
-    fun addFriend(
-            userId: Long,
+    fun changeUserData(
+            userName: String?,
+            userBankAccount: String?,
             @GraphQLContext context: AppGraphQLContext
-    ): Boolean {
-        return userService.addFriend(userId, context.subject)
+    ): UserType? {
+        return userService.changeUserData(context.subject, userName, userBankAccount).toResponse()
+    }
+
+    @Authenticated(role = Roles.USER)
+    fun addFriend(
+            userEmail: String,
+            @GraphQLContext context: AppGraphQLContext
+    ): UserType? {
+        return userService.addFriend(context.subject, userEmail).toResponse()
     }
 
     @Authenticated(role = Roles.USER)
     fun removeFriend(
-            userId: Long,
+            userId: String,
             @GraphQLContext context: AppGraphQLContext
     ): Boolean {
-        userService.removeFriend(userId, context.subject)
+        userService.removeFriend(userId.toLong(), context.subject)
 
         return true
     }

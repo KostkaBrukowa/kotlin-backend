@@ -47,9 +47,24 @@ class ExpenseQueryTest extends BaseIntegrationSpec {
                 expenseDate: threeDaysEarlier,
                 description: "test expense description"
         ], expenseRepository)
+        def expense1 = anExpense([
+                user       : baseUser,
+                name       : 'test name 2',
+                party      : aParty,
+                amount     : 55.43,
+                expenseDate: threeDaysEarlier,
+                description: "test expense description1"
+        ], expenseRepository)
+        def expense3 = anExpense([
+                user       : baseUser,
+                name       : 'test name 3',
+                party      : aParty,
+                amount     : 11.43,
+                expenseDate: threeDaysEarlier,
+                description: "long expense description1 test expense description1 test expense description1"
+        ], expenseRepository)
         def expensePayment1 = aPayment([user: baseUser, expense: expense], paymentRepository)
         def expensePayment2 = aPayment([user: aClient(userRepository), expense: expense], paymentRepository)
-        def expenseMessage = aExpenseMessage([user: baseUser, expense: expense], messageRepository)
 
         and:
         def getSingleExpenseQuery = ("""

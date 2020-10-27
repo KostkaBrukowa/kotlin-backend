@@ -5,6 +5,7 @@ import com.example.graphql.adapters.pgsql.utils.toNullable
 import com.example.graphql.domain.message.Message
 import com.example.graphql.domain.payment.*
 import org.springframework.stereotype.Component
+import java.time.ZonedDateTime
 import javax.transaction.Transactional
 
 @Component
@@ -60,6 +61,10 @@ class PgSqlPaymentRepository(
 
     override fun updatePaymentsStatuses(paymentsIds: List<Long>, status: PaymentStatus): List<Payment> {
         paymentRepository.updatePaymentStatus(paymentsIds, status)
+
+        if(status == PaymentStatus.PAID) {
+            paymentRepository.updatePaymentPaidDate(paymentsIds, ZonedDateTime.now())
+        }
 
         return paymentRepository.findAllById(paymentsIds)
                 .map {

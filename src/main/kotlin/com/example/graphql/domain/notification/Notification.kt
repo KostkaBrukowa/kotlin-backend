@@ -14,6 +14,7 @@ data class Notification(
         val objectType: NotificationObjectType,
         val event: NotificationEvent,
         val isRead: Boolean = false,
+        val isDeleted: Boolean = false,
 
 
         val actor: User? = null,

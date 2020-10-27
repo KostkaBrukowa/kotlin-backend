@@ -6,17 +6,31 @@ import com.example.graphql.adapters.pgsql.partyrequest.PersistentPartyRequestRep
 import com.example.graphql.adapters.pgsql.payment.PersistentPaymentRepository
 import com.example.graphql.adapters.pgsql.user.PersistentUserRepository
 import com.example.graphql.domain.expense.ExpenseStatus
+import com.example.graphql.domain.party.PartyKind
 import com.example.graphql.domain.payment.PaymentStatus
 import intergration.BaseIntegrationSpec
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
 import java.time.ZonedDateTime
+import java.util.stream.Collectors
 
 import static intergration.utils.builders.PersistentExpenseTestBuilder.anExpense
+import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPartyRequest
+import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPartyRequest
+import static intergration.utils.builders.PersistentPartyRequestTestBuilder.aPartyRequest
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
+import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPartyTestBuilder.aParty
 import static intergration.utils.builders.PersistentPaymentTestBuilder.aPayment
 import static intergration.utils.builders.PersistentUserTestBuilder.aClient
+import static intergration.utils.builders.PersistentUserTestBuilder.defaultPersistentUser
 
 class ExpenseMutationTest extends BaseIntegrationSpec {
 
@@ -36,12 +50,15 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
     PersistentPaymentRepository paymentRepository
 
     def createExpenseMutation(Map props = [:]) {
+        PartyKind partyKind = PartyKind.FRIENDS
         String name = props.containsKey("name") ? props.name : 'Test name'
         String amount = props.containsKey("amount") ? props.amount : "42.42"
         ZonedDateTime expenseDate = props.containsKey("expenseDate") ? props.expenseDate : ZonedDateTime.now().minusDays(1)
         String description = props.containsKey("description") ? props.description : "I bought a booze"
         Long partyId = props.containsKey("partyId") ? props.partyId : aParty([owner: baseUser], partyRepository).id
-        String participantsIds = (props.containsKey("participants") ? props.participants : []).join(", ")
+        String participantsIds = (props.containsKey("participants")
+                ? (props.participants as List<Integer>).stream().map { """\"${it.toString()}\""""}.collect(Collectors.toList())
+                : []).join(", ")
 
         return """
             createExpense(
@@ -50,11 +67,73 @@ class ExpenseMutationTest extends BaseIntegrationSpec {
                     amount: ${amount}
                     expenseDate: "${expenseDate}"
                     description: "${description}"
-                    partyId: "${partyId}"
+                    partyId: "${partyId.toString()}"
                     participants: [${participantsIds}]
+                    partyType: ${partyKind}
                 }
             ) { id }
         """
+    }
+
+    def "sed the database"() {
+        when:
+        authenticate()
+
+        def loggedInClient = defaultPersistentUser([id: baseUserId])
+        def secondClient = aClient(userRepository)
+        def thirdClient = aClient(userRepository)
+        def firstExpenseParticipant = aClient(['friends': [loggedInClient, secondClient, thirdClient]],userRepository)
+        def secondExpenseParticipant = aClient(userRepository)
+        def thirdExpenseParticipant = aClient(userRepository)
+        then:
+        aParty([owner: baseUser, type: PartyKind.GROUP], partyRepository)
+        aParty([owner: baseUser, name: 'logged party 1', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
+        def p1 = aParty([owner: baseUser, name: 'logged party 2', participants: [secondClient, thirdClient], type: PartyKind.GROUP], partyRepository)
+        aParty([owner: baseUser, name: null, participants: [secondClient, thirdClient], type: PartyKind.FRIENDS], partyRepository)
+        aParty([owner: baseUser, name: null, participants: [secondClient, thirdClient], type: PartyKind.FRIENDS], partyRepository)
+        aPartyRequest([user: aClient(userRepository), party: p1], partyRequestRepository)
+        aPartyRequest([user: aClient(userRepository), party: p1], partyRequestRepository)
+        aPartyRequest([user: aClient(userRepository), party: p1], partyRequestRepository)
+        def p = aParty([
+                owner: baseUser,
+                name : 'logged party 2',
+                participants: [firstExpenseParticipant, secondExpenseParticipant, thirdExpenseParticipant],
+                type: PartyKind.EVENT,
+                locationName: 'Niebo',
+                locationLatitude: 52.13,
+                locationLongitude: 21.0,
+        ], partyRepository)
+
+        aParty([
+                owner: baseUser,
+                description: 'Najleprza impresa koronawosiura',
+                name : 'some party',
+                participants: [secondClient, thirdClient],
+                type: PartyKind.EVENT,
+                locationName: 'Niebo',
+                locationLatitude: 52.13,
+                locationLongitude: 21.0,
+        ], partyRepository)
+        def createExpenseMutation = createExpenseMutation(
+                participants: [firstExpenseParticipant.id, secondExpenseParticipant.id, thirdExpenseParticipant.id],
+                partyId: p.id
+        )
+
+        postMutation(createExpenseMutation, "createExpense").id
+
+        def aExpense = anExpense([party: p, user: baseUser], expenseRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
+        aPayment([user: baseUser, expense: aExpense, status: PaymentStatus.IN_PROGRESS], paymentRepository)
     }
 
     def "New expense should be present in db when create expense mutation is called"() {

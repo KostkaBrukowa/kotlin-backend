@@ -7,6 +7,7 @@ import com.example.graphql.domain.partyrequest.PartyRequest
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
 import com.example.graphql.resolvers.message.MessageType
+import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Service
 
@@ -19,14 +20,24 @@ class NotificationService(private val notificationRepository: NotificationReposi
         return notificationRepository.findUserNotifications(userId)
     }
 
-    fun markNotificationsAsRead(notificationsIds: List<Long>, currentUserId: Long): Boolean {
+    fun markNotificationsAsRead(notificationsIds: List<Long>, currentUserId: Long): List<Notification> {
         val notifications = notificationRepository.findNotificationsWithUsers(notificationsIds)
 
         requireNotificationsOwner(notifications, currentUserId)
 
         notificationRepository.markNotificationsAsRead(notificationsIds)
 
-        return true
+        return notifications.map {it.copy(isRead = true)}
+    }
+
+    fun removeNotification(notificationId: Long, currentUserId: Long): Notification {
+        val notification = notificationRepository.findUserNotificationWithUser(notificationId) ?: throw EntityNotFoundException("notification")
+
+        requireNotificationsOwner(listOf(notification), currentUserId)
+
+        notificationRepository.removeNotification(notificationId)
+
+        return notification
     }
 
     private fun requireNotificationsOwner(notifications: List<Notification>, currentUserId: Long) {
@@ -50,11 +61,11 @@ class NotificationService(private val notificationRepository: NotificationReposi
         notificationRepository.sendMessagesNotifications(message, messageType, objectId)
     }
 
-    fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyName: String) {
+    fun newPartyRequestsNotifications(partyRequests: List<PartyRequest>, partyOwner: Long, partyId: Long, partyName: String?) {
         if (partyRequests.any { it.user == null }) throw InternalError("Party request was not entirely fetched")
 
         val notifications = partyRequests.map {
-            NewPartyRequestNotification(actorId = partyOwner, receiverId = it.user!!.id, partyRequestId = it.id, objectName = partyName)
+            NewPartyRequestNotification(actorId = partyOwner, receiverId = it.user!!.id, partyRequestId = partyId, objectName = partyName)
         }
 
         notificationRepository.sendPartyRequestsNotifications(notifications)

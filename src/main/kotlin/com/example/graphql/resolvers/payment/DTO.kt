@@ -5,10 +5,12 @@ import com.example.graphql.domain.payment.BulkPayment
 import com.example.graphql.domain.payment.BulkPaymentStatus
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentStatus
+import com.example.graphql.resolvers.expense.ExpenseType
 import com.example.graphql.resolvers.message.MessageResponseType
 import com.example.graphql.resolvers.user.UserType
 import com.example.graphql.resolvers.utils.GQLResponseType
 import com.expediagroup.graphql.annotations.GraphQLID
+import java.time.ZonedDateTime
 
 
 data class PaymentType(
@@ -16,11 +18,13 @@ data class PaymentType(
         @GraphQLID
         override val id: String,
         val amount: Float?,
+        val createdAt: ZonedDateTime,
+        val paidAt: ZonedDateTime?,
         val confirmImageUrl: String?,
         val status: PaymentStatus = PaymentStatus.IN_PROGRESS
 ) : GQLResponseType {
 
-    lateinit var paymentExpense: Expense
+    lateinit var paymentExpense: ExpenseType
 
     lateinit var paymentPayer: UserType
 
@@ -31,7 +35,9 @@ fun Payment.toResponse() = PaymentType(
         id = this.id.toString(),
         amount = this.amount,
         confirmImageUrl = this.confirmImageUrl,
-        status = this.status
+        status = this.status,
+        paidAt = this.paidAt,
+        createdAt = this.createdAt
 )
 
 data class BulkPaymentType(
@@ -61,12 +67,12 @@ fun BulkPayment.toResponse() = BulkPaymentType(
 
 data class UpdatePaymentStatusInput(
 
-        val paymentId: Long,
+        val paymentId: String,
         val status: PaymentStatus
 )
 
 data class UpdateBulkPaymentStatusInput(
 
-        val id: Long,
+        val id: String,
         val status: BulkPaymentStatus
 )

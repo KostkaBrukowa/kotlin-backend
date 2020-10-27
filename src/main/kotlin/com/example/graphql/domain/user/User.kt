@@ -11,7 +11,7 @@ data class User(
 
         val email: String = "",
 
-        val name: String? = null,
+        val name: String = "",
 
         val bankAccount: String? = null,
 

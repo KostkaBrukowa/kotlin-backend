@@ -24,21 +24,19 @@ class PartyMutation(
 
     @Authenticated(role = Roles.USER)
     fun updateParty(
-            id: Long,
             @Valid editPartyInput: EditPartyInput
-    ) = partyService.updateParty(id, editPartyInput.toDomain())
+    ) = partyService.updateParty(editPartyInput.toDomain()).toResponse()
 
     @Authenticated(role = Roles.USER)
-    fun deleteParty(
-            id: Long,
+    fun removeParty(
+            id: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyService.deleteParty(id, context.subject)
+    ) = partyService.deleteParty(id.toLong(), context.subject)?.toResponse()
 
     @Authenticated(role = Roles.USER)
     fun removeParticipant(
-            partyId: Long,
-            participantId: Long,
+            partyId: String,
+            participantId: String,
             @GraphQLContext context: AppGraphQLContext
-    ) = partyService.removeParticipant(partyId, participantId, context.subject)
+    ) = partyService.removeParticipant(partyId.toLong(), participantId.toLong(), context.subject)?.toResponse()
 }
-

@@ -16,7 +16,7 @@ data class UserType(
         @field:Email
         val email: String = "",
 
-        val name: String? = null,
+        val name: String = "",
 
         val bankAccount: String? = null
 ) : GQLResponseType {

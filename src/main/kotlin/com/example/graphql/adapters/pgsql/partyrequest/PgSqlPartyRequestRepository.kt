@@ -53,7 +53,7 @@ class PgSqlPartyRequestRepository(
     }
 
     override fun remove(request: PartyRequest): Boolean {
-        persistentPartyRequestRepository.delete(request.toPersistentEntity())
+        persistentPartyRequestRepository.deleteById(request.id)
 
         return true
     }

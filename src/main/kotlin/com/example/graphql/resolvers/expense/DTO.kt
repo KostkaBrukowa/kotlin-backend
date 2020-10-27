@@ -2,7 +2,9 @@ package com.example.graphql.resolvers.expense
 
 import com.example.graphql.domain.expense.Expense
 import com.example.graphql.domain.expense.ExpenseStatus
+import com.example.graphql.domain.party.PartyKind
 import com.example.graphql.resolvers.message.MessageResponseType
+import com.example.graphql.resolvers.party.PartyType
 import com.example.graphql.resolvers.partyrequest.PartyRequestType
 import com.example.graphql.resolvers.payment.PaymentType
 import com.example.graphql.resolvers.user.UserType
@@ -25,7 +27,7 @@ data class ExpenseType(
 
         val expenseDate: ZonedDateTime,
 
-        val description: String? = null,
+        val description: String,
 
         val expenseStatus: ExpenseStatus
 
@@ -33,7 +35,7 @@ data class ExpenseType(
 
     lateinit var expensePayer: UserType
 
-    lateinit var expenseParty: PartyRequestType
+    lateinit var expenseParty: PartyType
 
     lateinit var expensePayments: List<PaymentType>
 
@@ -64,14 +66,18 @@ data class NewExpenseInput(
         @field:Length(min = 3, max = 256)
         val description: String,
 
-        val partyId: Long,
+        val partyId: String?,
 
-        val participants: List<Long>
-)
+        val participants: List<String>,
+
+        val partyType: PartyKind
+) {
+
+}
 
 data class UpdateExpenseInput(
 
-        val id: Long,
+        val id: String,
 
         @field:Length(min = 3, max = 256)
         val name: String,
@@ -80,12 +86,16 @@ data class UpdateExpenseInput(
         val expenseDate: ZonedDateTime,
 
         @field:Length(min = 3, max = 256)
-        val description: String
+        val description: String,
+
+        @field:Positive
+        @field:Min(value = 1)
+        val amount: Float
 )
 
 data class UpdateExpenseAmountInput(
 
-        val id: Long,
+        val id: String,
 
         @field:Positive
         @field:Min(value = 1)
@@ -94,7 +104,7 @@ data class UpdateExpenseAmountInput(
 
 data class UpdateExpenseStatusInput(
 
-        val id: Long,
+        val id: String,
 
         val expenseStatus: ExpenseStatus
 )

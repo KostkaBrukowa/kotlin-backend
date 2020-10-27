@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.example.graphql.configuration.security.SecurityConstants.JWT_EXPIRATION_TIME
+import com.example.graphql.domain.user.UserRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
@@ -17,9 +18,10 @@ const val ACCESS_TOKEN = "xppctkn"
 const val REFRESH_TOKEN = "xppcreftkn"
 
 @Component
-class JWTAuthentication(private val jwtClient: JWTClient) {
+class JWTAuthentication(private val jwtClient: JWTClient, private val userRepository: UserRepository) {
 
     fun handleJWTAuthorisation(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT? {
+//        return decodeTokenSafely(jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString()).jwtToken)
         return try {
             log.debug("Processing '{}' request to resource: {}", request.method, request.uri)
 
@@ -42,7 +44,6 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
 
         return when {
             decodedJWT.isNotExpired() -> decodedJWT
-            request.isCookiePresent(REFRESH_TOKEN) -> handleRefreshToken(request, response)
             else -> decodedJWT
         }
     }
@@ -50,20 +51,24 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
     fun handleRefreshToken(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT {
         log.debug("Handling request with no/expired token. Refresh token cookie is present.")
 
-        val tokenResponse = jwtClient.validateAndCreateValidationTokens(request.getCookieValue(REFRESH_TOKEN))
+        val tokenResponse = jwtClient.validateAndCreateValidationTokens(request.getCookieValue(REFRESH_TOKEN)) //todo revert
+//        val tokenResponse = jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString())
         log.debug("Received new OAuth2 token from authorization server using refresh token.")
 
-        response.addOAuthTokensCookies(tokenResponse.jwtToken, tokenResponse.refreshToken)
+        response.addRefreshTokenCookie(tokenResponse.refreshToken)
+
         return decodeTokenSafely(tokenResponse.jwtToken)
     }
 
-    fun authenticateUser(subject: String, request: ServerHttpRequest, response: ServerHttpResponse) {
+    fun authenticateUser(subject: String, request: ServerHttpRequest, response: ServerHttpResponse): String {
         val tokenResponse = jwtClient.createAuthenticationTokensResponse(subject)
 
-        response.addOAuthTokensCookies(tokenResponse.jwtToken, tokenResponse.refreshToken)
+        response.addRefreshTokenCookie(tokenResponse.refreshToken)
+
+        return tokenResponse.jwtToken
     }
 
-    private fun decodeTokenSafely(token: String): DecodedJWT {
+    public fun decodeTokenSafely(token: String): DecodedJWT {
         try {
             return JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
                     .build()
@@ -75,8 +80,7 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
 
     class ClientAuthenticationException(cause: String) : Exception(cause) {}
 
-    private fun ServerHttpRequest.isAuthorizationTokenPresent(): Boolean =
-            isCookiePresent(ACCESS_TOKEN) || isHeaderPresent(HttpHeaders.AUTHORIZATION)
+    private fun ServerHttpRequest.isAuthorizationTokenPresent(): Boolean = isHeaderPresent(HttpHeaders.AUTHORIZATION) && getHeaderValue(HttpHeaders.AUTHORIZATION).replace("Bearer ", "") != "null"
 
     private fun ServerHttpRequest.extractAuthorizationToken(): String {
         val token: String
@@ -87,10 +91,6 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
                 token = getHeaderValue(HttpHeaders.AUTHORIZATION).replace("Bearer ", "")
                 log.debug("Extracted authorization token from header.")
             }
-            isCookiePresent(ACCESS_TOKEN) -> {
-                token = getCookieValue(ACCESS_TOKEN)
-                log.debug("Extracted authorization token from cookie.")
-            }
             else -> {
                 throw IllegalStateException("Authorization header or token cookie should be present but they are not.")
             }
@@ -99,13 +99,7 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
         return token
     }
 
-    private fun ServerHttpResponse.addOAuthTokensCookies(token: String?, refreshToken: String? = null) {
-        token?.let {
-            this.addCookie(
-                    ResponseCookie.from(ACCESS_TOKEN, token).build()
-            )
-        }
-
+    private fun ServerHttpResponse.addRefreshTokenCookie(refreshToken: String? = null) {
         refreshToken?.let {
             this.addCookie(
                     ResponseCookie.from(REFRESH_TOKEN, refreshToken).apply {

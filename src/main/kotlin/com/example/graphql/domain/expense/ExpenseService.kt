@@ -2,6 +2,7 @@ package com.example.graphql.domain.expense
 
 import com.example.graphql.domain.notification.NotificationService
 import com.example.graphql.domain.party.Party
+import com.example.graphql.domain.party.PartyKind
 import com.example.graphql.domain.party.PartyRepository
 import com.example.graphql.domain.payment.Payment
 import com.example.graphql.domain.payment.PaymentService
@@ -9,10 +10,10 @@ import com.example.graphql.domain.payment.PaymentStatus
 import com.example.graphql.domain.user.User
 import com.example.graphql.domain.user.UserRepository
 import com.example.graphql.resolvers.expense.NewExpenseInput
-import com.example.graphql.resolvers.expense.UpdateExpenseAmountInput
 import com.example.graphql.resolvers.expense.UpdateExpenseInput
 import com.example.graphql.resolvers.expense.UpdateExpenseStatusInput
 import com.example.graphql.schema.exceptions.handlers.EntityNotFoundException
+import com.example.graphql.schema.exceptions.handlers.InvalidActionException
 import com.example.graphql.schema.exceptions.handlers.SimpleValidationException
 import com.example.graphql.schema.exceptions.handlers.UnauthorisedException
 import org.springframework.stereotype.Component
@@ -22,8 +23,7 @@ class ExpenseService(
         private val expenseRepository: ExpenseRepository,
         private val paymentService: PaymentService,
         private val userRepository: UserRepository,
-        private val partyRepository: PartyRepository,
-        private val notificationService: NotificationService
+        private val partyRepository: PartyRepository
 ) {
     // GET
     fun findExpenseById(expenseId: Long, currentUserId: Long): Expense? {
@@ -44,23 +44,47 @@ class ExpenseService(
 
     // CREATE
     fun createExpense(expenseInput: NewExpenseInput, currentUserId: Long): Expense {
-        val expenseParty = partyRepository.findPartiesWithParticipants(setOf(expenseInput.partyId)).firstOrNull()
-                ?: throw EntityNotFoundException("party")
+        if (expenseInput.partyType != PartyKind.FRIENDS && expenseInput.partyId == null) {
+            throw InvalidActionException("Cannot add expense without party Id")
+        }
 
-        val expenseParticipants = expenseInput.participants.filter { it != currentUserId }.toSet()
+        val expenseParty = if (expenseInput.partyId != null) partyRepository.findPartiesWithParticipants(setOf(expenseInput.partyId.toLong())).firstOrNull()
+                ?: throw EntityNotFoundException("party") else findOrCreateFriendsParty(expenseInput, currentUserId)
 
-        requirePartyParticipantsIncludeExpenseParticipants(expenseParticipants, expenseParty, currentUserId)
+        val expenseInputWithPartyId = expenseInput.copy(partyId = expenseParty.id.toString())
+        val expenseParticipants = expenseInputWithPartyId.participants.filter { it.toLong() != currentUserId }.map { it.toLong() }.toSet()
 
-        val newExpense = expenseRepository.saveNewExpense(expenseInput.toDomain(currentUserId))
+        requirePartyParticipantsIncludeExpenseParticipants(expenseParticipants.map { it }.toSet(), expenseParty, currentUserId)
+
+        val newExpense = expenseRepository.saveNewExpense(expenseInputWithPartyId.toDomain(currentUserId))
 
         paymentService.createPaymentsForExpense(newExpense, expenseParticipants)
 
         return newExpense
     }
 
+    private fun findOrCreateFriendsParty(expenseInput: NewExpenseInput, userId: Long): Party {
+        val usersParties = partyRepository.getAllUsersPartiesWithParticipants(userId)
+        val expenseInputParticipants = (expenseInput.participants + userId.toString()).map { it.toLong() }.distinct()
+
+        val existingFriendsParty = usersParties.filter { it.type === PartyKind.FRIENDS }.find {
+            val partyParticipantsIds = it.participants.map { participant -> participant.id }
+
+            expenseInputParticipants.containsAll(partyParticipantsIds) && partyParticipantsIds.containsAll(expenseInputParticipants)
+        }
+
+        return if (existingFriendsParty == null) {
+            val currentUser = User(id = userId)
+
+            partyRepository.saveNewParty(Party(
+                    owner = currentUser, participants = expenseInputParticipants.map { User(id = it) }, type = PartyKind.FRIENDS
+            )).copy(participants = expenseInputParticipants.map { User(id = it) })
+        } else existingFriendsParty
+    }
+
     // UPDATE
     fun updateExpense(updateExpenseInput: UpdateExpenseInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseInput.id)
+        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseInput.id.toLong())
                 ?: throw EntityNotFoundException("expense")
 
         requireExpenseOwner(expenseToUpdate, currentUserId)
@@ -68,32 +92,27 @@ class ExpenseService(
         val updatedExpense = expenseToUpdate.copy(
                 name = updateExpenseInput.name,
                 description = updateExpenseInput.description,
-                expenseDate = updateExpenseInput.expenseDate
+                expenseDate = updateExpenseInput.expenseDate,
+                amount = updateExpenseInput.amount
         )
 
+        updateExpenseAmount(expenseToUpdate, updateExpenseInput.amount)
         expenseRepository.updateExpense(updatedExpense)
 
         return updatedExpense
     }
 
-    fun updateExpenseAmount(updateExpenseAmountInput: UpdateExpenseAmountInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseById(updateExpenseAmountInput.id)
-                ?: throw EntityNotFoundException("expense")
+    private fun updateExpenseAmount(expenseToUpdate: Expense, amount: Float) {
+        if (expenseToUpdate.amount == amount)
+            return
 
-        requireExpenseOwner(expenseToUpdate, currentUserId)
         requireExpenseStatuses(expenseToUpdate, listOf(ExpenseStatus.IN_PROGRESS_REQUESTING))
 
-        val updatedExpense = expenseToUpdate.copy(amount = updateExpenseAmountInput.amount)
-
-        expenseRepository.updateExpense(updatedExpense)
-
-        paymentService.resetPaymentsStatuses(updatedExpense.id)
-
-        return updatedExpense
+        paymentService.resetPaymentsStatuses(expenseToUpdate.id)
     }
 
     fun updateExpenseStatus(updateExpenseStatusInput: UpdateExpenseStatusInput, currentUserId: Long): Expense {
-        val expenseToUpdate = expenseRepository.findExpenseWithPayments(updateExpenseStatusInput.id)
+        val expenseToUpdate = expenseRepository.findExpenseWithPayments(updateExpenseStatusInput.id.toLong())
                 ?: throw EntityNotFoundException("expense")
 
         requireExpenseOwner(expenseToUpdate, currentUserId)
@@ -114,7 +133,7 @@ class ExpenseService(
     }
 
     // DELETE
-    fun deleteExpense(expenseId: Long, currentUserId: Long): Boolean {
+    fun deleteExpense(expenseId: Long, currentUserId: Long): Expense {
         val expenseToDelete = expenseRepository.findExpenseById(expenseId)
                 ?: throw EntityNotFoundException("expense")
 
@@ -123,7 +142,7 @@ class ExpenseService(
 
         expenseRepository.removeExpense(expenseToDelete)
 
-        return true
+        return expenseToDelete
     }
 
     private fun updateExpensePaymentsAmounts(updatedExpense: Expense) {
@@ -156,7 +175,7 @@ class ExpenseService(
             }
             ExpenseStatus.RESOLVED -> {
                 requireExpenseStatuses(expense, listOf(ExpenseStatus.IN_PROGRESS_PAYING))
-                requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.CONFIRMED, PaymentStatus.DECLINED))
+                requirePaymentsStatuses(expense.payments, listOf(PaymentStatus.PAID, PaymentStatus.DECLINED))
             }
         }
     }
@@ -191,7 +210,7 @@ fun NewExpenseInput.toDomain(userId: Long) = Expense(
         amount = amount,
         expenseDate = expenseDate,
         user = User(userId),
-        party = Party(this.partyId)
+        party = if(this.partyId != null) Party(this.partyId.toLong()) else null
 )
 
 class ExpenseParticipantNotInPartyException : SimpleValidationException("Not all users were party participants")

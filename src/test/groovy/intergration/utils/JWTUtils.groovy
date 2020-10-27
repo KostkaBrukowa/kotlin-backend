@@ -24,7 +24,7 @@ class JWTUtils {
 
         return JWT.create()
                 .withSubject(decodedToken.subject)
-                .withExpiresAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis()-60*60*1000))
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET.bytes))
     }
 }

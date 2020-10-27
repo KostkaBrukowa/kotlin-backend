@@ -20,6 +20,10 @@ class PgSqlNotificationRepository(
         private val expenseRepository: PersistentExpenseRepository
 
 ) : NotificationRepository {
+    override fun findUserNotificationWithUser(notificationId: Long): Notification? {
+        return notificationRepository.getTopById(notificationId)?.toDomainWithRelations()
+    }
+
     override fun findUserNotifications(userId: Long): List<Notification> {
         return notificationRepository.findAllByReceiverId(userId).map { it.toDomainWithRelations() }
     }
@@ -122,7 +126,7 @@ class PgSqlNotificationRepository(
 
     override fun sendExpenseNotifications(notifications: Iterable<NewExpenseNotification>): List<Notification> {
         val newNotifications = notifications.map {
-            it.toPersistentEntity(it.expenseId, NotificationObjectType.PAYMENT, NotificationEvent.CREATION)
+            it.toPersistentEntity(it.expenseId, NotificationObjectType.EXPENSE, NotificationEvent.CREATION)
         }
 
         return notificationRepository.saveAll(newNotifications).map { it.toDomainWithRelations() }
@@ -138,7 +142,7 @@ class PgSqlNotificationRepository(
 
     override fun sendPaymentsNotifications(notifications: List<UpdatePaymentStatusNotification>): List<Notification> {
         val newNotifications = notifications.map {
-            it.toPersistentEntity(it.paymentId, NotificationObjectType.PARTY_REQUEST, it.notificationEvent)
+            it.toPersistentEntity(it.paymentId, NotificationObjectType.PAYMENT, it.notificationEvent)
         }
 
         return notificationRepository.saveAll(newNotifications).map { it.toDomainWithRelations() }
@@ -146,6 +150,10 @@ class PgSqlNotificationRepository(
 
     override fun markNotificationsAsRead(notificationsIds: Iterable<Long>) {
         notificationRepository.markNotificationsAsRead(notificationsIds)
+    }
+
+    override fun removeNotification(notificationId: Long) {
+        notificationRepository.markNotificationAsDeleted(listOf(notificationId))
     }
 }
 

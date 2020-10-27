@@ -2,6 +2,7 @@ package com.example.graphql.domain.user
 
 interface UserRepository {
     fun saveUser(user: User): User
+    fun updateUser(userId: Long, name: String?, bankAccount: String?): User
 
     fun findUserByEmail(email: String): User?
     fun findUserById(id: Long): User?
@@ -15,6 +16,6 @@ interface UserRepository {
     fun findUsersWithJoinedParties(usersIds: Set<Long>): List<User>
 
 
-    fun addFriend(userId: Long, friendId: Long): Boolean
+    fun addFriend(userId: Long, friendEmail: String): User
     fun removeFriend(userId: Long, friendId: Long)
 }

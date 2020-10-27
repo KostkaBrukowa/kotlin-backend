@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component
 class PartyRequestQuery(private val partyRequestService: PartyRequestService) : Query {
 
     @Authenticated(role = Roles.USER)
-    fun getPartyRequestsForParty(partyId: Long) =
-            partyRequestService.getAllPartyRequestsByPartyId(partyId).map { it.toResponse() }
+    fun getPartyRequestsForParty(partyId: String) =
+            partyRequestService.getAllPartyRequestsByPartyId(partyId.toLong()).map { it.toResponse() }
 
     @Authenticated(role = Roles.USER)
-    fun getPartyRequestsForUser(userId: Long, @GraphQLContext context: AppGraphQLContext) =
-            partyRequestService.getAllPartyRequestsByUserId(userId, context.subject).map { it.toResponse() }
+    fun getPartyRequestsForUser(userId: String, @GraphQLContext context: AppGraphQLContext) =
+            partyRequestService.getAllPartyRequestsByUserId(userId.toLong(), context.subject).map { it.toResponse() }
 }

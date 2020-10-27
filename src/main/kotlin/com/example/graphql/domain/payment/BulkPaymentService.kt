@@ -44,7 +44,7 @@ class BulkPaymentService(
 
     fun updatePaymentStatus(bulkPaymentUpdateInput: UpdateBulkPaymentStatusInput, currentUserId: Long): BulkPayment {
         val (bulkPaymentId, newPaymentStatus) = bulkPaymentUpdateInput
-        val bulkPayment = bulkPaymentRepository.findBulkPaymentById(bulkPaymentId)
+        val bulkPayment = bulkPaymentRepository.findBulkPaymentById(bulkPaymentId.toLong())
                 ?: throw EntityNotFoundException("bulk payment")
 
         requireCorrectBulkPaymentStatus(bulkPayment.status, newPaymentStatus)

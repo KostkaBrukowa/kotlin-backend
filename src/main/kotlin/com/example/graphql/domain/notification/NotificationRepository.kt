@@ -5,6 +5,7 @@ import com.example.graphql.resolvers.message.MessageType
 
 interface NotificationRepository {
 
+    fun findUserNotificationWithUser(notificationId: Long): Notification?
     fun findUserNotifications(userId: Long): List<Notification>
     fun findNotificationsWithUsers(notificationsIds: Iterable<Long>): List<Notification>
 
@@ -14,4 +15,5 @@ interface NotificationRepository {
     fun sendPaymentsNotifications(notifications: List<UpdatePaymentStatusNotification>): List<Notification>
 
     fun markNotificationsAsRead(notificationsIds: Iterable<Long>)
+    fun removeNotification(notificationId: Long)
 }
