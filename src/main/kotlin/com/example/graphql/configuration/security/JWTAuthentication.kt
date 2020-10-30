@@ -7,6 +7,7 @@ import com.example.graphql.configuration.security.SecurityConstants.JWT_EXPIRATI
 import com.example.graphql.domain.user.UserRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseCookie
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -19,6 +20,8 @@ const val REFRESH_TOKEN = "xppcreftkn"
 
 @Component
 class JWTAuthentication(private val jwtClient: JWTClient, private val userRepository: UserRepository) {
+    @Value("\${LOCAL_DEV}")
+    private val isLocalDevelopment: String? = null
 
     fun handleJWTAuthorisation(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT? {
 //        return decodeTokenSafely(jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString()).jwtToken)
@@ -104,6 +107,10 @@ class JWTAuthentication(private val jwtClient: JWTClient, private val userReposi
             this.addCookie(
                     ResponseCookie.from(REFRESH_TOKEN, refreshToken).apply {
                         this.httpOnly(true)
+                        if(isLocalDevelopment == null) {
+                            this.sameSite("None")
+                            this.secure(true)
+                        }
                     }.build()
             )
         }

@@ -37,21 +37,21 @@ class AuthMutation(private val authService: AuthService) : Mutation {
 }
 
 data class UserAuthInput(
-        @Email(message = "Email should be valid")
+        @Email(message = "Email powinien być poprawny")
         val email: String,
 
-        @field:Length(min = 3, max = 256)
+        @field:Length(min = 3, max = 256, message = "Hasło powinno mieć od 3 do 256 znaków")
         val password: String
 )
 
 data class NewUserInput(
-        @Email(message = "Email should be valid")
+        @Email(message = "Email powinien być poprawny")
         val email: String,
 
-        @field:Length(min = 3, max = 256)
+        @field:Length(min = 3, max = 256, message = "Hasło powinno mieć od 3 do 256 znaków")
         val password: String,
 
-        @field:Length(min = 3, max = 256)
+        @field:Length(min = 3, max = 256, message = "Imię powinno mieć od 3 do 256 znaków")
         val name: String
 
 )

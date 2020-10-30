@@ -72,7 +72,7 @@ class PgSqlUserRepository(private val userRepository: PersistentUserRepository) 
     @Transactional
     override fun addFriend(userId: Long, friendEmail: String): User {
         val friend = userRepository.findUserByEmailWithFriends(friendEmail)
-                ?: throw EntityNotFoundException("User does not exist")
+                ?: throw EntityNotFoundException("Użytkownik o takim mailu nie istnieje")
 
         if (friend.friends.any { it.id == userId } || friend.friendOf.any { it.id == userId }) {
             throw FriendshipAlreadyExistsException()

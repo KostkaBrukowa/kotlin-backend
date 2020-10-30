@@ -13,7 +13,6 @@ data class UserType(
         @GraphQLID
         override val id: String = "0",
 
-        @field:Email
         val email: String = "",
 
         val name: String = "",

@@ -99,10 +99,10 @@ data class EditPartyInput(
         @field:Length(min = 3, max = 256)
         val name: String?,
 
-        @field:FutureOrPresent
+        @field:FutureOrPresent(message = "Data powinna być w przyszłości")
         val startDate: ZonedDateTime?,
 
-        @field:FutureOrPresent
+        @field:FutureOrPresent(message = "Data powinna być w przyszłości")
         val endDate: ZonedDateTime?,
 
         val description: String?,
