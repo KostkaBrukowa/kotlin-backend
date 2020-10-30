@@ -20,8 +20,8 @@ const val REFRESH_TOKEN = "xppcreftkn"
 
 @Component
 class JWTAuthentication(private val jwtClient: JWTClient, private val userRepository: UserRepository) {
-    @Value("\${LOCAL_DEV}")
-    private val isLocalDevelopment: String? = null
+    @Value("\${ENV}")
+    private val environment: String? = null
 
     fun handleJWTAuthorisation(request: ServerHttpRequest, response: ServerHttpResponse): DecodedJWT? {
 //        return decodeTokenSafely(jwtClient.createAuthenticationTokensResponse(userRepository.findUserByEmail("admin@gmail.com")?.id.toString()).jwtToken)
@@ -107,7 +107,7 @@ class JWTAuthentication(private val jwtClient: JWTClient, private val userReposi
             this.addCookie(
                     ResponseCookie.from(REFRESH_TOKEN, refreshToken).apply {
                         this.httpOnly(true)
-                        if(isLocalDevelopment == null) {
+                        if(environment != null && environment == "production") {
                             this.sameSite("None")
                             this.secure(true)
                         }
