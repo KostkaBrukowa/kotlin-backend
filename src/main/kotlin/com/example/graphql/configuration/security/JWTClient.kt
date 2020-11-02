@@ -2,11 +2,12 @@ package com.example.graphql.configuration.security
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.graphql.domain.user.UserRepository
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class JWTClient {
+class JWTClient(private val userRepository: UserRepository) {
     fun createJWTToken(userId: String): String {
         return createToken(userId, SecurityConstants.JWT_EXPIRATION_TIME)
     }
@@ -21,6 +22,8 @@ class JWTClient {
                     .build()
                     .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
                     .subject
+
+            if(userRepository.findUserById(subject.toLong()) == null) throw Exception("Subject not found in database")
 
             createAuthenticationTokensResponse(subject)
         } catch (e: Exception) {

@@ -24,8 +24,9 @@ class PartyMutation(
 
     @Authenticated(role = Roles.USER)
     fun updateParty(
-            @Valid editPartyInput: EditPartyInput
-    ) = partyService.updateParty(editPartyInput.toDomain()).toResponse()
+            @Valid editPartyInput: EditPartyInput,
+            @GraphQLContext context: AppGraphQLContext
+    ) = partyService.updateParty(editPartyInput.toDomain(), context.subject).toResponse()
 
     @Authenticated(role = Roles.USER)
     fun removeParty(

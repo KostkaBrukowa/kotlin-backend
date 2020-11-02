@@ -10,12 +10,15 @@ import com.expediagroup.graphql.annotations.GraphQLDescription
 import com.expediagroup.graphql.spring.operations.Mutation
 import org.hibernate.validator.constraints.Length
 import org.springframework.stereotype.Component
+import org.springframework.validation.annotation.Validated
 import java.time.ZonedDateTime
+import javax.validation.Valid
 import javax.validation.constraints.Email
 import javax.validation.constraints.Min
 import javax.validation.constraints.PastOrPresent
 import javax.validation.constraints.Positive
 
+@Validated
 @Component
 class AuthMutation(private val authService: AuthService) : Mutation {
 
@@ -24,11 +27,11 @@ class AuthMutation(private val authService: AuthService) : Mutation {
             = authService.refreshToken(context)
 
     @GraphQLDescription("Registers user and return JWT token as return value")
-    fun signUp(input: NewUserInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse
+    fun signUp(@Valid input: NewUserInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse
             = authService.signUpUser(input.email, input.password, input.name, context)
 
     @GraphQLDescription("Logs in user and return JWT token as return value")
-    fun logIn(input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse?
+    fun logIn(@Valid input: UserAuthInput, @GraphQLContext context: AppGraphQLContext): UserAuthResponse?
             = authService.logInUser(input.email, input.password, context)
 
     @GraphQLDescription("Removes the cookie from request")

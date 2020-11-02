@@ -79,13 +79,13 @@ data class UpdateExpenseInput(
 
         val id: String,
 
-        @field:Length(min = 3, max = 256)
+        @field:Length(min = 3, max = 256, message = "Długosc musi zawierac sie miedzy 3 a 256 znakow")
         val name: String,
 
         @field:PastOrPresent
         val expenseDate: ZonedDateTime,
 
-        @field:Length(min = 3, max = 256)
+        @field:Length(min = 3, max = 256, message = "Długosc musi zawierac sie miedzy 3 a 256 znakow")
         val description: String,
 
         @field:Positive

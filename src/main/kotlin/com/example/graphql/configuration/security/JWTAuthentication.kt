@@ -19,7 +19,7 @@ const val ACCESS_TOKEN = "xppctkn"
 const val REFRESH_TOKEN = "xppcreftkn"
 
 @Component
-class JWTAuthentication(private val jwtClient: JWTClient, private val userRepository: UserRepository) {
+class JWTAuthentication(private val jwtClient: JWTClient) {
     @Value("\${ENV}")
     private val environment: String? = null
 

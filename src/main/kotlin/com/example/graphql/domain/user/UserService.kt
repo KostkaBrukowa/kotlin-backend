@@ -25,6 +25,6 @@ class UserService(
     }
 }
 
-class FriendshipAlreadyExistsException : SimpleValidationException("Friendship already exists")
+class FriendshipAlreadyExistsException : SimpleValidationException("Dodałeś już takiego znajomego")
 class CannotAddYourselfAsFriendException : SimpleValidationException("Nie możesz dodać siebie jako znajomego")
 

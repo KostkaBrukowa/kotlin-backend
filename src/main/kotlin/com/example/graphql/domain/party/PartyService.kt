@@ -40,7 +40,13 @@ class PartyService(
     }
 
     // UPDATE
-    fun updateParty(party: Party) = partyRepository.updateParty(party.copy(id = party.id))
+    fun updateParty(partyRequest: Party, currentUserId: Long): Party {
+        val party = partyRepository.getTopById(partyRequest.id) ?: throw EntityNotFoundException("Party")
+
+        requirePartyOwner(party, currentUserId)
+
+        return partyRepository.updateParty(partyRequest.copy(id = party.id))
+    }
 
     fun removeParticipant(partyId: Long, participantId: Long, currentUserId: Long): Party? {
         val party = partyRepository.getPartyWithOwnerAndParticipants(partyId)
