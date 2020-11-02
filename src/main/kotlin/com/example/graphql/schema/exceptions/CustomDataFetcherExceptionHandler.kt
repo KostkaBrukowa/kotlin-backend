@@ -9,6 +9,7 @@ import graphql.execution.DataFetcherExceptionHandler
 import graphql.execution.DataFetcherExceptionHandlerParameters
 import graphql.execution.DataFetcherExceptionHandlerResult
 import org.slf4j.LoggerFactory
+import java.lang.reflect.UndeclaredThrowableException
 import javax.validation.ConstraintViolationException
 
 class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
@@ -24,6 +25,7 @@ class CustomDataFetcherExceptionHandler : DataFetcherExceptionHandler {
             is ConstraintViolationException -> exception.asValidationDataFetchingGraphQLError(exception, path, sourceLocation)
             is UnauthenticatedException -> UnauthenticatedGraphQLError(exception, path, sourceLocation)
             is SimpleValidationException -> SimpleValidationGraphQLError(exception, path, sourceLocation)
+            is UndeclaredThrowableException -> SimpleValidationGraphQLError(exception.undeclaredThrowable, path, sourceLocation)
             else -> SimpleKotlinGraphQLError(exception = exception, locations = listOf(sourceLocation), path = path.toList())
         }
         log.warn(error.message, exception)

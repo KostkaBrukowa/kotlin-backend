@@ -16,6 +16,7 @@ class JWTClient(private val userRepository: UserRepository) {
         return createToken(userId, SecurityConstants.REFRESH_EXPIRATION_TIME)
     }
 
+    @Throws(JWTAuthentication.ClientAuthenticationException::class)
     fun validateAndCreateValidationTokens(token: String): ValidationTokensResponse {
         return try {
             val subject = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.toByteArray()))
@@ -23,7 +24,8 @@ class JWTClient(private val userRepository: UserRepository) {
                     .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
                     .subject
 
-            if(userRepository.findUserById(subject.toLong()) == null) throw Exception("Subject not found in database")
+            if(userRepository.findUserById(subject.toLong()) == null)
+                throw Exception("Subject not found in database")
 
             createAuthenticationTokensResponse(subject)
         } catch (e: Exception) {

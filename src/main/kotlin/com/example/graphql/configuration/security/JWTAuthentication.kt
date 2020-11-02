@@ -30,7 +30,6 @@ class JWTAuthentication(private val jwtClient: JWTClient) {
 
             when {
                 request.isAuthorizationTokenPresent() -> handleJWTValidation(request, response)
-                request.isCookiePresent(REFRESH_TOKEN) -> handleRefreshToken(request, response)
                 else -> null
             }
         } catch (e: ClientAuthenticationException) {
