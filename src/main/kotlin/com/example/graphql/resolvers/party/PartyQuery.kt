@@ -7,10 +7,7 @@ import com.expediagroup.graphql.spring.operations.Query
 import org.springframework.stereotype.Component
 
 @Component
-class PartyQuery(
-        private val partyService: PartyService
-) : Query {
-
+class PartyQuery(private val partyService: PartyService) : Query {
     @Authenticated(role = Roles.USER)
     fun getAllParties(userId: String): List<PartyType> =
             partyService.getAllUserParties(userId.toLong()).map { it.toResponse() }
